@@ -1,11 +1,9 @@
 import { useEditor } from "@/store/editor";
-import { useSettings } from "@/store/settings";
 import { applyLayout, SUGGESTIONS } from "@/lib/designer";
 import { PanelHeader } from "./TextPanel";
 
 export function DesignerPanel() {
   const { pages, currentIndex, canvasW, canvasH, loadTemplate } = useEditor();
-  const { interactiveHover, setInteractiveHover } = useSettings();
   const page = pages[currentIndex];
   const els = page?.elements ?? [];
 
@@ -17,15 +15,6 @@ export function DesignerPanel() {
       <p className="font-mono text-[10px] leading-relaxed text-teal/60">
         Same content, new composition. Click a layout to apply it to this slide.
       </p>
-      <label className="flex cursor-pointer items-center justify-between border border-teal/30 bg-surface px-3 py-2 font-mono text-[10px] text-teal">
-        <span>INTERACTIVE HOVER</span>
-        <input
-          type="checkbox"
-          checked={interactiveHover}
-          onChange={(event) => setInteractiveHover(event.target.checked)}
-          className="accent-teal"
-        />
-      </label>
       <div className="grid grid-cols-2 gap-2">
         {SUGGESTIONS.map((s) => {
           const laid = preview(s.id);

@@ -1,12 +1,12 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   HelpCircle, BarChart3, LineChart, PieChart, AreaChart, MousePointerClick, Youtube, Globe,
   Square, Hash, Gauge, AlertTriangle, ListChecks, Quote, User, CreditCard, Command, TrendingUp,
   AppWindow, Chrome, Search, TerminalSquare, Smartphone, MessageSquare, Rows3, ToggleRight, LogIn, Bell,
-  PanelBottom, PanelLeft, LayoutPanelTop, FolderOpen, SlidersHorizontal, Terminal, ImagePlus,
+  PanelBottom, PanelLeft, LayoutPanelTop, FolderOpen, SlidersHorizontal, Terminal,
 } from "lucide-react";
 import {
-  useEditor, newQuiz, newPoll, newChart, newButton, newEmbed, newImage, newUi, toEmbedSrc,
+  useEditor, newQuiz, newPoll, newChart, newButton, newEmbed, newUi, toEmbedSrc,
   UI_STYLE_THEMES, chartStylePatch, solidThemeBg, type ChartKind, type ButtonAction, type UiKind, type UiStyle,
 } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
@@ -50,19 +50,8 @@ export function ComponentsPanel() {
   const { add, selectedId, elements, update } = useEditor();
   const [style, setStyle] = useState<UiStyle>("cyber");
   const [embedUrl, setEmbedUrl] = useState("");
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const selected = elements.find((e) => e.id === selectedId);
-  const addImage = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const src = String(reader.result ?? "");
-      setImagePreview(src);
-      add(newImage(src));
-    };
-    reader.readAsDataURL(file);
-  };
 
   const pickStyle = (s: UiStyle) => {
     setStyle(s);
@@ -109,34 +98,6 @@ export function ComponentsPanel() {
         <p className="font-mono text-[9px] text-teal/50">
           &gt; Applies to new components, charts{selected?.type === "ui" || selected?.type === "chart" ? " and the selected one" : ""}.
         </p>
-      </div>
-
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Media</div>
-      <div className="brutal-border-2 bg-surface p-3">
-        <button
-          type="button"
-          onClick={() => imageInputRef.current?.click()}
-          className="brutal-press flex w-full flex-col items-center gap-2 border border-dashed border-teal/50 bg-ink p-4 text-teal transition-colors hover:border-teal hover:bg-surface-2"
-        >
-          {imagePreview ? (
-            <img src={imagePreview} alt="Selected image preview" className="h-20 w-full object-cover" />
-          ) : (
-            <ImagePlus className="h-8 w-8" strokeWidth={1.5} />
-          )}
-          <span className="font-display text-[10px] uppercase tracking-[0.15em]">Image Card</span>
-          <span className="font-mono text-[9px] text-teal/60">Choose an image to add to the slide</span>
-        </button>
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) addImage(file);
-            event.currentTarget.value = "";
-          }}
-        />
       </div>
 
       <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Interfaces</div>

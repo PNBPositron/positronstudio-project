@@ -486,7 +486,7 @@ export const CANVAS_PRESETS = [
   { name: "Slide 16:9", w: 1920, h: 1080 },
 ] as const;
 
-type Tool = "templates" | "text" | "elements" | "design" | "ai" | "presets";
+type Tool = "templates" | "text" | "shapes" | "uploads" | "design" | "ai" | "components";
 
 type HistorySnap = { pages: Page[]; currentIndex: number };
 
@@ -534,10 +534,6 @@ type State = {
   }, scope: "slide" | "deck") => void;
   setPresenting: (v: boolean) => void;
   setGuides: (g: { v: number[]; h: number[] }) => void;
-  alignToCanvas: (
-    id: string,
-    dir: "left" | "center-h" | "right" | "top" | "center-v" | "bottom",
-  ) => void;
   copySelected: () => void;
   paste: () => void;
   undo: () => void;
@@ -957,27 +953,6 @@ export const useEditor = create<State>((set, get) => {
     },
     setPresenting: (presenting) => set({ presenting }),
     setGuides: (guides) => set({ guides }),
-    alignToCanvas: (id, dir) => {
-      const { elements, canvasW, canvasH } = get();
-      const el = elements.find((e) => e.id === id);
-      if (!el) return;
-      let nx = el.x;
-      let ny = el.y;
-      if (dir === "left") nx = 0;
-      else if (dir === "center-h") nx = Math.round((canvasW - el.width) / 2);
-      else if (dir === "right") nx = canvasW - el.width;
-      else if (dir === "top") ny = 0;
-      else if (dir === "center-v") ny = Math.round((canvasH - el.height) / 2);
-      else if (dir === "bottom") ny = canvasH - el.height;
-      if (nx === el.x && ny === el.y) return;
-      pushHistory();
-      updateCurrentPage((p) => ({
-        ...p,
-        elements: p.elements.map((e) =>
-          e.id === id ? ({ ...e, x: nx, y: ny } as AnyElement) : e,
-        ),
-      }));
-    },
     copySelected: () => {
       const { selectedId, elements } = get();
       if (!selectedId) return;

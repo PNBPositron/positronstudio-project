@@ -5,16 +5,18 @@ export type PanelId =
   | "templates"
   | "ai"
   | "text"
-  | "presets"
-  | "elements"
+  | "components"
+  | "shapes"
+  | "uploads"
   | "design";
 
 export const PANEL_LABELS: Record<PanelId, string> = {
   templates: "Templates",
   ai: "AI Edit",
   text: "Text",
-  presets: "Presets",
-  elements: "Elements",
+  components: "Components",
+  shapes: "Shapes",
+  uploads: "Uploads",
   design: "Design",
 };
 
@@ -47,7 +49,6 @@ type SettingsState = {
   panelDurationMs: number;
   panelStiffness: number; // 0 = soft ease, 100 = springy overshoot
   reduceMotion: boolean; // force-disable panel motion
-  interactiveHover: boolean;
   brandKit: BrandKit;
   setBrandKit: (patch: Partial<BrandKit>) => void;
   resetBrandKit: () => void;
@@ -58,7 +59,6 @@ type SettingsState = {
   setPanelDurationMs: (v: number) => void;
   setPanelStiffness: (v: number) => void;
   setReduceMotion: (v: boolean) => void;
-  setInteractiveHover: (v: boolean) => void;
   resetMotion: () => void;
   togglePanel: (id: PanelId) => void;
   resetPanels: () => void;
@@ -74,31 +74,38 @@ export const springEasing = (stiffness: number) => {
 };
 
 export const AI_MODELS: Array<{ id: string; label: string; hint: string }> = [
-  { id: "openrouter/openai/gpt-oss-20b:free", label: "OpenRouter Free", hint: "fast · free router" },
-  { id: "huggingface/Qwen/Qwen2.5-72B-Instruct", label: "Qwen 2.5 72B", hint: "Hugging Face · instruction tuned" },
-  { id: "huggingface/google/gemma-3-27b-it", label: "Gemma 3 27B", hint: "Hugging Face · fast structured generation" },
+  { id: "google/gemini-3.6-flash", label: "Gemini 3.6 Flash", hint: "fast · balanced (default)" },
+  { id: "google/gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite", hint: "cheapest · quickest" },
+  { id: "google/gemini-3.1-pro-preview", label: "Gemini 3.1 Pro", hint: "deepest reasoning" },
+  { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro", hint: "strong multimodal" },
+  { id: "openai/gpt-5.6-terra", label: "GPT-5.6 Terra", hint: "balanced openai" },
+  { id: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna", hint: "fast openai" },
+  { id: "openai/gpt-5.5", label: "GPT-5.5", hint: "frontier quality" },
+  { id: "openai/gpt-5.4-mini", label: "GPT-5.4 Mini", hint: "cheap openai" },
+  { id: "openrouter/openai/gpt-oss-20b:free", label: "GPT-OSS 20B (free)", hint: "openrouter · free" },
+  { id: "openrouter/nvidia/nemotron-3-super-120b-a12b:free", label: "Nemotron 3 Super 120B (free)", hint: "openrouter · free" },
+  { id: "openrouter/google/gemma-4-31b-it:free", label: "Gemma 4 31B (free)", hint: "openrouter · free" },
 ];
 
-export const DEFAULT_AI_MODEL = "openrouter/z-ai/glm-5.2:free";
+export const DEFAULT_AI_MODEL = AI_MODELS[0].id;
 
 export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> = [
-  { id: "everest", label: "Everest", hint: "white and blue (default)" },
-  { id: "custom", label: "Custom", hint: "your brand palette" },
-  { id: "cyber", label: "Cyber", hint: "teal neon on ink" },
+  { id: "cyber", label: "Cyber", hint: "teal neon on ink (default)" },
   { id: "glass", label: "Glass", hint: "soft frosted greys" },
   { id: "neobrutalist", label: "Neobrutalist", hint: "paper white + hot accents" },
   { id: "matrix", label: "Matrix", hint: "green terminal" },
   { id: "midnight", label: "Midnight", hint: "deep indigo dark" },
 ];
 
-export const DEFAULT_EDITOR_THEME = "everest";
+export const DEFAULT_EDITOR_THEME = "cyber";
 
 const ALL_ON: Record<PanelId, boolean> = {
   templates: true,
   ai: true,
   text: true,
-  presets: true,
-  elements: true,
+  components: true,
+  shapes: true,
+  uploads: true,
   design: true,
 };
 
@@ -113,7 +120,6 @@ export const useSettings = create<SettingsState>()(
       panelDurationMs: DEFAULT_PANEL_DURATION,
       panelStiffness: DEFAULT_PANEL_STIFFNESS,
       reduceMotion: true,
-      interactiveHover: true,
       brandKit: { ...DEFAULT_BRAND_KIT },
       setBrandKit: (patch) => set((s) => ({ brandKit: { ...s.brandKit, ...patch } })),
       resetBrandKit: () => set({ brandKit: { ...DEFAULT_BRAND_KIT } }),
@@ -123,9 +129,8 @@ export const useSettings = create<SettingsState>()(
       setEditorTheme: (editorTheme) => set({ editorTheme }),
       setPanelDurationMs: (panelDurationMs) => set({ panelDurationMs }),
       setPanelStiffness: (panelStiffness) => set({ panelStiffness }),
-  setReduceMotion: (reduceMotion) => set({ reduceMotion }),
-  setInteractiveHover: (interactiveHover) => set({ interactiveHover }),
-  resetMotion: () =>
+      setReduceMotion: (reduceMotion) => set({ reduceMotion }),
+      resetMotion: () =>
         set({
           panelDurationMs: DEFAULT_PANEL_DURATION,
           panelStiffness: DEFAULT_PANEL_STIFFNESS,
@@ -146,7 +151,6 @@ export const useSettings = create<SettingsState>()(
       migrate: (state) => ({
         ...(state as SettingsState),
         reduceMotion: true,
-        interactiveHover: (state as SettingsState)?.interactiveHover ?? true,
         brandKit: { ...DEFAULT_BRAND_KIT, ...((state as SettingsState)?.brandKit ?? {}) },
       }),
     },

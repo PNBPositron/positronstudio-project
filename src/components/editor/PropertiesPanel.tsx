@@ -1,5 +1,5 @@
 import { useEditor, DEFAULT_FILTERS, UI_STYLE_THEMES, chartStylePatch, type ImageFilters, type ElementShadow, type ShapeGradient, type QuizElement, type QuizOption, type ChartElement, type ButtonElement, type ChartKind, type ButtonAction, type UiStyle } from "@/store/editor";
-import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check, AlignStartVertical, AlignCenterHorizontal, AlignEndVertical, AlignStartHorizontal, AlignCenterVertical, AlignEndHorizontal } from "lucide-react";
+import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check } from "lucide-react";
 import { FONTS } from "./panels/TextPanel";
 
 const FONT_FAMILIES: string[] = Array.from(
@@ -12,7 +12,7 @@ const SWATCHES = [
 ];
 
 export function PropertiesPanel() {
-  const { elements, selectedId, update, remove, duplicate, bringForward, sendBackward, alignToCanvas } = useEditor();
+  const { elements, selectedId, update, remove, duplicate, bringForward, sendBackward } = useEditor();
   const el = elements.find((e) => e.id === selectedId);
   if (!el) {
     return (
@@ -667,28 +667,6 @@ export function PropertiesPanel() {
           );
         })()}
 
-
-        <Field label="Align to canvas">
-          <div className="grid grid-cols-3 gap-1">
-            {([
-              ["left", "L", AlignStartVertical],
-              ["center-h", "CH", AlignCenterHorizontal],
-              ["right", "R", AlignEndVertical],
-              ["top", "T", AlignStartHorizontal],
-              ["center-v", "CV", AlignCenterVertical],
-              ["bottom", "B", AlignEndHorizontal],
-            ] as const).map(([dir, lbl, Icon]) => (
-              <button
-                key={dir}
-                onClick={() => alignToCanvas(el.id, dir)}
-                title={`Align ${lbl}`}
-                className="brutal-border-2 brutal-press grid place-items-center py-1.5 text-teal hover:border-teal"
-              >
-                <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
-              </button>
-            ))}
-          </div>
-        </Field>
 
         <Field label="Rotation">
           <input
