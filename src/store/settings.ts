@@ -2,21 +2,19 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type PanelId =
-  | "templates"
+  | "home"
   | "ai"
   | "text"
   | "components"
-  | "shapes"
-  | "uploads"
+  | "elements"
   | "design";
 
 export const PANEL_LABELS: Record<PanelId, string> = {
-  templates: "Templates",
+  home: "Home",
   ai: "AI Edit",
   text: "Text",
   components: "Components",
-  shapes: "Shapes",
-  uploads: "Uploads",
+  elements: "Elements",
   design: "Design",
 };
 
@@ -90,7 +88,8 @@ export const AI_MODELS: Array<{ id: string; label: string; hint: string }> = [
 export const DEFAULT_AI_MODEL = AI_MODELS[0].id;
 
 export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> = [
-  { id: "cyber", label: "Cyber", hint: "teal neon on ink (default)" },
+  { id: "cyber", label: "Cyber", hint: "teal neon on ink" },
+  { id: "everest", label: "Everest", hint: "blue and white light" },
   { id: "glass", label: "Glass", hint: "soft frosted greys" },
   { id: "neobrutalist", label: "Neobrutalist", hint: "paper white + hot accents" },
   { id: "matrix", label: "Matrix", hint: "green terminal" },
@@ -100,12 +99,11 @@ export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> =
 export const DEFAULT_EDITOR_THEME = "cyber";
 
 const ALL_ON: Record<PanelId, boolean> = {
-  templates: true,
+  home: true,
   ai: true,
   text: true,
   components: true,
-  shapes: true,
-  uploads: true,
+  elements: true,
   design: true,
 };
 

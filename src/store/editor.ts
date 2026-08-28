@@ -486,7 +486,7 @@ export const CANVAS_PRESETS = [
   { name: "Slide 16:9", w: 1920, h: 1080 },
 ] as const;
 
-type Tool = "templates" | "text" | "shapes" | "uploads" | "design" | "ai" | "components";
+type Tool = "home" | "text" | "elements" | "design" | "ai" | "components";
 
 type HistorySnap = { pages: Page[]; currentIndex: number };
 
@@ -868,7 +868,7 @@ export const useEditor = create<State>((set, get) => {
     elements: initialPage.elements,
     bgColor: initialPage.bgColor,
     selectedId: null,
-    tool: "templates",
+    tool: "home",
     canvasW: DEFAULT_W,
     canvasH: DEFAULT_H,
     history: [],

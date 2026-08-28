@@ -215,9 +215,15 @@ export function Toolbar() {
           <Redo2 className="h-4 w-4" strokeWidth={2.5} />
         </IconBtn>
         {user ? (
-          <IconBtn onClick={() => setSettingsOpen(true)} title="Settings">
-            <Settings className="h-4 w-4" strokeWidth={2.5} />
-          </IconBtn>
+          <BentoMenu
+            onSettings={() => setSettingsOpen(true)}
+            onNewDesign={newDesign}
+            onMyDesigns={() => setOpen(true)}
+            onShare={handlePublish}
+            onExport={() => setExportOpen((v) => !v)}
+            publishing={publishing}
+            exporting={!!exporting}
+          />
         ) : (
           <IconBtn onClick={clear} title="Clear">
             <Trash2 className="h-4 w-4" strokeWidth={2.5} />
@@ -240,12 +246,6 @@ export function Toolbar() {
 
         {user ? (
           <>
-            <IconBtn onClick={newDesign} title="New design">
-              <FilePlus className="h-4 w-4" strokeWidth={2.5} />
-            </IconBtn>
-            <IconBtn onClick={() => setOpen(true)} title="My designs">
-              <FolderOpen className="h-4 w-4" strokeWidth={2.5} />
-            </IconBtn>
             {aiEnabled && (
             <div className="relative" ref={langRef}>
               <button
@@ -273,23 +273,12 @@ export function Toolbar() {
               )}
             </div>
             )}
-            <IconBtn onClick={handlePublish} title="Publish as public template">
-              {publishing ? (
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />
-              ) : (
-                <Share2 className="h-4 w-4" strokeWidth={2.5} />
-              )}
-            </IconBtn>
             <button
               onClick={handleSave}
               disabled={saving}
               className="brutal-border brutal-press flex items-center gap-2 bg-surface px-4 py-2 font-display text-xs tracking-[0.2em] text-teal hover:bg-teal/10 disabled:opacity-60"
             >
-              {saving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Save className="h-3.5 w-3.5" strokeWidth={3} />
-              )}
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" strokeWidth={3} />}
               SAVE
             </button>
             <UserMenu email={user.email ?? ""} />
@@ -370,6 +359,63 @@ export function Toolbar() {
         </div>
       )}
     </header>
+  );
+}
+
+function BentoMenu({
+  onSettings,
+  onNewDesign,
+  onMyDesigns,
+  onShare,
+  onExport,
+  publishing,
+  exporting,
+}: {
+  onSettings: () => void;
+  onNewDesign: () => void;
+  onMyDesigns: () => void;
+  onShare: () => void;
+  onExport: () => void;
+  publishing: boolean;
+  exporting: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const items = [
+    { label: "Settings", icon: Settings, action: onSettings },
+    { label: "New design", icon: FilePlus, action: onNewDesign },
+    { label: "My designs", icon: FolderOpen, action: onMyDesigns },
+    { label: publishing ? "Sharing..." : "Share", icon: publishing ? Loader2 : Share2, action: onShare },
+    { label: exporting ? "Exporting..." : "Export", icon: Download, action: onExport },
+  ];
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label="Open editor menu"
+        title="Editor menu"
+        className="brutal-border-2 brutal-press grid h-10 w-10 place-items-center bg-blue text-ink"
+      >
+        <span className="grid grid-cols-2 gap-0.5" aria-hidden="true">
+          <span className="size-1.5 bg-current" /><span className="size-1.5 bg-current" />
+          <span className="size-1.5 bg-current" /><span className="size-1.5 bg-current" />
+        </span>
+      </button>
+      {open && (
+        <div className="brutal-border-2 absolute right-0 top-12 z-50 grid w-52 grid-cols-2 gap-1 bg-ink p-1">
+          {items.map(({ label, icon: Icon, action }) => (
+            <button
+              key={label}
+              onClick={() => { action(); setOpen(false); }}
+              className="flex min-h-16 flex-col items-center justify-center gap-1 bg-surface px-2 py-2 font-display text-[9px] tracking-[0.12em] text-teal hover:bg-blue-deep"
+            >
+              <Icon className={label === "Sharing..." ? "h-4 w-4 animate-spin" : "h-4 w-4"} strokeWidth={2.5} />
+              {label.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
