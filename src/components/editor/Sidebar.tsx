@@ -2,29 +2,36 @@ import { useEffect, useState } from "react";
 import { useEditor } from "@/store/editor";
 import { useSettings, springEasing, type PanelId } from "@/store/settings";
 import { useUi } from "@/store/ui";
-import { LayoutTemplate, Type, Shapes, Upload, SlidersHorizontal, Bot, Blocks, Settings } from "lucide-react";
+import {
+  LayoutTemplate,
+  Type,
+  Image,
+  SlidersHorizontal,
+  Bot,
+  Blocks,
+  Settings,
+} from "lucide-react";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { TextPanel } from "./panels/TextPanel";
-import { ShapesPanel } from "./panels/ShapesPanel";
-import { UploadsPanel } from "./panels/UploadsPanel";
+import { ElementsPanel } from "./panels/ElementsPanel";
 import { DesignPanel } from "./panels/DesignPanel";
 import { AiChatPanel } from "./panels/AiChatPanel";
 import { ComponentsPanel } from "./panels/ComponentsPanel";
 import { SettingsDialog } from "./SettingsDialog";
 
 const TOOLS = [
-  { id: "templates", label: "Templates", icon: LayoutTemplate },
+  { id: "home", label: "Home", icon: LayoutTemplate },
   { id: "ai", label: "AI Edit", icon: Bot },
   { id: "text", label: "Text", icon: Type },
   { id: "components", label: "Components", icon: Blocks },
-  { id: "shapes", label: "Shapes", icon: Shapes },
-  { id: "uploads", label: "Uploads", icon: Upload },
+  { id: "elements", label: "Elements", icon: Image },
   { id: "design", label: "Design", icon: SlidersHorizontal },
 ] as const;
 
 export function Sidebar() {
   const { tool, setTool } = useEditor();
-  const { panels, aiEnabled, panelDurationMs, panelStiffness, reduceMotion, editorTheme } = useSettings();
+  const { panels, aiEnabled, panelDurationMs, panelStiffness, reduceMotion, editorTheme } =
+    useSettings();
   const settingsOpen = useUi((s) => s.settingsOpen);
   const setSettingsOpen = useUi((s) => s.setSettingsOpen);
   const [hovering, setHovering] = useState(false);
@@ -110,12 +117,11 @@ export function Sidebar() {
             : `pointer-events-none -translate-x-[106%] opacity-0 ${noMotion ? "" : "scale-x-[0.97] blur-[2px]"}`
         }`}
       >
-        {tool === "templates" && <TemplatesPanel />}
+        {tool === "home" && <TemplatesPanel />}
         {tool === "ai" && aiEnabled && <AiChatPanel />}
         {tool === "text" && <TextPanel />}
         {tool === "components" && <ComponentsPanel />}
-        {tool === "shapes" && <ShapesPanel />}
-        {tool === "uploads" && <UploadsPanel />}
+        {tool === "elements" && <ElementsPanel />}
         {tool === "design" && <DesignPanel />}
       </div>
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
