@@ -12,4 +12,12 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    // TanStack's SSR/client entrypoints are resolved by the router runtime.
+    // Excluding them prevents Vite from serving stale optimized-dependency
+    // URLs after a lockfile or package-version change.
+    optimizeDeps: {
+      exclude: ["@tanstack/router-core", "@tanstack/history"],
+    },
+  },
 });
