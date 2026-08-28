@@ -2,29 +2,64 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useEditor, type Page, type AnyElement } from "@/store/editor";
 import {
-  Undo2, Redo2, Trash2, Download, Play, Zap, Save, Cloud,
-  FolderOpen, LogOut, FilePlus, Loader2, User as UserIcon, ChevronDown, Share2, Upload, Languages, Settings,
+  Undo2,
+  Redo2,
+  Trash2,
+  Download,
+  Play,
+  Zap,
+  Save,
+  Cloud,
+  FolderOpen,
+  LogOut,
+  FilePlus,
+  Loader2,
+  User as UserIcon,
+  ChevronDown,
+  Share2,
+  Upload,
+  Languages,
+  Settings,
 } from "lucide-react";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { saveDesign, publishAsTemplate } from "@/lib/designs";
 import { MyDesignsDialog } from "./MyDesignsDialog";
-import { exportPNG, exportPDF, exportPPTX, exportGIF, exportHTML, exportJSON, importJSONFile } from "@/lib/export";
+import {
+  exportPNG,
+  exportPDF,
+  exportPPTX,
+  exportGIF,
+  exportHTML,
+  exportJSON,
+  importJSONFile,
+} from "@/lib/export";
 import { useServerFn } from "@tanstack/react-start";
 import { translateTexts } from "@/lib/ai-templates.functions";
 import { useSettings } from "@/store/settings";
 import { useUi } from "@/store/ui";
 
 const LANGUAGES = [
-  "Spanish", "French", "German", "Italian", "Portuguese", "Dutch",
-  "Japanese", "Korean", "Chinese (Simplified)", "Arabic", "Hindi",
-  "Russian", "Turkish", "Polish", "Swedish", "English",
+  "Spanish",
+  "French",
+  "German",
+  "Italian",
+  "Portuguese",
+  "Dutch",
+  "Japanese",
+  "Korean",
+  "Chinese (Simplified)",
+  "Arabic",
+  "Hindi",
+  "Russian",
+  "Turkish",
+  "Polish",
+  "Swedish",
+  "English",
 ];
 
 export function Toolbar() {
-  const {
-    undo, redo, clear,
-    designId, designName, setDesignName, setDesignMeta, newDesign,
-  } = useEditor();
+  const { undo, redo, clear, designId, designName, setDesignName, setDesignMeta, newDesign } =
+    useEditor();
   const { user } = useAuth();
   const aiEnabled = useSettings((s) => s.aiEnabled);
   const setSettingsOpen = useUi((s) => s.setSettingsOpen);
@@ -44,7 +79,9 @@ export function Toolbar() {
     return () => clearTimeout(t);
   }, [savedAt]);
 
-  const [exporting, setExporting] = useState<null | "png" | "pdf" | "pptx" | "gif" | "html" | "json">(null);
+  const [exporting, setExporting] = useState<
+    null | "png" | "pdf" | "pptx" | "gif" | "html" | "json"
+  >(null);
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
@@ -143,24 +180,47 @@ export function Toolbar() {
       const { pages, loadPages } = useEditor.getState();
       // Collect strings with a stable path index.
       const strings: string[] = [];
-      const paths: Array<{ p: number; i: number; field: "text" | "question" | "opt"; oi?: number }> = [];
+      const paths: Array<{
+        p: number;
+        i: number;
+        field: "text" | "question" | "opt";
+        oi?: number;
+      }> = [];
       pages.forEach((pg, p) => {
         pg.elements.forEach((el, i) => {
-          if (el.type === "text" && el.text) { strings.push(el.text); paths.push({ p, i, field: "text" }); }
-          if (el.type === "button" && el.text) { strings.push(el.text); paths.push({ p, i, field: "text" }); }
+          if (el.type === "text" && el.text) {
+            strings.push(el.text);
+            paths.push({ p, i, field: "text" });
+          }
+          if (el.type === "button" && el.text) {
+            strings.push(el.text);
+            paths.push({ p, i, field: "text" });
+          }
           if (el.type === "quiz") {
-            if (el.question) { strings.push(el.question); paths.push({ p, i, field: "question" }); }
+            if (el.question) {
+              strings.push(el.question);
+              paths.push({ p, i, field: "question" });
+            }
             el.options.forEach((o, oi) => {
-              if (o.text) { strings.push(o.text); paths.push({ p, i, field: "opt", oi }); }
+              if (o.text) {
+                strings.push(o.text);
+                paths.push({ p, i, field: "opt", oi });
+              }
             });
           }
         });
       });
-      if (strings.length === 0) { alert("No text to translate."); return; }
+      if (strings.length === 0) {
+        alert("No text to translate.");
+        return;
+      }
 
       const { translations } = await translate({ data: { texts: strings, target } });
 
-      const nextPages: Page[] = pages.map((pg) => ({ ...pg, elements: pg.elements.map((e) => ({ ...e })) as AnyElement[] }));
+      const nextPages: Page[] = pages.map((pg) => ({
+        ...pg,
+        elements: pg.elements.map((e) => ({ ...e })) as AnyElement[],
+      }));
       paths.forEach((path, idx) => {
         const t = translations[idx];
         if (typeof t !== "string") return;
@@ -201,9 +261,7 @@ export function Toolbar() {
             onChange={(e) => setDesignName(e.target.value)}
             className="brutal-border-2 bg-surface px-3 py-1.5 font-mono text-xs text-teal focus:outline-none focus:border-teal focus:bg-surface-2"
           />
-          {savedAt && (
-            <span className="font-mono text-[10px] text-teal/70">✓ saved</span>
-          )}
+          {savedAt && <span className="font-mono text-[10px] text-teal/70">✓ saved</span>}
         </div>
       </div>
 
@@ -247,38 +305,48 @@ export function Toolbar() {
         {user ? (
           <>
             {aiEnabled && (
-            <div className="relative" ref={langRef}>
-              <button
-                onClick={() => setLangOpen((v) => !v)}
-                disabled={translating}
-                title="Translate deck"
-                aria-label="Translate deck"
-                className="brutal-border-2 brutal-press grid h-10 w-10 place-items-center bg-surface text-teal hover:bg-surface-2 hover:border-teal disabled:opacity-60"
-              >
-                {translating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" strokeWidth={2.5} />}
-              </button>
-              {langOpen && (
-                <div className="brutal-border-2 absolute right-0 top-12 z-50 max-h-72 w-52 overflow-y-auto bg-ink p-1">
-                  <div className="border-b border-teal/30 px-3 py-1.5 font-mono text-[10px] text-teal/60">TRANSLATE TO...</div>
-                  {LANGUAGES.map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => handleTranslate(l)}
-                      className="flex w-full items-center px-3 py-2 font-display text-[11px] tracking-[0.15em] text-teal hover:bg-surface"
-                    >
-                      {l.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+              <div className="relative" ref={langRef}>
+                <button
+                  onClick={() => setLangOpen((v) => !v)}
+                  disabled={translating}
+                  title="Translate deck"
+                  aria-label="Translate deck"
+                  className="brutal-border-2 brutal-press grid h-10 w-10 place-items-center bg-surface text-teal hover:bg-surface-2 hover:border-teal disabled:opacity-60"
+                >
+                  {translating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" strokeWidth={2.5} />
+                  )}
+                </button>
+                {langOpen && (
+                  <div className="brutal-border-2 absolute right-0 top-12 z-50 max-h-72 w-52 overflow-y-auto bg-ink p-1">
+                    <div className="border-b border-teal/30 px-3 py-1.5 font-mono text-[10px] text-teal/60">
+                      TRANSLATE TO...
+                    </div>
+                    {LANGUAGES.map((l) => (
+                      <button
+                        key={l}
+                        onClick={() => handleTranslate(l)}
+                        className="flex w-full items-center px-3 py-2 font-display text-[11px] tracking-[0.15em] text-teal hover:bg-surface"
+                      >
+                        {l.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
             <button
               onClick={handleSave}
               disabled={saving}
               className="brutal-border brutal-press flex items-center gap-2 bg-surface px-4 py-2 font-display text-xs tracking-[0.2em] text-teal hover:bg-teal/10 disabled:opacity-60"
             >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" strokeWidth={3} />}
+              {saving ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" strokeWidth={3} />
+              )}
               SAVE
             </button>
             <UserMenu email={user.email ?? ""} />
@@ -318,7 +386,15 @@ export function Toolbar() {
                 >
                   <span>EXPORT .{k.toUpperCase()}</span>
                   <span className="font-mono text-[9px] text-teal/60">
-                    {k === "png" ? "current" : k === "gif" ? "animated" : k === "html" ? "interactive" : k === "json" ? "editable" : "all pages"}
+                    {k === "png"
+                      ? "current"
+                      : k === "gif"
+                        ? "animated"
+                        : k === "html"
+                          ? "interactive"
+                          : k === "json"
+                            ? "editable"
+                            : "all pages"}
                   </span>
                 </button>
               ))}
@@ -331,7 +407,9 @@ export function Toolbar() {
       {shareLink && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-ink/80 p-6">
           <div className="brutal-border-2 w-full max-w-md bg-surface p-6">
-            <div className="font-display text-sm tracking-[0.2em] text-teal">✓ PUBLISHED · SHARE LINK</div>
+            <div className="font-display text-sm tracking-[0.2em] text-teal">
+              ✓ PUBLISHED · SHARE LINK
+            </div>
             <p className="mt-2 font-mono text-[11px] text-teal/60">
               Anyone with this link can view your deck.
             </p>
@@ -384,7 +462,11 @@ function BentoMenu({
     { label: "Settings", icon: Settings, action: onSettings },
     { label: "New design", icon: FilePlus, action: onNewDesign },
     { label: "My designs", icon: FolderOpen, action: onMyDesigns },
-    { label: publishing ? "Sharing..." : "Share", icon: publishing ? Loader2 : Share2, action: onShare },
+    {
+      label: publishing ? "Sharing..." : "Share",
+      icon: publishing ? Loader2 : Share2,
+      action: onShare,
+    },
     { label: exporting ? "Exporting..." : "Export", icon: Download, action: onExport },
   ];
   return (
@@ -397,8 +479,10 @@ function BentoMenu({
         className="brutal-border-2 brutal-press grid h-10 w-10 place-items-center bg-blue text-ink"
       >
         <span className="grid grid-cols-2 gap-0.5" aria-hidden="true">
-          <span className="size-1.5 bg-current" /><span className="size-1.5 bg-current" />
-          <span className="size-1.5 bg-current" /><span className="size-1.5 bg-current" />
+          <span className="size-1.5 bg-current" />
+          <span className="size-1.5 bg-current" />
+          <span className="size-1.5 bg-current" />
+          <span className="size-1.5 bg-current" />
         </span>
       </button>
       {open && (
@@ -406,10 +490,16 @@ function BentoMenu({
           {items.map(({ label, icon: Icon, action }) => (
             <button
               key={label}
-              onClick={() => { action(); setOpen(false); }}
+              onClick={() => {
+                action();
+                setOpen(false);
+              }}
               className="flex min-h-16 flex-col items-center justify-center gap-1 bg-surface px-2 py-2 font-display text-[9px] tracking-[0.12em] text-teal hover:bg-blue-deep"
             >
-              <Icon className={label === "Sharing..." ? "h-4 w-4 animate-spin" : "h-4 w-4"} strokeWidth={2.5} />
+              <Icon
+                className={label === "Sharing..." ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+                strokeWidth={2.5}
+              />
               {label.toUpperCase()}
             </button>
           ))}
