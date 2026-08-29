@@ -23,8 +23,8 @@ const TOOLS = [
   { id: "home", label: "Home", icon: LayoutTemplate },
   { id: "ai", label: "AI Edit", icon: Bot },
   { id: "text", label: "Text", icon: Type },
-  { id: "components", label: "Components", icon: Blocks },
   { id: "elements", label: "Elements", icon: Image },
+  { id: "components", label: "Presets", icon: Blocks },
   { id: "design", label: "Design", icon: SlidersHorizontal },
 ] as const;
 
@@ -45,6 +45,7 @@ export function Sidebar() {
     if (editorTheme !== "auto") {
       root.style.removeProperty("--auto-slide-color");
       root.style.removeProperty("--auto-slide-ink");
+      root.style.removeProperty("--auto-chrome");
       return;
     }
 
@@ -56,8 +57,11 @@ export function Sidebar() {
       channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
     );
     const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    const foreground = luminance > 0.55 ? "#0b1736" : "#ffffff";
+    const chrome = luminance > 0.55 ? "#ffffff" : "#0b1736";
     root.style.setProperty("--auto-slide-color", normalized);
-    root.style.setProperty("--auto-slide-ink", luminance > 0.55 ? "#0b1736" : "#ffffff");
+    root.style.setProperty("--auto-slide-ink", foreground);
+    root.style.setProperty("--auto-chrome", chrome);
   }, [editorTheme, bgColor]);
 
   useEffect(() => {
@@ -126,6 +130,16 @@ export function Sidebar() {
           Settings
         </button>
       </nav>
+      <div
+        className="pointer-events-none absolute left-20 top-0 z-40 flex h-12 w-72 items-center gap-2 border-r border-b border-teal/30 bg-paper px-4"
+        aria-hidden="true"
+      >
+        <span className="size-2 bg-blue shadow-[0_0_0_3px_var(--blue-deep)]" />
+        <span className="font-display text-[10px] font-bold uppercase tracking-[0.22em] text-teal">
+          {TOOLS.find((item) => item.id === tool)?.label}
+        </span>
+        <span className="ml-auto font-mono text-[9px] text-teal/50">EDITOR</span>
+      </div>
       <div
         aria-hidden={!panelOpen}
         style={{ transition: panelTransition }}

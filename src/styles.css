@@ -91,13 +91,17 @@
 
 /* ---- Editor themes (mirrors the component style packs) ---- */
 [data-editor-theme="auto"] {
-  --ink: color-mix(in srgb, var(--auto-slide-color, #2563eb) 14%, white);
+  --ink: var(--auto-chrome, #0b1736);
   --paper: color-mix(in srgb, var(--auto-slide-color, #2563eb) 8%, white);
-  --surface: white;
+  --surface: color-mix(in srgb, var(--auto-chrome, #0b1736) 4%, white);
   --surface-2: color-mix(in srgb, var(--auto-slide-color, #2563eb) 12%, white);
   --grid: color-mix(in srgb, var(--auto-slide-color, #2563eb) 28%, white);
   --teal: var(--auto-slide-ink, #0b1736);
-  --teal-deep: color-mix(in srgb, var(--auto-slide-color, #2563eb) 72%, #0b1736);
+  --teal-deep: color-mix(
+    in srgb,
+    var(--auto-slide-ink, #0b1736) 82%,
+    var(--auto-slide-color, #2563eb)
+  );
   --blue: var(--auto-slide-color, #2563eb);
   --blue-deep: color-mix(in srgb, var(--auto-slide-color, #2563eb) 72%, white);
   --background: var(--paper);
