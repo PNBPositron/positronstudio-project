@@ -76,10 +76,7 @@ export function MyDesignsDialog({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {items.map((d) => (
                 <div key={d.id} className="brutal-border-2 group relative bg-ink">
-                  <button
-                    onClick={() => handleOpen(d)}
-                    className="block w-full text-left"
-                  >
+                  <button onClick={() => handleOpen(d)} className="block w-full text-left">
                     <div
                       className="aspect-video w-full"
                       style={{

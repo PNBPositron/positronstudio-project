@@ -1,5 +1,16 @@
 import { useRef, useState, useEffect } from "react";
-import { useEditor, UI_STYLE_THEMES, type AnyElement, type ShapeElement, type QuizElement, type ChartElement, type ButtonElement, type ElementShadow, DEFAULT_FILTERS, type ImageFilters } from "@/store/editor";
+import {
+  useEditor,
+  UI_STYLE_THEMES,
+  type AnyElement,
+  type ShapeElement,
+  type QuizElement,
+  type ChartElement,
+  type ButtonElement,
+  type ElementShadow,
+  DEFAULT_FILTERS,
+  type ImageFilters,
+} from "@/store/editor";
 import { ShapeRender } from "./ShapeRender";
 import { UiRender } from "./UiRender";
 import * as LucideIcons from "lucide-react";
@@ -116,7 +127,10 @@ export function CanvasElement({
         const s = snap(c.anchor, vTargets);
         if (s.hit !== null) {
           const d = Math.abs(s.v - c.anchor);
-          if (d < xDist) { xDist = d; xShift = s.v - c.anchor; }
+          if (d < xDist) {
+            xDist = d;
+            xShift = s.v - c.anchor;
+          }
         }
       }
       nx += xShift;
@@ -126,7 +140,10 @@ export function CanvasElement({
         const s = snap(c.anchor, hTargets);
         if (s.hit !== null) {
           const d = Math.abs(s.v - c.anchor);
-          if (d < yDist) { yDist = d; yShift = s.v - c.anchor; }
+          if (d < yDist) {
+            yDist = d;
+            yShift = s.v - c.anchor;
+          }
         }
       }
       ny += yShift;
@@ -143,7 +160,8 @@ export function CanvasElement({
         const targets = a.k === "v" ? vTargets : hTargets;
         for (const t of targets) {
           if (Math.abs(a.v - t) < 0.5) {
-            if (a.k === "v") vHits.add(t); else hHits.add(t);
+            if (a.k === "v") vHits.add(t);
+            else hHits.add(t);
           }
         }
       }
@@ -168,11 +186,30 @@ export function CanvasElement({
     const onMove = (m: MouseEvent) => {
       const dx = (m.clientX - startX) / scale;
       const dy = (m.clientY - startY) / scale;
-      let nx = x, ny = y, nw = width, nh = height;
-      if (handle === "se") { nw = Math.max(20, width + dx); nh = Math.max(20, height + dy); }
-      if (handle === "ne") { ny = y + dy; nh = Math.max(20, height - dy); nw = Math.max(20, width + dx); }
-      if (handle === "sw") { nx = x + dx; nw = Math.max(20, width - dx); nh = Math.max(20, height + dy); }
-      if (handle === "nw") { nx = x + dx; ny = y + dy; nw = Math.max(20, width - dx); nh = Math.max(20, height - dy); }
+      let nx = x,
+        ny = y,
+        nw = width,
+        nh = height;
+      if (handle === "se") {
+        nw = Math.max(20, width + dx);
+        nh = Math.max(20, height + dy);
+      }
+      if (handle === "ne") {
+        ny = y + dy;
+        nh = Math.max(20, height - dy);
+        nw = Math.max(20, width + dx);
+      }
+      if (handle === "sw") {
+        nx = x + dx;
+        nw = Math.max(20, width - dx);
+        nh = Math.max(20, height + dy);
+      }
+      if (handle === "nw") {
+        nx = x + dx;
+        ny = y + dy;
+        nw = Math.max(20, width - dx);
+        nh = Math.max(20, height - dy);
+      }
       update(element.id, { x: nx, y: ny, width: nw, height: nh });
     };
     const onUp = () => {
@@ -217,78 +254,84 @@ export function CanvasElement({
         outlineOffset: "2px",
       }}
     >
-      {element.type === "text" && (() => {
-        const presenting = useEditor.getState().presenting;
-        const display = element.bullet && !editing
-          ? (element.text || "").split("\n").map((l) => (l.trim() ? `• ${l}` : l)).join("\n")
-          : element.text;
-        const isLink = !!element.href && presenting;
-        const textStyle: React.CSSProperties = {
-          width: "100%",
-          height: "100%",
-          fontSize: element.fontSize,
-          color: element.color,
-          fontWeight: element.fontWeight,
-          fontFamily: element.fontFamily,
-          textAlign: element.align,
-          fontStyle: element.italic ? "italic" : "normal",
-          textDecoration: element.underline || isLink ? "underline" : "none",
-          outline: "none",
-          lineHeight: element.lineHeight ?? 1.15,
-          letterSpacing: `${element.letterSpacing ?? -0.02}em`,
-          textTransform: element.textTransform ?? "none",
-          opacity: element.opacity ?? 1,
-          textShadow: element.shadow
-            ? `${element.shadow.x}px ${element.shadow.y}px ${element.shadow.blur}px ${element.shadow.color}`
-            : undefined,
-          wordBreak: "break-word",
-          whiteSpace: "pre-wrap",
-        };
-        const inner = (
-          <div
-            contentEditable={editing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
-              update(element.id, { text: e.currentTarget.innerText || "" });
-              setEditing(false);
-            }}
-            style={textStyle}
-          >
-            {display}
-          </div>
-        );
-        if (isLink) {
-          return (
-            <a
-              href={element.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              onMouseDown={(e) => e.stopPropagation()}
-              style={{ display: "block", width: "100%", height: "100%", color: "inherit" }}
+      {element.type === "text" &&
+        (() => {
+          const presenting = useEditor.getState().presenting;
+          const display =
+            element.bullet && !editing
+              ? (element.text || "")
+                  .split("\n")
+                  .map((l) => (l.trim() ? `• ${l}` : l))
+                  .join("\n")
+              : element.text;
+          const isLink = !!element.href && presenting;
+          const textStyle: React.CSSProperties = {
+            width: "100%",
+            height: "100%",
+            fontSize: element.fontSize,
+            color: element.color,
+            fontWeight: element.fontWeight,
+            fontFamily: element.fontFamily,
+            textAlign: element.align,
+            fontStyle: element.italic ? "italic" : "normal",
+            textDecoration: element.underline || isLink ? "underline" : "none",
+            outline: "none",
+            lineHeight: element.lineHeight ?? 1.15,
+            letterSpacing: `${element.letterSpacing ?? -0.02}em`,
+            textTransform: element.textTransform ?? "none",
+            opacity: element.opacity ?? 1,
+            textShadow: element.shadow
+              ? `${element.shadow.x}px ${element.shadow.y}px ${element.shadow.blur}px ${element.shadow.color}`
+              : undefined,
+            wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
+          };
+          const inner = (
+            <div
+              contentEditable={editing}
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                update(element.id, { text: e.currentTarget.innerText || "" });
+                setEditing(false);
+              }}
+              style={textStyle}
             >
-              {inner}
-            </a>
+              {display}
+            </div>
           );
-        }
-        return inner;
-      })()}
-      {element.type === "shape" && (() => {
-        const fx = shapeEffectStyle(element);
-        const sFilter = shadowFilter(element.shadow);
-        const isOverlay = element.effect === "liquid_glass" || element.effect === "inner_glow";
-        return (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              ...fx,
-              filter: [fx.filter, sFilter].filter(Boolean).join(" ") || undefined,
-            }}
-          >
-            {!isOverlay && <ShapeRender element={element} />}
-          </div>
-        );
-      })()}
+          if (isLink) {
+            return (
+              <a
+                href={element.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{ display: "block", width: "100%", height: "100%", color: "inherit" }}
+              >
+                {inner}
+              </a>
+            );
+          }
+          return inner;
+        })()}
+      {element.type === "shape" &&
+        (() => {
+          const fx = shapeEffectStyle(element);
+          const sFilter = shadowFilter(element.shadow);
+          const isOverlay = element.effect === "liquid_glass" || element.effect === "inner_glow";
+          return (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                ...fx,
+                filter: [fx.filter, sFilter].filter(Boolean).join(" ") || undefined,
+              }}
+            >
+              {!isOverlay && <ShapeRender element={element} />}
+            </div>
+          );
+        })()}
       {element.type === "image" && (
         <div
           style={{
@@ -315,7 +358,9 @@ export function CanvasElement({
               objectFit: element.fit ?? "cover",
               display: "block",
               transform: `scale(${element.flipX ? -1 : 1}, ${element.flipY ? -1 : 1})`,
-              filter: [filterCss(element.filters), shadowFilter(element.shadow)].filter(Boolean).join(" "),
+              filter: [filterCss(element.filters), shadowFilter(element.shadow)]
+                .filter(Boolean)
+                .join(" "),
             }}
           />
           {element.gradient && (
@@ -334,59 +379,67 @@ export function CanvasElement({
           )}
         </div>
       )}
-      {element.type === "icon" && (() => {
-        const Comp =
-          (LucideIcons as unknown as Record<string, React.ComponentType<LucideIcons.LucideProps>>)[element.name] ??
-          HelpCircle;
-        return (
-          <Comp
-            color={element.color}
-            strokeWidth={element.strokeWidth}
-            style={{ width: "100%", height: "100%", display: "block" }}
-          />
-        );
-      })()}
-      {element.type === "quiz" && (() => {
-        const presenting = useEditor.getState().presenting;
-        return (
-          <QuizRender
-            element={element}
-            interactive={presenting}
-          />
-        );
-      })()}
+      {element.type === "icon" &&
+        (() => {
+          const Comp =
+            (
+              LucideIcons as unknown as Record<string, React.ComponentType<LucideIcons.LucideProps>>
+            )[element.name] ?? HelpCircle;
+          return (
+            <Comp
+              color={element.color}
+              strokeWidth={element.strokeWidth}
+              style={{ width: "100%", height: "100%", display: "block" }}
+            />
+          );
+        })()}
+      {element.type === "quiz" &&
+        (() => {
+          const presenting = useEditor.getState().presenting;
+          return <QuizRender element={element} interactive={presenting} />;
+        })()}
 
       {element.type === "chart" && <ChartRender element={element} />}
       {element.type === "ui" && <UiRender element={element} />}
-      {element.type === "button" && (() => {
-        const presenting = useEditor.getState().presenting;
-        return <ButtonRender element={element} interactive={presenting} />;
-      })()}
-      {element.type === "embed" && (() => {
-        const presenting = useEditor.getState().presenting;
-        return (
-          <div style={{ width: "100%", height: "100%", position: "relative", background: "#0a0f1f" }}>
-            <iframe
-              src={element.src}
-              title={element.title || "Embed"}
-              allow={element.allow}
-              allowFullScreen
-              style={{ width: "100%", height: "100%", border: 0, display: "block", background: "#000" }}
-            />
-            {!presenting && (
-              <div
-                // Overlay lets the editor select/drag; iframe still visible but not interactive.
+      {element.type === "button" &&
+        (() => {
+          const presenting = useEditor.getState().presenting;
+          return <ButtonRender element={element} interactive={presenting} />;
+        })()}
+      {element.type === "embed" &&
+        (() => {
+          const presenting = useEditor.getState().presenting;
+          return (
+            <div
+              style={{ width: "100%", height: "100%", position: "relative", background: "#0a0f1f" }}
+            >
+              <iframe
+                src={element.src}
+                title={element.title || "Embed"}
+                allow={element.allow}
+                allowFullScreen
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "transparent",
-                  cursor: "move",
+                  width: "100%",
+                  height: "100%",
+                  border: 0,
+                  display: "block",
+                  background: "#000",
                 }}
               />
-            )}
-          </div>
-        );
-      })()}
+              {!presenting && (
+                <div
+                  // Overlay lets the editor select/drag; iframe still visible but not interactive.
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "transparent",
+                    cursor: "move",
+                  }}
+                />
+              )}
+            </div>
+          );
+        })()}
 
       {selected && !editing && (
         <>
@@ -533,59 +586,58 @@ function QuizRender({ element, interactive }: { element: QuizElement; interactiv
               opacity: 0.7,
             }}
           >
-            <span>{total} vote{total === 1 ? "" : "s"} · live</span>
+            <span>
+              {total} vote{total === 1 ? "" : "s"} · live
+            </span>
             {interactive && (
-              <span
-                onClick={resetPoll}
-                style={{ cursor: "pointer", textDecoration: "underline" }}
-              >
+              <span onClick={resetPoll} style={{ cursor: "pointer", textDecoration: "underline" }}>
                 reset
               </span>
             )}
           </div>
         </div>
       ) : (
-      <div style={{ display: "grid", gap: "3%", flex: 1, gridTemplateColumns: "1fr 1fr" }}>
-        {element.options.map((opt) => {
-          const isPicked = picked === opt.id;
-          const isCorrect = opt.id === element.correctId;
-          const showResult = picked !== null;
-          const bg = !showResult
-            ? "rgba(255,255,255,0.06)"
-            : isCorrect
-              ? "#16a34a"
-              : isPicked
-                ? "#dc2626"
-                : "rgba(255,255,255,0.04)";
-          return (
-            <button
-              key={opt.id}
-              disabled={!interactive || showResult}
-              onClick={() => interactive && setPicked(opt.id)}
-              style={{
-                background: bg,
-                color: element.fgColor,
-                border: `2px solid ${isPicked || (showResult && isCorrect) ? element.accentColor : "rgba(255,255,255,0.18)"}`,
-                borderRadius: 12,
-                padding: "0 16px",
-                fontSize: "max(16px, 3.2%)",
-                fontWeight: 600,
-                textAlign: "left",
-                cursor: interactive && !showResult ? "pointer" : "default",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 8,
-                transition: "all 0.2s",
-              }}
-            >
-              <span>{opt.text}</span>
-              {showResult && isCorrect && <Check size={20} strokeWidth={3} />}
-              {showResult && isPicked && !isCorrect && <XIcon size={20} strokeWidth={3} />}
-            </button>
-          );
-        })}
-      </div>
+        <div style={{ display: "grid", gap: "3%", flex: 1, gridTemplateColumns: "1fr 1fr" }}>
+          {element.options.map((opt) => {
+            const isPicked = picked === opt.id;
+            const isCorrect = opt.id === element.correctId;
+            const showResult = picked !== null;
+            const bg = !showResult
+              ? "rgba(255,255,255,0.06)"
+              : isCorrect
+                ? "#16a34a"
+                : isPicked
+                  ? "#dc2626"
+                  : "rgba(255,255,255,0.04)";
+            return (
+              <button
+                key={opt.id}
+                disabled={!interactive || showResult}
+                onClick={() => interactive && setPicked(opt.id)}
+                style={{
+                  background: bg,
+                  color: element.fgColor,
+                  border: `2px solid ${isPicked || (showResult && isCorrect) ? element.accentColor : "rgba(255,255,255,0.18)"}`,
+                  borderRadius: 12,
+                  padding: "0 16px",
+                  fontSize: "max(16px, 3.2%)",
+                  fontWeight: 600,
+                  textAlign: "left",
+                  cursor: interactive && !showResult ? "pointer" : "default",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  transition: "all 0.2s",
+                }}
+              >
+                <span>{opt.text}</span>
+                {showResult && isCorrect && <Check size={20} strokeWidth={3} />}
+                {showResult && isPicked && !isCorrect && <XIcon size={20} strokeWidth={3} />}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -595,8 +647,12 @@ function ChartRender({ element }: { element: ChartElement }) {
   const { chart, data, colors, bgColor, fgColor, title, showValues, showAxes } = element;
   const theme = element.uiStyle ? UI_STYLE_THEMES[element.uiStyle] : null;
   const fontFamily = theme ? theme.font : "Inter, sans-serif";
-  const W = 400, H = 300;
-  const padL = 50, padR = 20, padT = title ? 40 : 20, padB = 40;
+  const W = 400,
+    H = 300;
+  const padL = 50,
+    padR = 20,
+    padT = title ? 40 : 20,
+    padB = 40;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
   const maxV = Math.max(1, ...data.map((d) => d.value));
@@ -614,9 +670,28 @@ function ChartRender({ element }: { element: ChartElement }) {
         <g key={i}>
           <rect x={x} y={y} width={bw} height={h} fill={c(i)} />
           {showValues && (
-            <text x={x + bw / 2} y={y - 4} textAnchor="middle" fill={fgColor} fontSize="10" fontFamily={fontFamily} fontWeight={700}>{d.value}</text>
+            <text
+              x={x + bw / 2}
+              y={y - 4}
+              textAnchor="middle"
+              fill={fgColor}
+              fontSize="10"
+              fontFamily={fontFamily}
+              fontWeight={700}
+            >
+              {d.value}
+            </text>
           )}
-          <text x={x + bw / 2} y={padT + plotH + 14} textAnchor="middle" fill={fgColor} fontSize="10" fontFamily={fontFamily}>{d.label}</text>
+          <text
+            x={x + bw / 2}
+            y={padT + plotH + 14}
+            textAnchor="middle"
+            fill={fgColor}
+            fontSize="10"
+            fontFamily={fontFamily}
+          >
+            {d.label}
+          </text>
         </g>
       );
     });
@@ -625,20 +700,50 @@ function ChartRender({ element }: { element: ChartElement }) {
   const renderLineOrArea = (filled: boolean) => {
     if (data.length < 2) return null;
     const stepX = plotW / (data.length - 1);
-    const pts = data.map((d, i) => [padL + i * stepX, padT + plotH - (d.value / maxV) * plotH] as const);
+    const pts = data.map(
+      (d, i) => [padL + i * stepX, padT + plotH - (d.value / maxV) * plotH] as const,
+    );
     const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ");
-    const area = filled ? `${path} L${pts[pts.length - 1][0]},${padT + plotH} L${pts[0][0]},${padT + plotH} Z` : null;
+    const area = filled
+      ? `${path} L${pts[pts.length - 1][0]},${padT + plotH} L${pts[0][0]},${padT + plotH} Z`
+      : null;
     return (
       <g>
         {area && <path d={area} fill={c(0)} fillOpacity={0.25} />}
-        <path d={path} fill="none" stroke={c(0)} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+        <path
+          d={path}
+          fill="none"
+          stroke={c(0)}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
         {pts.map((p, i) => (
           <g key={i}>
             <circle cx={p[0]} cy={p[1]} r={3.5} fill={c(0)} stroke={bgColor} strokeWidth={1.5} />
             {showValues && (
-              <text x={p[0]} y={p[1] - 8} textAnchor="middle" fill={fgColor} fontSize="10" fontFamily={fontFamily} fontWeight={700}>{data[i].value}</text>
+              <text
+                x={p[0]}
+                y={p[1] - 8}
+                textAnchor="middle"
+                fill={fgColor}
+                fontSize="10"
+                fontFamily={fontFamily}
+                fontWeight={700}
+              >
+                {data[i].value}
+              </text>
             )}
-            <text x={p[0]} y={padT + plotH + 14} textAnchor="middle" fill={fgColor} fontSize="10" fontFamily={fontFamily}>{data[i].label}</text>
+            <text
+              x={p[0]}
+              y={padT + plotH + 14}
+              textAnchor="middle"
+              fill={fgColor}
+              fontSize="10"
+              fontFamily={fontFamily}
+            >
+              {data[i].label}
+            </text>
           </g>
         ))}
       </g>
@@ -646,22 +751,28 @@ function ChartRender({ element }: { element: ChartElement }) {
   };
 
   const renderPie = (donut: boolean) => {
-    const cx = W / 2, cy = padT + plotH / 2;
+    const cx = W / 2,
+      cy = padT + plotH / 2;
     const r = Math.min(plotW, plotH) / 2 - 10;
     const inner = donut ? r * 0.55 : 0;
     const total = data.reduce((a, b) => a + b.value, 0) || 1;
     let acc = -Math.PI / 2;
     return data.map((d, i) => {
       const ang = (d.value / total) * Math.PI * 2;
-      const a1 = acc, a2 = acc + ang;
+      const a1 = acc,
+        a2 = acc + ang;
       acc = a2;
       const large = ang > Math.PI ? 1 : 0;
-      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
-      const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+      const x1 = cx + r * Math.cos(a1),
+        y1 = cy + r * Math.sin(a1);
+      const x2 = cx + r * Math.cos(a2),
+        y2 = cy + r * Math.sin(a2);
       let path: string;
       if (donut) {
-        const xi1 = cx + inner * Math.cos(a1), yi1 = cy + inner * Math.sin(a1);
-        const xi2 = cx + inner * Math.cos(a2), yi2 = cy + inner * Math.sin(a2);
+        const xi1 = cx + inner * Math.cos(a1),
+          yi1 = cy + inner * Math.sin(a1);
+        const xi2 = cx + inner * Math.cos(a2),
+          yi2 = cy + inner * Math.sin(a2);
         path = `M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${xi2},${yi2} A${inner},${inner} 0 ${large} 0 ${xi1},${yi1} Z`;
       } else {
         path = `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z`;
@@ -672,8 +783,17 @@ function ChartRender({ element }: { element: ChartElement }) {
       return (
         <g key={i}>
           <path d={path} fill={c(i)} stroke={bgColor} strokeWidth={1.5} />
-          <text x={lx} y={ly} textAnchor={Math.cos(mid) > 0 ? "start" : "end"} fill={fgColor} fontSize="9" fontFamily={fontFamily} fontWeight={600}>
-            {d.label}{showValues ? ` · ${d.value}` : ""}
+          <text
+            x={lx}
+            y={ly}
+            textAnchor={Math.cos(mid) > 0 ? "start" : "end"}
+            fill={fgColor}
+            fontSize="9"
+            fontFamily={fontFamily}
+            fontWeight={600}
+          >
+            {d.label}
+            {showValues ? ` · ${d.value}` : ""}
           </text>
         </g>
       );
@@ -697,16 +817,46 @@ function ChartRender({ element }: { element: ChartElement }) {
     >
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
         {title && (
-          <text x={padL} y={22} fill={fgColor} fontSize="16" fontWeight={800} fontFamily={fontFamily}>{title}</text>
+          <text
+            x={padL}
+            y={22}
+            fill={fgColor}
+            fontSize="16"
+            fontWeight={800}
+            fontFamily={fontFamily}
+          >
+            {title}
+          </text>
         )}
         {showAxes && chart !== "pie" && chart !== "donut" && (
           <g>
             <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke={stroke} strokeWidth={1} />
-            <line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} stroke={stroke} strokeWidth={1} />
+            <line
+              x1={padL}
+              y1={padT + plotH}
+              x2={padL + plotW}
+              y2={padT + plotH}
+              stroke={stroke}
+              strokeWidth={1}
+            />
             {[0, 0.25, 0.5, 0.75, 1].map((t, i) => (
               <g key={i}>
-                <line x1={padL - 4} y1={padT + plotH - t * plotH} x2={padL} y2={padT + plotH - t * plotH} stroke={stroke} />
-                <text x={padL - 6} y={padT + plotH - t * plotH + 3} textAnchor="end" fill={fgColor} fontSize="9" fontFamily={fontFamily} opacity={0.7}>
+                <line
+                  x1={padL - 4}
+                  y1={padT + plotH - t * plotH}
+                  x2={padL}
+                  y2={padT + plotH - t * plotH}
+                  stroke={stroke}
+                />
+                <text
+                  x={padL - 6}
+                  y={padT + plotH - t * plotH + 3}
+                  textAnchor="end"
+                  fill={fgColor}
+                  fontSize="9"
+                  fontFamily={fontFamily}
+                  opacity={0.7}
+                >
                   {Math.round(maxV * t)}
                 </text>
               </g>
@@ -728,11 +878,21 @@ function ButtonRender({ element, interactive }: { element: ButtonElement; intera
   const onClick = () => {
     if (!interactive) return;
     switch (element.action) {
-      case "next-slide": if (currentIndex < pages.length - 1) setCurrentPage(currentIndex + 1); break;
-      case "prev-slide": if (currentIndex > 0) setCurrentPage(currentIndex - 1); break;
-      case "first-slide": setCurrentPage(0); break;
-      case "last-slide": setCurrentPage(pages.length - 1); break;
-      case "link": if (element.href) window.open(element.href, "_blank", "noopener,noreferrer"); break;
+      case "next-slide":
+        if (currentIndex < pages.length - 1) setCurrentPage(currentIndex + 1);
+        break;
+      case "prev-slide":
+        if (currentIndex > 0) setCurrentPage(currentIndex - 1);
+        break;
+      case "first-slide":
+        setCurrentPage(0);
+        break;
+      case "last-slide":
+        setCurrentPage(pages.length - 1);
+        break;
+      case "link":
+        if (element.href) window.open(element.href, "_blank", "noopener,noreferrer");
+        break;
     }
   };
   return (

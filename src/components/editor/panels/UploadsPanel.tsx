@@ -39,25 +39,42 @@ function buildFromAi(els: AiElementInput[]): AnyElement[] {
       if (e.type === "text") {
         return newText({
           text: e.text,
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fontSize: e.fontSize, color: e.color,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fontSize: e.fontSize,
+          color: e.color,
           fontFamily: e.fontFamily ?? "Archivo Black",
           fontWeight: e.fontWeight ?? 700,
           align: e.align ?? "left",
-          italic: e.italic, underline: e.underline, bullet: e.bullet, href: e.href,
+          italic: e.italic,
+          underline: e.underline,
+          bullet: e.bullet,
+          href: e.href,
         });
       }
       if (e.type === "shape") {
         return newShape(e.shape, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth,
-          effect: e.effect, shadow: e.shadow,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fill: e.fill,
+          stroke: e.stroke,
+          strokeWidth: e.strokeWidth,
+          effect: e.effect,
+          shadow: e.shadow,
         });
       }
       if (e.type === "icon") {
         return newIcon(e.name, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          color: e.color, strokeWidth: e.strokeWidth ?? 2,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          color: e.color,
+          strokeWidth: e.strokeWidth ?? 2,
         });
       }
       return null;
@@ -143,47 +160,54 @@ export function UploadsPanel() {
       </label>
 
       {aiEnabled && (
-      <div className="brutal-border-2 space-y-2 bg-surface p-3">
-        <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
-          <FileUp className="h-3.5 w-3.5" /> IMPORT_TEMPLATE
+        <div className="brutal-border-2 space-y-2 bg-surface p-3">
+          <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
+            <FileUp className="h-3.5 w-3.5" /> IMPORT_TEMPLATE
+          </div>
+          <p className="font-mono text-[10px] text-teal/60">
+            &gt; upload a .pdf or .pptx · AI reads it &amp; rebuilds it as an editable deck
+            (replaces current pages)
+          </p>
+          <select
+            value={style}
+            onChange={(e) => setStyle(e.target.value as AiStyle)}
+            disabled={importing}
+            className="w-full border border-teal/40 bg-ink px-2 py-1.5 font-mono text-[11px] text-teal focus:border-teal focus:outline-none disabled:opacity-40"
+          >
+            {STYLE_OPTIONS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onImportFile(f);
+              e.target.value = "";
+            }}
+          />
+          <button
+            onClick={() => importRef.current?.click()}
+            disabled={importing}
+            className="brutal-border brutal-press flex w-full items-center justify-center gap-2 bg-blue px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
+          >
+            {importing ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileUp className="h-3.5 w-3.5" />
+            )}
+            {importing ? "ANALYZING..." : "CHOOSE PDF / PPTX"}
+          </button>
+          {importName && !importError && (
+            <p className="truncate font-mono text-[10px] text-teal/60">▸ {importName}</p>
+          )}
+          {importError && <p className="font-mono text-[10px] text-[#ff0080]">! {importError}</p>}
         </div>
-        <p className="font-mono text-[10px] text-teal/60">
-          &gt; upload a .pdf or .pptx · AI reads it &amp; rebuilds it as an editable deck (replaces current pages)
-        </p>
-        <select
-          value={style}
-          onChange={(e) => setStyle(e.target.value as AiStyle)}
-          disabled={importing}
-          className="w-full border border-teal/40 bg-ink px-2 py-1.5 font-mono text-[11px] text-teal focus:border-teal focus:outline-none disabled:opacity-40"
-        >
-          {STYLE_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
-          ))}
-        </select>
-        <input
-          ref={importRef}
-          type="file"
-          accept=".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onImportFile(f);
-            e.target.value = "";
-          }}
-        />
-        <button
-          onClick={() => importRef.current?.click()}
-          disabled={importing}
-          className="brutal-border brutal-press flex w-full items-center justify-center gap-2 bg-blue px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
-        >
-          {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
-          {importing ? "ANALYZING..." : "CHOOSE PDF / PPTX"}
-        </button>
-        {importName && !importError && (
-          <p className="truncate font-mono text-[10px] text-teal/60">▸ {importName}</p>
-        )}
-        {importError && <p className="font-mono text-[10px] text-[#ff0080]">! {importError}</p>}
-      </div>
       )}
 
       {uploads.length > 0 ? (

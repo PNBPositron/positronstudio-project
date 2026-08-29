@@ -8,19 +8,26 @@ import { useAuthStore } from "@/hooks/use-auth";
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
   validateSearch: (s: Record<string, unknown>) => ({
-    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+    next:
+      typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+        ? s.next
+        : undefined,
   }),
   head: () => ({
     meta: [
       { title: "Sign in — Positron Studio" },
-      { name: "description", content: "Sign in to Positron Studio to save and sync your neobrutalist designs." },
+      {
+        name: "description",
+        content: "Sign in to Positron Studio to save and sync your neobrutalist designs.",
+      },
       { property: "og:title", content: "Sign in — Positron Studio" },
-      { property: "og:description", content: "Sign in to Positron Studio to save and sync your neobrutalist designs." },
+      {
+        property: "og:description",
+        content: "Sign in to Positron Studio to save and sync your neobrutalist designs.",
+      },
       { property: "og:url", content: "https://positronstudio.lovable.app/auth" },
     ],
-    links: [
-      { rel: "canonical", href: "https://positronstudio.lovable.app/auth" },
-    ],
+    links: [{ rel: "canonical", href: "https://positronstudio.lovable.app/auth" }],
   }),
 });
 
@@ -200,10 +207,22 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function GoogleIcon() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 24 24">
-      <path fill="#EA4335" d="M12 5c1.6 0 3.1.5 4.3 1.5l3.2-3.2C17.5 1.4 14.9.4 12 .4 7.4.4 3.5 3 1.5 6.7l3.7 2.9C6.2 6.9 8.9 5 12 5z" />
-      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.5l3.7 2.9c2.2-2 3.7-5 3.7-8.6z" />
-      <path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.6.4-2.4L1.5 6.7C.6 8.3.1 10.1.1 12s.5 3.7 1.4 5.3l3.7-2.9z" />
-      <path fill="#34A853" d="M12 23.6c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.1 0-5.8-1.9-6.8-4.6L1.5 17.3C3.5 21 7.4 23.6 12 23.6z" />
+      <path
+        fill="#EA4335"
+        d="M12 5c1.6 0 3.1.5 4.3 1.5l3.2-3.2C17.5 1.4 14.9.4 12 .4 7.4.4 3.5 3 1.5 6.7l3.7 2.9C6.2 6.9 8.9 5 12 5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.5l3.7 2.9c2.2-2 3.7-5 3.7-8.6z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.6.4-2.4L1.5 6.7C.6 8.3.1 10.1.1 12s.5 3.7 1.4 5.3l3.7-2.9z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23.6c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.1 0-5.8-1.9-6.8-4.6L1.5 17.3C3.5 21 7.4 23.6 12 23.6z"
+      />
     </svg>
   );
 }

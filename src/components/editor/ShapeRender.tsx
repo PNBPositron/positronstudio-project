@@ -123,7 +123,8 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
     );
   }
   if (shape === "star") {
-    const cx = width / 2, cy = height / 2;
+    const cx = width / 2,
+      cy = height / 2;
     const rO = Math.min(width, height) / 2 - strokeWidth;
     const rI = rO * 0.45;
     const pts: string[] = [];
@@ -135,7 +136,13 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
     return (
       <svg {...common}>
         {defs}
-        <polygon points={pts.join(" ")} fill={fillRef} stroke={stroke} strokeWidth={strokeWidth} strokeLinejoin="miter" />
+        <polygon
+          points={pts.join(" ")}
+          fill={fillRef}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+          strokeLinejoin="miter"
+        />
       </svg>
     );
   }
@@ -169,7 +176,13 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
         style={{ opacity: element.opacity ?? 1 }}
       >
         {defs}
-        <path d={d} fill={fillRef} stroke={stroke} strokeWidth={strokeWidth / 2} strokeLinejoin="miter" />
+        <path
+          d={d}
+          fill={fillRef}
+          stroke={stroke}
+          strokeWidth={strokeWidth / 2}
+          strokeLinejoin="miter"
+        />
       </svg>
     );
   }

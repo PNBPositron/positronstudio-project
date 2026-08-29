@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { useAuthInit } from "@/hooks/use-auth";
@@ -74,16 +75,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Positron Studio — Neobrutalist Design Editor" },
-      { name: "description", content: "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides." },
+      {
+        name: "description",
+        content:
+          "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Positron Studio — Neobrutalist Design Editor" },
-      { property: "og:description", content: "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides." },
+      {
+        property: "og:description",
+        content:
+          "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides.",
+      },
       { property: "og:site_name", content: "Positron Studio" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Positron Studio — Neobrutalist Design Editor" },
-      { name: "twitter:description", content: "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides." },
+      {
+        name: "twitter:description",
+        content:
+          "Positron Studio is a futuristic, neobrutalist presentation and design editor for creating bold multipage slides.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -131,6 +144,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );

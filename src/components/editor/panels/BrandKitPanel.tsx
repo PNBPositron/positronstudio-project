@@ -53,7 +53,9 @@ export function BrandKitPanel() {
             className="brutal-border-2 w-full bg-surface px-1.5 py-1.5 font-mono text-[10px] text-teal focus:border-teal focus:outline-none"
           >
             {FONTS.map((f) => (
-              <option key={f.family} value={f.family}>{f.family}</option>
+              <option key={f.family} value={f.family}>
+                {f.family}
+              </option>
             ))}
           </select>
         </label>
@@ -67,7 +69,9 @@ export function BrandKitPanel() {
             className="brutal-border-2 w-full bg-surface px-1.5 py-1.5 font-mono text-[10px] text-teal focus:border-teal focus:outline-none"
           >
             {FONTS.map((f) => (
-              <option key={f.family} value={f.family}>{f.family}</option>
+              <option key={f.family} value={f.family}>
+                {f.family}
+              </option>
             ))}
           </select>
         </label>

@@ -2,8 +2,18 @@ import { useEditor, type SlideTransition } from "@/store/editor";
 import { Plus, Copy, Trash2, Play } from "lucide-react";
 
 export function PagesBar() {
-  const { pages, currentIndex, setCurrentPage, addPage, duplicatePage, removePage, canvasW, canvasH, setTransition, setPresenting } =
-    useEditor();
+  const {
+    pages,
+    currentIndex,
+    setCurrentPage,
+    addPage,
+    duplicatePage,
+    removePage,
+    canvasW,
+    canvasH,
+    setTransition,
+    setPresenting,
+  } = useEditor();
   const currentTransition: SlideTransition = pages[currentIndex]?.transition ?? "none";
   const ratio = canvasW / canvasH;
   const thumbW = ratio >= 1 ? 96 : 96 * ratio;

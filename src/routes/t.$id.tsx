@@ -9,7 +9,11 @@ export const Route = createFileRoute("/t/$id")({
   head: () => ({
     meta: [
       { title: "Shared deck — Positron Studio" },
-      { name: "description", content: "View a deck shared publicly from Positron Studio, the neobrutalist design and presentation editor." },
+      {
+        name: "description",
+        content:
+          "View a deck shared publicly from Positron Studio, the neobrutalist design and presentation editor.",
+      },
       { property: "og:title", content: "Shared deck — Positron Studio" },
       { property: "og:description", content: "View a deck shared publicly from Positron Studio." },
       { property: "og:type", content: "website" },

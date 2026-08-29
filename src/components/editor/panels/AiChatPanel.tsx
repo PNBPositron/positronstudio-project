@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Sparkles, Wand2, X } from "lucide-react";
-import {
-  useEditor,
-  newText,
-  newShape,
-  newIcon,
-  type AnyElement,
-  type Page,
-} from "@/store/editor";
+import { useEditor, newText, newShape, newIcon, type AnyElement, type Page } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
 import { useSettings } from "@/store/settings";
-import { editCurrentSlide, redesignSlideVariations, type AiElementInput, type AiPage } from "@/lib/ai-templates.functions";
+import {
+  editCurrentSlide,
+  redesignSlideVariations,
+  type AiElementInput,
+  type AiPage,
+} from "@/lib/ai-templates.functions";
 import { SlideThumbnail } from "../SlideThumbnail";
 
 function buildFromAi(els: AiElementInput[]): AnyElement[] {
@@ -19,25 +17,43 @@ function buildFromAi(els: AiElementInput[]): AnyElement[] {
     .map((e): AnyElement | null => {
       if (e.type === "text") {
         return newText({
-          text: e.text, x: e.x, y: e.y, width: e.width, height: e.height,
-          fontSize: e.fontSize, color: e.color,
+          text: e.text,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fontSize: e.fontSize,
+          color: e.color,
           fontFamily: e.fontFamily ?? "Archivo Black",
           fontWeight: e.fontWeight ?? 700,
           align: e.align ?? "left",
-          italic: e.italic, underline: e.underline, bullet: e.bullet, href: e.href,
+          italic: e.italic,
+          underline: e.underline,
+          bullet: e.bullet,
+          href: e.href,
         });
       }
       if (e.type === "shape") {
         return newShape(e.shape, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth,
-          effect: e.effect, shadow: e.shadow,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fill: e.fill,
+          stroke: e.stroke,
+          strokeWidth: e.strokeWidth,
+          effect: e.effect,
+          shadow: e.shadow,
         });
       }
       if (e.type === "icon") {
         return newIcon(e.name, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          color: e.color, strokeWidth: e.strokeWidth ?? 2,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          color: e.color,
+          strokeWidth: e.strokeWidth ?? 2,
         });
       }
       return null;
@@ -47,23 +63,54 @@ function buildFromAi(els: AiElementInput[]): AnyElement[] {
 
 // Convert current page elements back to AI shape for context
 function toAi(els: AnyElement[]): AiElementInput[] {
-  return els.map((e): AiElementInput | null => {
-    if (e.type === "text") return {
-      type: "text", text: e.text, x: e.x, y: e.y, width: e.width, height: e.height,
-      fontSize: e.fontSize, color: e.color, fontFamily: e.fontFamily,
-      fontWeight: e.fontWeight, align: e.align, italic: e.italic, underline: e.underline,
-      bullet: e.bullet, href: e.href,
-    };
-    if (e.type === "shape") return {
-      type: "shape", shape: e.shape, x: e.x, y: e.y, width: e.width, height: e.height,
-      fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth, effect: e.effect, shadow: e.shadow,
-    };
-    if (e.type === "icon") return {
-      type: "icon", name: e.name, x: e.x, y: e.y, width: e.width, height: e.height,
-      color: e.color, strokeWidth: e.strokeWidth,
-    };
-    return null;
-  }).filter((x): x is AiElementInput => x !== null);
+  return els
+    .map((e): AiElementInput | null => {
+      if (e.type === "text")
+        return {
+          type: "text",
+          text: e.text,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fontSize: e.fontSize,
+          color: e.color,
+          fontFamily: e.fontFamily,
+          fontWeight: e.fontWeight,
+          align: e.align,
+          italic: e.italic,
+          underline: e.underline,
+          bullet: e.bullet,
+          href: e.href,
+        };
+      if (e.type === "shape")
+        return {
+          type: "shape",
+          shape: e.shape,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fill: e.fill,
+          stroke: e.stroke,
+          strokeWidth: e.strokeWidth,
+          effect: e.effect,
+          shadow: e.shadow,
+        };
+      if (e.type === "icon")
+        return {
+          type: "icon",
+          name: e.name,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          color: e.color,
+          strokeWidth: e.strokeWidth,
+        };
+      return null;
+    })
+    .filter((x): x is AiElementInput => x !== null);
 }
 
 type ChatMsg = { role: "user" | "assistant"; text: string };
@@ -152,7 +199,11 @@ export function AiChatPanel() {
         disabled={redesigning || busy}
         className="brutal-border-2 brutal-press flex w-full items-center justify-center gap-2 bg-[#ff0080] px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
       >
-        {redesigning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" strokeWidth={2.5} />}
+        {redesigning ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Wand2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+        )}
         {redesigning ? "REDESIGNING..." : "REDESIGN THIS SLIDE"}
       </button>
       <p className="font-mono text-[9px] text-teal/50">
@@ -232,7 +283,11 @@ export function AiChatPanel() {
 }
 
 function VariationPicker({
-  variants, canvasW, canvasH, onPick, onClose,
+  variants,
+  canvasW,
+  canvasH,
+  onPick,
+  onClose,
 }: {
   variants: AiPage[];
   canvasW: number;
@@ -248,7 +303,10 @@ function VariationPicker({
     elements: buildFromAi(v.elements),
   });
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/85 p-6" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/85 p-6"
+      onClick={onClose}
+    >
       <div
         className="brutal-border-2 relative w-full max-w-6xl bg-ink p-6"
         onClick={(e) => e.stopPropagation()}
@@ -271,7 +329,12 @@ function VariationPicker({
               onClick={() => onPick(v)}
               className="brutal-border-2 brutal-press group flex flex-col gap-2 bg-surface p-2 text-left hover:border-teal"
             >
-              <SlideThumbnail page={asPage(v)} canvasW={canvasW} canvasH={canvasH} className="w-full" />
+              <SlideThumbnail
+                page={asPage(v)}
+                canvasW={canvasW}
+                canvasH={canvasH}
+                className="w-full"
+              />
               <div className="flex items-center justify-between px-1 pb-1 font-display text-[11px] tracking-[0.2em] text-teal">
                 <span>VARIATION {i + 1}</span>
                 <span className="text-[10px] text-teal/60 group-hover:text-teal">APPLY →</span>

@@ -29,7 +29,9 @@ export function PresentationMode() {
     // Enter native fullscreen so the slide truly fills the screen.
     const root = document.documentElement;
     if (root.requestFullscreen && !document.fullscreenElement) {
-      root.requestFullscreen().catch(() => { /* user gesture missing — ignore */ });
+      root.requestFullscreen().catch(() => {
+        /* user gesture missing — ignore */
+      });
     }
     const onFsChange = () => {
       if (!document.fullscreenElement) setPresenting(false);
@@ -73,7 +75,9 @@ export function PresentationMode() {
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("fullscreenchange", onFsChange);
       if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => { /* noop */ });
+        document.exitFullscreen().catch(() => {
+          /* noop */
+        });
       }
       if (idleRef.current) window.clearTimeout(idleRef.current);
       document.body.style.overflow = prev;
@@ -83,9 +87,10 @@ export function PresentationMode() {
   if (!presenting) return null;
 
   const morphing = page.transition === "morph";
-  const transition = page.transition && page.transition !== "none" && !morphing
-    ? `slide-transition-${page.transition}`
-    : "";
+  const transition =
+    page.transition && page.transition !== "none" && !morphing
+      ? `slide-transition-${page.transition}`
+      : "";
   // Morph matches elements across slides so shared shapes/text tween instead of cutting.
   const morphKey = (el: (typeof page.elements)[number], i: number) => {
     if (!morphing) return el.id;
@@ -109,7 +114,10 @@ export function PresentationMode() {
       >
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-teal to-transparent" />
         <div className="font-display text-sm uppercase tracking-[0.25em] text-teal text-glow">
-          ▶ presenting · <span className="font-mono text-xs text-teal/70">{canvasW}×{canvasH}</span>
+          ▶ presenting ·{" "}
+          <span className="font-mono text-xs text-teal/70">
+            {canvasW}×{canvasH}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs text-teal/80">
@@ -123,7 +131,10 @@ export function PresentationMode() {
           </button>
         </div>
       </div>
-      <div ref={wrapRef} className="relative flex flex-1 items-center justify-center overflow-hidden">
+      <div
+        ref={wrapRef}
+        className="relative flex flex-1 items-center justify-center overflow-hidden"
+      >
         <button
           onClick={() => setCurrentPage(currentIndex - 1)}
           disabled={currentIndex === 0}

@@ -10,7 +10,9 @@ type OAuthDetails = {
 };
 
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
   approveAuthorization: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
   denyAuthorization: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
 };
@@ -89,7 +91,11 @@ function Consent() {
           &gt; {clientName} wants to use Positron Studio as you — read, create and delete your
           designs, and browse community templates.
         </p>
-        {error && <p className="mt-3 font-mono text-[10px] text-[#ff0080]" role="alert">! {error}</p>}
+        {error && (
+          <p className="mt-3 font-mono text-[10px] text-[#ff0080]" role="alert">
+            ! {error}
+          </p>
+        )}
         <div className="mt-6 flex gap-3">
           <button
             disabled={busy}
