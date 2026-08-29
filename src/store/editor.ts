@@ -523,15 +523,18 @@ type State = {
   setTransition: (t: SlideTransition) => void;
   setCanvasSize: (w: number, h: number) => void;
   magicResize: (w: number, h: number) => void;
-  applyBrandKit: (kit: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    bg: string;
-    text: string;
-    headingFont: string;
-    bodyFont: string;
-  }, scope: "slide" | "deck") => void;
+  applyBrandKit: (
+    kit: {
+      primary: string;
+      secondary: string;
+      accent: string;
+      bg: string;
+      text: string;
+      headingFont: string;
+      bodyFont: string;
+    },
+    scope: "slide" | "deck",
+  ) => void;
   setPresenting: (v: boolean) => void;
   setGuides: (g: { v: number[]; h: number[] }) => void;
   copySelected: () => void;
@@ -551,7 +554,13 @@ type State = {
   // cloud
   setDesignMeta: (meta: { id: string | null; name: string }) => void;
   setDesignName: (name: string) => void;
-  loadDesign: (input: { id: string; name: string; pages: Page[]; canvasW: number; canvasH: number }) => void;
+  loadDesign: (input: {
+    id: string;
+    name: string;
+    pages: Page[];
+    canvasW: number;
+    canvasH: number;
+  }) => void;
   newDesign: () => void;
 };
 
@@ -619,7 +628,10 @@ export const newIcon = (name: string, overrides: Partial<IconElement> = {}): Ico
 });
 
 export const newQuiz = (overrides: Partial<QuizElement> = {}): QuizElement => {
-  const a = uid(), b = uid(), c = uid(), d = uid();
+  const a = uid(),
+    b = uid(),
+    c = uid(),
+    d = uid();
   return {
     id: uid(),
     type: "quiz",
@@ -644,7 +656,9 @@ export const newQuiz = (overrides: Partial<QuizElement> = {}): QuizElement => {
 };
 
 export const newPoll = (overrides: Partial<QuizElement> = {}): QuizElement => {
-  const a = uid(), b = uid(), c = uid();
+  const a = uid(),
+    b = uid(),
+    c = uid();
   return {
     ...newQuiz({
       question: "Which one do you prefer?",
@@ -750,7 +764,8 @@ export function toEmbedSrc(raw: string): string {
       const v = u.searchParams.get("v");
       if (v) return `https://www.youtube.com/embed/${v}`;
       if (u.pathname.startsWith("/embed/")) return s;
-      if (u.pathname.startsWith("/shorts/")) return `https://www.youtube.com/embed/${u.pathname.split("/")[2]}`;
+      if (u.pathname.startsWith("/shorts/"))
+        return `https://www.youtube.com/embed/${u.pathname.split("/")[2]}`;
     }
     if (host === "youtu.be") {
       const id = u.pathname.slice(1);
@@ -776,37 +791,188 @@ export const newEmbed = (src: string, overrides: Partial<EmbedElement> = {}): Em
   height: 405,
   rotation: 0,
   src: toEmbedSrc(src),
-  allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+  allow:
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
   ...overrides,
 });
 
-const UI_DEFAULTS: Record<UiKind, { w: number; h: number; title: string; body: string; value: number; items: string[] }> = {
-  card: { w: 560, h: 360, title: "Card title", body: "Supporting copy goes here. Double-click to edit in the properties panel.", value: 0, items: [] },
-  stat: { w: 420, h: 260, title: "Active users", body: "+12.4% this month", value: 8420, items: [] },
+const UI_DEFAULTS: Record<
+  UiKind,
+  { w: number; h: number; title: string; body: string; value: number; items: string[] }
+> = {
+  card: {
+    w: 560,
+    h: 360,
+    title: "Card title",
+    body: "Supporting copy goes here. Double-click to edit in the properties panel.",
+    value: 0,
+    items: [],
+  },
+  stat: {
+    w: 420,
+    h: 260,
+    title: "Active users",
+    body: "+12.4% this month",
+    value: 8420,
+    items: [],
+  },
   badge: { w: 280, h: 96, title: "NEW", body: "", value: 0, items: [] },
   progress: { w: 560, h: 160, title: "Progress", body: "Loading assets", value: 68, items: [] },
-  alert: { w: 620, h: 200, title: "Heads up", body: "This is an important message for your audience.", value: 0, items: [] },
-  list: { w: 520, h: 380, title: "Checklist", body: "", value: 0, items: ["First item", "Second item", "Third item"] },
-  quote: { w: 640, h: 300, title: "The best way to predict the future is to invent it.", body: "Alan Kay", value: 0, items: [] },
+  alert: {
+    w: 620,
+    h: 200,
+    title: "Heads up",
+    body: "This is an important message for your audience.",
+    value: 0,
+    items: [],
+  },
+  list: {
+    w: 520,
+    h: 380,
+    title: "Checklist",
+    body: "",
+    value: 0,
+    items: ["First item", "Second item", "Third item"],
+  },
+  quote: {
+    w: 640,
+    h: 300,
+    title: "The best way to predict the future is to invent it.",
+    body: "Alan Kay",
+    value: 0,
+    items: [],
+  },
   profile: { w: 520, h: 200, title: "Ada Lovelace", body: "Lead engineer", value: 0, items: [] },
-  pricing: { w: 460, h: 480, title: "Pro", body: "$29 / month", value: 0, items: ["Unlimited decks", "AI redesign", "Priority support"] },
+  pricing: {
+    w: 460,
+    h: 480,
+    title: "Pro",
+    body: "$29 / month",
+    value: 0,
+    items: ["Unlimited decks", "AI redesign", "Priority support"],
+  },
   kbd: { w: 360, h: 120, title: "⌘ + K", body: "Command palette", value: 0, items: [] },
-  window: { w: 720, h: 460, title: "My Document", body: "Window content area", value: 0, items: ["File", "Edit", "View", "Help"] },
-  browser: { w: 800, h: 500, title: "Positron Studio", body: "https://positronstudio.lovable.app", value: 0, items: ["Home", "Docs", "Pricing"] },
+  window: {
+    w: 720,
+    h: 460,
+    title: "My Document",
+    body: "Window content area",
+    value: 0,
+    items: ["File", "Edit", "View", "Help"],
+  },
+  browser: {
+    w: 800,
+    h: 500,
+    title: "Positron Studio",
+    body: "https://positronstudio.lovable.app",
+    value: 0,
+    items: ["Home", "Docs", "Pricing"],
+  },
   search: { w: 640, h: 120, title: "Search anything…", body: "⌘K", value: 0, items: [] },
-  terminal: { w: 720, h: 400, title: "bash — 80×24", body: "npm run build", value: 0, items: ["$ npm install", "added 214 packages", "$ npm run build", "✓ built in 1.24s"] },
-  phone: { w: 340, h: 640, title: "Positron", body: "Mobile preview", value: 0, items: ["Inbox", "Today", "Settings"] },
-  modal: { w: 620, h: 340, title: "Delete this slide?", body: "This action can't be undone.", value: 0, items: ["Cancel", "Delete"] },
-  tabs: { w: 680, h: 300, title: "Overview", body: "Tab panel content goes here.", value: 0, items: ["Overview", "Activity", "Settings"] },
-  toggle: { w: 560, h: 300, title: "Preferences", body: "", value: 0, items: ["Notifications", "Dark mode", "Auto-save"] },
-  login: { w: 480, h: 480, title: "Sign in", body: "Continue to your workspace", value: 0, items: ["Email", "Password"] },
-  notification: { w: 560, h: 160, title: "Deck published", body: "Your presentation is now live.", value: 0, items: [] },
-  taskbar: { w: 900, h: 88, title: "Windows", body: "9:41 AM", value: 0, items: ["Explorer", "Edge", "Mail", "Store", "Photos"] },
-  vtabs: { w: 860, h: 520, title: "Positron Studio", body: "https://positronstudio.lovable.app", value: 0, items: ["Dashboard", "Editor", "Templates", "Settings"] },
-  kdePanel: { w: 900, h: 88, title: "Plasma", body: "9:41", value: 0, items: ["Dolphin", "Konsole", "Firefox", "Kate", "Discover"] },
-  kdeFiles: { w: 840, h: 520, title: "Documents — Dolphin", body: "/home/user/Documents", value: 0, items: ["Home", "Desktop", "Documents", "Downloads", "Pictures"] },
-  kdeRunner: { w: 720, h: 320, title: "konsole", body: "KRunner", value: 0, items: ["Konsole — Terminal", "Konsolidate — App", "Console settings"] },
-  kdeSettings: { w: 860, h: 520, title: "System Settings", body: "Appearance", value: 0, items: ["Appearance", "Workspace", "Networking", "Hardware"] },
+  terminal: {
+    w: 720,
+    h: 400,
+    title: "bash — 80×24",
+    body: "npm run build",
+    value: 0,
+    items: ["$ npm install", "added 214 packages", "$ npm run build", "✓ built in 1.24s"],
+  },
+  phone: {
+    w: 340,
+    h: 640,
+    title: "Positron",
+    body: "Mobile preview",
+    value: 0,
+    items: ["Inbox", "Today", "Settings"],
+  },
+  modal: {
+    w: 620,
+    h: 340,
+    title: "Delete this slide?",
+    body: "This action can't be undone.",
+    value: 0,
+    items: ["Cancel", "Delete"],
+  },
+  tabs: {
+    w: 680,
+    h: 300,
+    title: "Overview",
+    body: "Tab panel content goes here.",
+    value: 0,
+    items: ["Overview", "Activity", "Settings"],
+  },
+  toggle: {
+    w: 560,
+    h: 300,
+    title: "Preferences",
+    body: "",
+    value: 0,
+    items: ["Notifications", "Dark mode", "Auto-save"],
+  },
+  login: {
+    w: 480,
+    h: 480,
+    title: "Sign in",
+    body: "Continue to your workspace",
+    value: 0,
+    items: ["Email", "Password"],
+  },
+  notification: {
+    w: 560,
+    h: 160,
+    title: "Deck published",
+    body: "Your presentation is now live.",
+    value: 0,
+    items: [],
+  },
+  taskbar: {
+    w: 900,
+    h: 88,
+    title: "Windows",
+    body: "9:41 AM",
+    value: 0,
+    items: ["Explorer", "Edge", "Mail", "Store", "Photos"],
+  },
+  vtabs: {
+    w: 860,
+    h: 520,
+    title: "Positron Studio",
+    body: "https://positronstudio.lovable.app",
+    value: 0,
+    items: ["Dashboard", "Editor", "Templates", "Settings"],
+  },
+  kdePanel: {
+    w: 900,
+    h: 88,
+    title: "Plasma",
+    body: "9:41",
+    value: 0,
+    items: ["Dolphin", "Konsole", "Firefox", "Kate", "Discover"],
+  },
+  kdeFiles: {
+    w: 840,
+    h: 520,
+    title: "Documents — Dolphin",
+    body: "/home/user/Documents",
+    value: 0,
+    items: ["Home", "Desktop", "Documents", "Downloads", "Pictures"],
+  },
+  kdeRunner: {
+    w: 720,
+    h: 320,
+    title: "konsole",
+    body: "KRunner",
+    value: 0,
+    items: ["Konsole — Terminal", "Konsolidate — App", "Console settings"],
+  },
+  kdeSettings: {
+    w: 860,
+    h: 520,
+    title: "System Settings",
+    body: "Appearance",
+    value: 0,
+    items: ["Appearance", "Workspace", "Networking", "Hardware"],
+  },
 };
 
 export const newUi = (
@@ -948,7 +1114,10 @@ export const useEditor = create<State>((set, get) => {
           return e;
         }),
       });
-      const next = scope === "deck" ? pages.map(paint) : pages.map((p, i) => (i === currentIndex ? paint(p) : p));
+      const next =
+        scope === "deck"
+          ? pages.map(paint)
+          : pages.map((p, i) => (i === currentIndex ? paint(p) : p));
       set({ ...syncCurrent(next, currentIndex), selectedId: null });
     },
     setPresenting: (presenting) => set({ presenting }),
@@ -963,7 +1132,12 @@ export const useEditor = create<State>((set, get) => {
       const { clipboard } = get();
       if (!clipboard) return;
       pushHistory();
-      const clone = { ...clipboard, id: uid(), x: clipboard.x + 30, y: clipboard.y + 30 } as AnyElement;
+      const clone = {
+        ...clipboard,
+        id: uid(),
+        x: clipboard.x + 30,
+        y: clipboard.y + 30,
+      } as AnyElement;
       updateCurrentPage((p) => ({ ...p, elements: [...p.elements, clone] }));
       set({ selectedId: clone.id });
     },
@@ -1077,7 +1251,10 @@ export const useEditor = create<State>((set, get) => {
       if (pages.length <= 1) return;
       pushHistory();
       const next = pages.filter((_, i) => i !== index);
-      const newIdx = Math.min(currentIndex > index ? currentIndex - 1 : currentIndex, next.length - 1);
+      const newIdx = Math.min(
+        currentIndex > index ? currentIndex - 1 : currentIndex,
+        next.length - 1,
+      );
       set({ ...syncCurrent(next, newIdx), selectedId: null });
     },
     duplicatePage: (index) => {
@@ -1119,7 +1296,10 @@ export const useEditor = create<State>((set, get) => {
     setDesignMeta: ({ id, name }) => set({ designId: id, designName: name }),
     setDesignName: (designName) => set({ designName }),
     loadDesign: ({ id, name, pages, canvasW, canvasH }) => {
-      const normalized = pages.map((p) => ({ ...p, duration: p.duration ?? DEFAULT_PAGE_DURATION }));
+      const normalized = pages.map((p) => ({
+        ...p,
+        duration: p.duration ?? DEFAULT_PAGE_DURATION,
+      }));
       const safePages = normalized.length > 0 ? normalized : [newPage()];
       set({
         ...syncCurrent(safePages, 0),

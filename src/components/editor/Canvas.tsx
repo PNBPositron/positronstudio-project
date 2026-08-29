@@ -3,7 +3,18 @@ import { useEditor } from "@/store/editor";
 import { CanvasElement } from "./CanvasElement";
 
 export function Canvas() {
-  const { elements, bgColor, select, selectedId, remove, canvasW, canvasH, guides, pages, currentIndex } = useEditor();
+  const {
+    elements,
+    bgColor,
+    select,
+    selectedId,
+    remove,
+    canvasW,
+    canvasH,
+    guides,
+    pages,
+    currentIndex,
+  } = useEditor();
   const page = pages[currentIndex];
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
@@ -80,7 +91,7 @@ export function Canvas() {
             height: canvasH,
             backgroundColor: bgColor,
             backgroundImage: page.bgImage ? `url(${page.bgImage})` : undefined,
-            backgroundSize: (page.bgFit ?? "cover"),
+            backgroundSize: page.bgFit ?? "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             transform: `scale(${scale})`,

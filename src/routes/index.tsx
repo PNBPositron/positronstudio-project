@@ -18,12 +18,14 @@ export const Route = createFileRoute("/")({
           "A loud, neobrutalist design editor for posters, social posts and graphics. Drag, drop, type, ship.",
       },
       { property: "og:title", content: "Positron Studio — Neobrutalist Design Editor" },
-      { property: "og:description", content: "A loud, neobrutalist design editor for posters, social posts and graphics. Drag, drop, type, ship." },
+      {
+        property: "og:description",
+        content:
+          "A loud, neobrutalist design editor for posters, social posts and graphics. Drag, drop, type, ship.",
+      },
       { property: "og:url", content: "https://positronstudio.lovable.app/" },
     ],
-    links: [
-      { rel: "canonical", href: "https://positronstudio.lovable.app/" },
-    ],
+    links: [{ rel: "canonical", href: "https://positronstudio.lovable.app/" }],
   }),
 });
 

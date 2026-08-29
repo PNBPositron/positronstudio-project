@@ -57,7 +57,11 @@ export function ColorPanel() {
         </div>
         {bgImage ? (
           <div className="relative">
-            <img src={bgImage} alt="Background image preview" className="h-20 w-full border border-teal/40 object-cover" />
+            <img
+              src={bgImage}
+              alt="Background image preview"
+              className="h-20 w-full border border-teal/40 object-cover"
+            />
             <button
               onClick={() => setBgImage(undefined)}
               className="absolute right-1 top-1 grid h-5 w-5 place-items-center bg-ink/90 text-teal hover:text-[#ff0080]"
@@ -102,7 +106,9 @@ export function ColorPanel() {
                 key={f}
                 onClick={() => setBgImage(bgImage, f)}
                 className={`brutal-border-2 flex-1 py-1 font-mono text-[10px] uppercase ${
-                  bgFit === f ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"
+                  bgFit === f
+                    ? "bg-blue text-ink border-teal"
+                    : "bg-surface text-teal hover:border-teal"
                 }`}
               >
                 {f}

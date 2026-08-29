@@ -1,9 +1,27 @@
 import { useEditor, newText } from "@/store/editor";
 
 const PRESETS = [
-  { label: "+ Add heading", fontSize: 120, fontWeight: 900, fontFamily: "Orbitron", text: "HEADING" },
-  { label: "+ Add subheading", fontSize: 64, fontWeight: 700, fontFamily: "Inter", text: "Subheading" },
-  { label: "+ Add body text", fontSize: 32, fontWeight: 500, fontFamily: "JetBrains Mono", text: "Body text goes here" },
+  {
+    label: "+ Add heading",
+    fontSize: 120,
+    fontWeight: 900,
+    fontFamily: "Orbitron",
+    text: "HEADING",
+  },
+  {
+    label: "+ Add subheading",
+    fontSize: 64,
+    fontWeight: 700,
+    fontFamily: "Inter",
+    text: "Subheading",
+  },
+  {
+    label: "+ Add body text",
+    fontSize: 32,
+    fontWeight: 500,
+    fontFamily: "JetBrains Mono",
+    text: "Body text goes here",
+  },
 ];
 
 type FontDef = { family: string; weight: number; sample?: string; category: string };

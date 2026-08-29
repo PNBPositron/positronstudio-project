@@ -63,10 +63,7 @@ export function SizePanel() {
                 }`}
               >
                 <div className="grid h-12 w-full place-items-center">
-                  <div
-                    className="border border-current"
-                    style={{ width: tw, height: th }}
-                  />
+                  <div className="border border-current" style={{ width: tw, height: th }} />
                 </div>
                 <span className="font-display text-[10px] uppercase tracking-wider">{p.name}</span>
                 <span className="font-mono text-[9px] opacity-70">

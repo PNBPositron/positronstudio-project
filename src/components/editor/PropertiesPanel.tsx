@@ -1,4 +1,19 @@
-import { useEditor, DEFAULT_FILTERS, UI_STYLE_THEMES, chartStylePatch, type ImageFilters, type ElementShadow, type ShapeGradient, type QuizElement, type QuizOption, type ChartElement, type ButtonElement, type ChartKind, type ButtonAction, type UiStyle } from "@/store/editor";
+import {
+  useEditor,
+  DEFAULT_FILTERS,
+  UI_STYLE_THEMES,
+  chartStylePatch,
+  type ImageFilters,
+  type ElementShadow,
+  type ShapeGradient,
+  type QuizElement,
+  type QuizOption,
+  type ChartElement,
+  type ButtonElement,
+  type ChartKind,
+  type ButtonAction,
+  type UiStyle,
+} from "@/store/editor";
 import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check } from "lucide-react";
 import { FONTS } from "./panels/TextPanel";
 
@@ -7,12 +22,20 @@ const FONT_FAMILIES: string[] = Array.from(
 ).sort();
 
 const SWATCHES = [
-  "#7df9ff", "#00d9ff", "#0ea5e9", "#4d7cff", "#1f3fb8",
-  "#0a0f1f", "#ffffff", "#ff0080", "#00ff88",
+  "#7df9ff",
+  "#00d9ff",
+  "#0ea5e9",
+  "#4d7cff",
+  "#1f3fb8",
+  "#0a0f1f",
+  "#ffffff",
+  "#ff0080",
+  "#00ff88",
 ];
 
 export function PropertiesPanel() {
-  const { elements, selectedId, update, remove, duplicate, bringForward, sendBackward } = useEditor();
+  const { elements, selectedId, update, remove, duplicate, bringForward, sendBackward } =
+    useEditor();
   const el = elements.find((e) => e.id === selectedId);
   if (!el) {
     return (
@@ -52,7 +75,10 @@ export function PropertiesPanel() {
                       key={s}
                       onClick={() => update(el.id, { uiStyle: s, accentColor: t.accent })}
                       className={`brutal-press border px-1 py-2 font-display text-[9px] uppercase tracking-[0.12em] ${active ? "border-teal glow-teal" : "border-teal/30"}`}
-                      style={{ background: t.bg === "rgba(255,255,255,0.16)" ? "#2a3550" : t.bg, color: t.fg }}
+                      style={{
+                        background: t.bg === "rgba(255,255,255,0.16)" ? "#2a3550" : t.bg,
+                        color: t.fg,
+                      }}
                     >
                       {t.label}
                     </button>
@@ -130,7 +156,11 @@ export function PropertiesPanel() {
               </div>
               <button
                 onClick={() =>
-                  update(el.id, { bgColor: undefined, fgColor: undefined, borderColorOverride: undefined })
+                  update(el.id, {
+                    bgColor: undefined,
+                    fgColor: undefined,
+                    borderColorOverride: undefined,
+                  })
                 }
                 className="brutal-border-2 mt-1.5 w-full bg-surface py-1 font-mono text-[10px] uppercase tracking-wider text-teal hover:border-teal"
               >
@@ -145,7 +175,9 @@ export function PropertiesPanel() {
               >
                 <option value="">Style default</option>
                 {FONT_FAMILIES.map((f) => (
-                  <option key={f} value={f}>{f}</option>
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
                 ))}
               </select>
             </Field>
@@ -203,7 +235,9 @@ export function PropertiesPanel() {
                 })}
               </div>
             </Field>
-            <Field label={`Corner radius ${el.cornerRadius ?? UI_STYLE_THEMES[el.uiStyle].radius}px`}>
+            <Field
+              label={`Corner radius ${el.cornerRadius ?? UI_STYLE_THEMES[el.uiStyle].radius}px`}
+            >
               <input
                 type="range"
                 min={0}
@@ -213,7 +247,9 @@ export function PropertiesPanel() {
                 className="w-full accent-teal"
               />
             </Field>
-            <Field label={`Border width ${el.borderWidth ?? UI_STYLE_THEMES[el.uiStyle].borderWidth}px`}>
+            <Field
+              label={`Border width ${el.borderWidth ?? UI_STYLE_THEMES[el.uiStyle].borderWidth}px`}
+            >
               <input
                 type="range"
                 min={0}
@@ -231,7 +267,11 @@ export function PropertiesPanel() {
                 Shadow
               </button>
               <button
-                onClick={() => update(el.id, { uppercase: !(el.uppercase ?? UI_STYLE_THEMES[el.uiStyle].uppercase) })}
+                onClick={() =>
+                  update(el.id, {
+                    uppercase: !(el.uppercase ?? UI_STYLE_THEMES[el.uiStyle].uppercase),
+                  })
+                }
                 className={`brutal-border-2 py-2 font-mono text-[10px] uppercase tracking-wider ${(el.uppercase ?? UI_STYLE_THEMES[el.uiStyle].uppercase) ? "bg-blue text-ink" : "bg-surface text-teal/50"}`}
               >
                 Caps
@@ -292,7 +332,9 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { letterSpacing: +e.target.value / 100 })}
                 className="w-full accent-teal"
               />
-              <div className="font-mono text-[11px] text-teal/70">{(el.letterSpacing ?? -0.02).toFixed(2)}em</div>
+              <div className="font-mono text-[11px] text-teal/70">
+                {(el.letterSpacing ?? -0.02).toFixed(2)}em
+              </div>
             </Field>
             <Field label="Line height">
               <input
@@ -303,7 +345,9 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { lineHeight: +e.target.value / 100 })}
                 className="w-full accent-teal"
               />
-              <div className="font-mono text-[11px] text-teal/70">{(el.lineHeight ?? 1.15).toFixed(2)}</div>
+              <div className="font-mono text-[11px] text-teal/70">
+                {(el.lineHeight ?? 1.15).toFixed(2)}
+              </div>
             </Field>
             <Field label="Opacity">
               <input
@@ -314,7 +358,9 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { opacity: +e.target.value / 100 })}
                 className="w-full accent-teal"
               />
-              <div className="font-mono text-[11px] text-teal/70">{Math.round((el.opacity ?? 1) * 100)}%</div>
+              <div className="font-mono text-[11px] text-teal/70">
+                {Math.round((el.opacity ?? 1) * 100)}%
+              </div>
             </Field>
             <Field label="Case">
               <div className="flex gap-1">
@@ -329,15 +375,18 @@ export function PropertiesPanel() {
                         : "bg-surface text-teal hover:border-teal"
                     }`}
                   >
-                    {t === "none" ? "Aa−" : t === "uppercase" ? "AA" : t === "lowercase" ? "aa" : "Aa"}
+                    {t === "none"
+                      ? "Aa−"
+                      : t === "uppercase"
+                        ? "AA"
+                        : t === "lowercase"
+                          ? "aa"
+                          : "Aa"}
                   </button>
                 ))}
               </div>
             </Field>
-            <ShadowEditor
-              shadow={el.shadow}
-              onChange={(s) => update(el.id, { shadow: s })}
-            />
+            <ShadowEditor shadow={el.shadow} onChange={(s) => update(el.id, { shadow: s })} />
             <Field label="Color">
               <ColorRow value={el.color} onChange={(c) => update(el.id, { color: c })} />
             </Field>
@@ -360,18 +409,23 @@ export function PropertiesPanel() {
             </Field>
             <Field label="Style">
               <div className="flex gap-1">
-                {([
-                  ["I", "italic", el.italic],
-                  ["U", "underline", el.underline],
-                  ["•", "bullet", el.bullet],
-                ] as const).map(([lbl, key, on]) => (
+                {(
+                  [
+                    ["I", "italic", el.italic],
+                    ["U", "underline", el.underline],
+                    ["•", "bullet", el.bullet],
+                  ] as const
+                ).map(([lbl, key, on]) => (
                   <button
                     key={key}
                     onClick={() => update(el.id, { [key]: !on } as Partial<typeof el>)}
                     className={`brutal-border-2 flex-1 py-1.5 font-mono text-[11px] ${
                       on ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"
                     }`}
-                    style={{ fontStyle: key === "italic" ? "italic" : undefined, textDecoration: key === "underline" ? "underline" : undefined }}
+                    style={{
+                      fontStyle: key === "italic" ? "italic" : undefined,
+                      textDecoration: key === "underline" ? "underline" : undefined,
+                    }}
                   >
                     {lbl}
                   </button>
@@ -386,7 +440,9 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { href: e.target.value })}
                 className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal focus:outline-none focus:border-teal"
               />
-              <div className="font-mono text-[10px] text-teal/50">&gt; click opens link · shift+click to select</div>
+              <div className="font-mono text-[10px] text-teal/50">
+                &gt; click opens link · shift+click to select
+              </div>
             </Field>
           </>
         )}
@@ -434,7 +490,9 @@ export function PropertiesPanel() {
                     key={sst}
                     onClick={() => update(el.id, { strokeStyle: sst })}
                     className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${
-                      (el.strokeStyle ?? "solid") === sst ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"
+                      (el.strokeStyle ?? "solid") === sst
+                        ? "bg-blue text-ink border-teal"
+                        : "bg-surface text-teal hover:border-teal"
                     }`}
                   >
                     {sst}
@@ -452,12 +510,16 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { opacity: +e.target.value })}
                 className="w-full accent-teal"
               />
-              <div className="font-mono text-[11px] text-teal/70">{Math.round((el.opacity ?? 1) * 100)}%</div>
+              <div className="font-mono text-[11px] text-teal/70">
+                {Math.round((el.opacity ?? 1) * 100)}%
+              </div>
             </Field>
             <Field label="Effect">
               <select
                 value={el.effect ?? "none"}
-                onChange={(e) => update(el.id, { effect: e.target.value as NonNullable<typeof el.effect> })}
+                onChange={(e) =>
+                  update(el.id, { effect: e.target.value as NonNullable<typeof el.effect> })
+                }
                 className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal focus:outline-none focus:border-teal"
               >
                 <option value="none">none</option>
@@ -467,10 +529,7 @@ export function PropertiesPanel() {
                 <option value="inner_glow">inner glow</option>
               </select>
             </Field>
-            <ShadowEditor
-              shadow={el.shadow}
-              onChange={(s) => update(el.id, { shadow: s })}
-            />
+            <ShadowEditor shadow={el.shadow} onChange={(s) => update(el.id, { shadow: s })} />
           </>
         )}
 
@@ -490,7 +549,10 @@ export function PropertiesPanel() {
                       key={s}
                       onClick={() => update(el.id, chartStylePatch(s))}
                       className={`brutal-press border px-1 py-2 font-display text-[9px] uppercase tracking-[0.12em] ${active ? "border-teal glow-teal" : "border-teal/30"}`}
-                      style={{ background: t.bg === "rgba(255,255,255,0.16)" ? "#2a3550" : t.bg, color: t.fg }}
+                      style={{
+                        background: t.bg === "rgba(255,255,255,0.16)" ? "#2a3550" : t.bg,
+                        color: t.fg,
+                      }}
                     >
                       {t.label}
                     </button>
@@ -514,7 +576,9 @@ export function PropertiesPanel() {
                 onChange={(e) => update(el.id, { name: e.target.value })}
                 className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal focus:outline-none focus:border-teal"
               />
-              <div className="font-mono text-[10px] text-teal/50">&gt; lucide PascalCase, e.g. Sparkles</div>
+              <div className="font-mono text-[10px] text-teal/50">
+                &gt; lucide PascalCase, e.g. Sparkles
+              </div>
             </Field>
             <Field label="Color">
               <ColorRow value={el.color} onChange={(c) => update(el.id, { color: c })} />
@@ -534,139 +598,146 @@ export function PropertiesPanel() {
           </>
         )}
 
-        {el.type === "image" && (() => {
-          const f: ImageFilters = { ...DEFAULT_FILTERS, ...(el.filters ?? {}) };
-          const set = (patch: Partial<ImageFilters>) =>
-            update(el.id, { filters: { ...f, ...patch } });
-          const FX: Array<[keyof ImageFilters, string, number, number, number, string]> = [
-            ["brightness", "Brightness", 0, 200, 1, "%"],
-            ["contrast", "Contrast", 0, 200, 1, "%"],
-            ["saturate", "Saturation", 0, 200, 1, "%"],
-            ["blur", "Blur", 0, 30, 0.5, "px"],
-            ["grayscale", "Grayscale", 0, 100, 1, "%"],
-            ["sepia", "Sepia", 0, 100, 1, "%"],
-            ["hueRotate", "Hue", -180, 180, 1, "°"],
-            ["invert", "Invert", 0, 100, 1, "%"],
-          ];
-          return (
-            <>
-              <div className="font-display text-[10px] uppercase tracking-[0.25em] text-teal/80">
-                ▸ Image effects
-              </div>
-              <Field label="Fit">
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(["cover", "contain", "fill"] as const).map((fit) => (
-                    <button
-                      key={fit}
-                      onClick={() => update(el.id, { fit })}
-                      className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${
-                        (el.fit ?? "cover") === fit ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"
-                      }`}
-                    >
-                      {fit}
-                    </button>
-                  ))}
+        {el.type === "image" &&
+          (() => {
+            const f: ImageFilters = { ...DEFAULT_FILTERS, ...(el.filters ?? {}) };
+            const set = (patch: Partial<ImageFilters>) =>
+              update(el.id, { filters: { ...f, ...patch } });
+            const FX: Array<[keyof ImageFilters, string, number, number, number, string]> = [
+              ["brightness", "Brightness", 0, 200, 1, "%"],
+              ["contrast", "Contrast", 0, 200, 1, "%"],
+              ["saturate", "Saturation", 0, 200, 1, "%"],
+              ["blur", "Blur", 0, 30, 0.5, "px"],
+              ["grayscale", "Grayscale", 0, 100, 1, "%"],
+              ["sepia", "Sepia", 0, 100, 1, "%"],
+              ["hueRotate", "Hue", -180, 180, 1, "°"],
+              ["invert", "Invert", 0, 100, 1, "%"],
+            ];
+            return (
+              <>
+                <div className="font-display text-[10px] uppercase tracking-[0.25em] text-teal/80">
+                  ▸ Image effects
                 </div>
-              </Field>
-              <Field label="Corner radius">
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.floor(Math.min(el.width, el.height) / 2)}
-                  value={el.cornerRadius ?? 0}
-                  onChange={(e) => update(el.id, { cornerRadius: +e.target.value })}
-                  className="w-full accent-teal"
-                />
-                <div className="font-mono text-[11px] text-teal/70">{el.cornerRadius ?? 0}px</div>
-              </Field>
-              <Field label="Opacity">
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={el.opacity ?? 1}
-                  onChange={(e) => update(el.id, { opacity: +e.target.value })}
-                  className="w-full accent-teal"
-                />
-                <div className="font-mono text-[11px] text-teal/70">{Math.round((el.opacity ?? 1) * 100)}%</div>
-              </Field>
-              <Field label="Border">
-                <input
-                  type="range"
-                  min={0}
-                  max={24}
-                  value={el.borderWidth ?? 0}
-                  onChange={(e) => update(el.id, { borderWidth: +e.target.value })}
-                  className="w-full accent-teal"
-                />
-                <ColorRow value={el.borderColor ?? "#0a0f1f"} onChange={(c) => update(el.id, { borderColor: c })} />
-              </Field>
-              <Field label="Flip">
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    onClick={() => update(el.id, { flipX: !el.flipX })}
-                    className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${el.flipX ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"}`}
-                  >
-                    horizontal
-                  </button>
-                  <button
-                    onClick={() => update(el.id, { flipY: !el.flipY })}
-                    className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${el.flipY ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"}`}
-                  >
-                    vertical
-                  </button>
-                </div>
-              </Field>
-              <GradientEditor
-                gradient={el.gradient}
-                fill="#7df9ff"
-                onChange={(g) => update(el.id, { gradient: g })}
-              />
-              {el.gradient && (
-                <Field label="Gradient strength">
+                <Field label="Fit">
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(["cover", "contain", "fill"] as const).map((fit) => (
+                      <button
+                        key={fit}
+                        onClick={() => update(el.id, { fit })}
+                        className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${
+                          (el.fit ?? "cover") === fit
+                            ? "bg-blue text-ink border-teal"
+                            : "bg-surface text-teal hover:border-teal"
+                        }`}
+                      >
+                        {fit}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+                <Field label="Corner radius">
+                  <input
+                    type="range"
+                    min={0}
+                    max={Math.floor(Math.min(el.width, el.height) / 2)}
+                    value={el.cornerRadius ?? 0}
+                    onChange={(e) => update(el.id, { cornerRadius: +e.target.value })}
+                    className="w-full accent-teal"
+                  />
+                  <div className="font-mono text-[11px] text-teal/70">{el.cornerRadius ?? 0}px</div>
+                </Field>
+                <Field label="Opacity">
                   <input
                     type="range"
                     min={0}
                     max={1}
                     step={0.05}
-                    value={el.gradientOpacity ?? 0.5}
-                    onChange={(e) => update(el.id, { gradientOpacity: +e.target.value })}
-                    className="w-full accent-teal"
-                  />
-                  <div className="font-mono text-[11px] text-teal/70">{Math.round((el.gradientOpacity ?? 0.5) * 100)}%</div>
-                </Field>
-              )}
-              {FX.map(([key, label, min, max, step, unit]) => (
-                <Field key={key} label={label}>
-                  <input
-                    type="range"
-                    min={min}
-                    max={max}
-                    step={step}
-                    value={f[key]}
-                    onChange={(e) => set({ [key]: +e.target.value } as Partial<ImageFilters>)}
+                    value={el.opacity ?? 1}
+                    onChange={(e) => update(el.id, { opacity: +e.target.value })}
                     className="w-full accent-teal"
                   />
                   <div className="font-mono text-[11px] text-teal/70">
-                    {f[key]}{unit}
+                    {Math.round((el.opacity ?? 1) * 100)}%
                   </div>
                 </Field>
-              ))}
-              <button
-                onClick={() => update(el.id, { filters: { ...DEFAULT_FILTERS } })}
-                className="brutal-border-2 brutal-press flex w-full items-center justify-center gap-1 bg-surface py-2 font-mono text-[10px] uppercase tracking-wider text-teal hover:border-teal"
-              >
-                <RotateCcw className="h-3 w-3" strokeWidth={3} /> Reset effects
-              </button>
-              <ShadowEditor
-                shadow={el.shadow}
-                onChange={(s) => update(el.id, { shadow: s })}
-              />
-            </>
-          );
-        })()}
-
+                <Field label="Border">
+                  <input
+                    type="range"
+                    min={0}
+                    max={24}
+                    value={el.borderWidth ?? 0}
+                    onChange={(e) => update(el.id, { borderWidth: +e.target.value })}
+                    className="w-full accent-teal"
+                  />
+                  <ColorRow
+                    value={el.borderColor ?? "#0a0f1f"}
+                    onChange={(c) => update(el.id, { borderColor: c })}
+                  />
+                </Field>
+                <Field label="Flip">
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      onClick={() => update(el.id, { flipX: !el.flipX })}
+                      className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${el.flipX ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"}`}
+                    >
+                      horizontal
+                    </button>
+                    <button
+                      onClick={() => update(el.id, { flipY: !el.flipY })}
+                      className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${el.flipY ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"}`}
+                    >
+                      vertical
+                    </button>
+                  </div>
+                </Field>
+                <GradientEditor
+                  gradient={el.gradient}
+                  fill="#7df9ff"
+                  onChange={(g) => update(el.id, { gradient: g })}
+                />
+                {el.gradient && (
+                  <Field label="Gradient strength">
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={el.gradientOpacity ?? 0.5}
+                      onChange={(e) => update(el.id, { gradientOpacity: +e.target.value })}
+                      className="w-full accent-teal"
+                    />
+                    <div className="font-mono text-[11px] text-teal/70">
+                      {Math.round((el.gradientOpacity ?? 0.5) * 100)}%
+                    </div>
+                  </Field>
+                )}
+                {FX.map(([key, label, min, max, step, unit]) => (
+                  <Field key={key} label={label}>
+                    <input
+                      type="range"
+                      min={min}
+                      max={max}
+                      step={step}
+                      value={f[key]}
+                      onChange={(e) => set({ [key]: +e.target.value } as Partial<ImageFilters>)}
+                      className="w-full accent-teal"
+                    />
+                    <div className="font-mono text-[11px] text-teal/70">
+                      {f[key]}
+                      {unit}
+                    </div>
+                  </Field>
+                ))}
+                <button
+                  onClick={() => update(el.id, { filters: { ...DEFAULT_FILTERS } })}
+                  className="brutal-border-2 brutal-press flex w-full items-center justify-center gap-1 bg-surface py-2 font-mono text-[10px] uppercase tracking-wider text-teal hover:border-teal"
+                >
+                  <RotateCcw className="h-3 w-3" strokeWidth={3} /> Reset effects
+                </button>
+                <ShadowEditor shadow={el.shadow} onChange={(s) => update(el.id, { shadow: s })} />
+              </>
+            );
+          })()}
 
         <Field label="Rotation">
           <input
@@ -696,13 +767,22 @@ export function PropertiesPanel() {
         </Field>
 
         <div className="grid grid-cols-2 gap-2 pt-2">
-          <ActionBtn onClick={() => bringForward(el.id)} icon={<ArrowUp className="h-3 w-3" strokeWidth={3} />}>
+          <ActionBtn
+            onClick={() => bringForward(el.id)}
+            icon={<ArrowUp className="h-3 w-3" strokeWidth={3} />}
+          >
             Forward
           </ActionBtn>
-          <ActionBtn onClick={() => sendBackward(el.id)} icon={<ArrowDown className="h-3 w-3" strokeWidth={3} />}>
+          <ActionBtn
+            onClick={() => sendBackward(el.id)}
+            icon={<ArrowDown className="h-3 w-3" strokeWidth={3} />}
+          >
             Backward
           </ActionBtn>
-          <ActionBtn onClick={() => duplicate(el.id)} icon={<Copy className="h-3 w-3" strokeWidth={3} />}>
+          <ActionBtn
+            onClick={() => duplicate(el.id)}
+            icon={<Copy className="h-3 w-3" strokeWidth={3} />}
+          >
             Duplicate
           </ActionBtn>
           <ActionBtn
@@ -911,7 +991,9 @@ function GradientEditor({
                   key={tp}
                   onClick={() => onChange({ ...g, type: tp })}
                   className={`brutal-border-2 py-1.5 font-mono text-[10px] uppercase ${
-                    (g.type ?? "linear") === tp ? "bg-blue text-ink border-teal" : "bg-surface text-teal hover:border-teal"
+                    (g.type ?? "linear") === tp
+                      ? "bg-blue text-ink border-teal"
+                      : "bg-surface text-teal hover:border-teal"
                   }`}
                 >
                   {tp}
@@ -966,7 +1048,9 @@ function QuizEditor({
                   onClick={() => onChange({ correctId: o.id })}
                   title="Mark correct"
                   className={`brutal-border-2 grid h-7 w-7 place-items-center ${
-                    correct ? "bg-blue text-ink border-teal" : "bg-surface text-teal/60 hover:border-teal"
+                    correct
+                      ? "bg-blue text-ink border-teal"
+                      : "bg-surface text-teal/60 hover:border-teal"
                   }`}
                 >
                   <Check className="h-3 w-3" strokeWidth={3} />
@@ -1035,7 +1119,8 @@ function ChartEditor({
   const setData = (i: number, patch: Partial<{ label: string; value: number }>) => {
     onChange({ data: element.data.map((d, idx) => (idx === i ? { ...d, ...patch } : d)) });
   };
-  const addRow = () => onChange({ data: [...element.data, { label: `Item ${element.data.length + 1}`, value: 0 }] });
+  const addRow = () =>
+    onChange({ data: [...element.data, { label: `Item ${element.data.length + 1}`, value: 0 }] });
   const removeRow = (i: number) => onChange({ data: element.data.filter((_, idx) => idx !== i) });
   return (
     <>
@@ -1098,7 +1183,9 @@ function ChartEditor({
                 type="color"
                 value={c}
                 onChange={(e) =>
-                  onChange({ colors: element.colors.map((col, idx) => (idx === i ? e.target.value : col)) })
+                  onChange({
+                    colors: element.colors.map((col, idx) => (idx === i ? e.target.value : col)),
+                  })
                 }
                 className="brutal-border-2 h-7 w-12 bg-surface"
               />
@@ -1119,10 +1206,20 @@ function ChartEditor({
         </div>
       </Field>
       <Field label="Background">
-        <input type="color" value={element.bgColor} onChange={(e) => onChange({ bgColor: e.target.value })} className="brutal-border-2 h-9 w-full bg-surface" />
+        <input
+          type="color"
+          value={element.bgColor}
+          onChange={(e) => onChange({ bgColor: e.target.value })}
+          className="brutal-border-2 h-9 w-full bg-surface"
+        />
       </Field>
       <Field label="Foreground">
-        <input type="color" value={element.fgColor} onChange={(e) => onChange({ fgColor: e.target.value })} className="brutal-border-2 h-9 w-full bg-surface" />
+        <input
+          type="color"
+          value={element.fgColor}
+          onChange={(e) => onChange({ fgColor: e.target.value })}
+          className="brutal-border-2 h-9 w-full bg-surface"
+        />
       </Field>
       <Field label="Display">
         <div className="flex gap-1">
@@ -1185,24 +1282,60 @@ function ButtonEditor({
         </Field>
       )}
       <Field label="Background">
-        <input type="color" value={element.bgColor} onChange={(e) => onChange({ bgColor: e.target.value })} className="brutal-border-2 h-9 w-full bg-surface" />
+        <input
+          type="color"
+          value={element.bgColor}
+          onChange={(e) => onChange({ bgColor: e.target.value })}
+          className="brutal-border-2 h-9 w-full bg-surface"
+        />
       </Field>
       <Field label="Text color">
-        <input type="color" value={element.fgColor} onChange={(e) => onChange({ fgColor: e.target.value })} className="brutal-border-2 h-9 w-full bg-surface" />
+        <input
+          type="color"
+          value={element.fgColor}
+          onChange={(e) => onChange({ fgColor: e.target.value })}
+          className="brutal-border-2 h-9 w-full bg-surface"
+        />
       </Field>
       <Field label="Border color">
-        <input type="color" value={element.borderColor} onChange={(e) => onChange({ borderColor: e.target.value })} className="brutal-border-2 h-9 w-full bg-surface" />
+        <input
+          type="color"
+          value={element.borderColor}
+          onChange={(e) => onChange({ borderColor: e.target.value })}
+          className="brutal-border-2 h-9 w-full bg-surface"
+        />
       </Field>
       <Field label="Border width">
-        <input type="range" min={0} max={16} value={element.borderWidth} onChange={(e) => onChange({ borderWidth: +e.target.value })} className="w-full accent-teal" />
+        <input
+          type="range"
+          min={0}
+          max={16}
+          value={element.borderWidth}
+          onChange={(e) => onChange({ borderWidth: +e.target.value })}
+          className="w-full accent-teal"
+        />
         <div className="font-mono text-[11px] text-teal/70">{element.borderWidth}px</div>
       </Field>
       <Field label="Corner radius">
-        <input type="range" min={0} max={64} value={element.cornerRadius} onChange={(e) => onChange({ cornerRadius: +e.target.value })} className="w-full accent-teal" />
+        <input
+          type="range"
+          min={0}
+          max={64}
+          value={element.cornerRadius}
+          onChange={(e) => onChange({ cornerRadius: +e.target.value })}
+          className="w-full accent-teal"
+        />
         <div className="font-mono text-[11px] text-teal/70">{element.cornerRadius}px</div>
       </Field>
       <Field label="Font size">
-        <input type="range" min={12} max={120} value={element.fontSize} onChange={(e) => onChange({ fontSize: +e.target.value })} className="w-full accent-teal" />
+        <input
+          type="range"
+          min={12}
+          max={120}
+          value={element.fontSize}
+          onChange={(e) => onChange({ fontSize: +e.target.value })}
+          className="w-full accent-teal"
+        />
         <div className="font-mono text-[11px] text-teal/70">{element.fontSize}px</div>
       </Field>
       <Field label="Font">

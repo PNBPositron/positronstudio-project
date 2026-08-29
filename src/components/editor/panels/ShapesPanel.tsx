@@ -36,7 +36,9 @@ export function ShapesPanel() {
     <div className="space-y-4">
       <PanelHeader title="Shapes" />
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Shapes</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Shapes
+      </div>
       <div className="grid grid-cols-3 gap-2">
         {SHAPES.flatMap((s) =>
           FILLS.map((fill) => (
@@ -59,7 +61,9 @@ export function ShapesPanel() {
         )}
       </div>
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Gradient shapes</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Gradient shapes
+      </div>
       <div className="grid grid-cols-4 gap-2">
         {GRADIENTS.map((g) =>
           (["rect", "circle"] as ShapeKind[]).map((kind) => (
