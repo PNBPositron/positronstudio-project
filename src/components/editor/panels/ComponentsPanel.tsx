@@ -1,13 +1,56 @@
 import { useState } from "react";
 import {
-  HelpCircle, BarChart3, LineChart, PieChart, AreaChart, MousePointerClick, Youtube, Globe,
-  Square, Hash, Gauge, AlertTriangle, ListChecks, Quote, User, CreditCard, Command, TrendingUp,
-  AppWindow, Chrome, Search, TerminalSquare, Smartphone, MessageSquare, Rows3, ToggleRight, LogIn, Bell,
-  PanelBottom, PanelLeft, LayoutPanelTop, FolderOpen, SlidersHorizontal, Terminal,
+  HelpCircle,
+  BarChart3,
+  LineChart,
+  PieChart,
+  AreaChart,
+  MousePointerClick,
+  Youtube,
+  Globe,
+  Square,
+  Hash,
+  Gauge,
+  AlertTriangle,
+  ListChecks,
+  Quote,
+  User,
+  CreditCard,
+  Command,
+  TrendingUp,
+  AppWindow,
+  Chrome,
+  Search,
+  TerminalSquare,
+  Smartphone,
+  MessageSquare,
+  Rows3,
+  ToggleRight,
+  LogIn,
+  Bell,
+  PanelBottom,
+  PanelLeft,
+  LayoutPanelTop,
+  FolderOpen,
+  SlidersHorizontal,
+  Terminal,
 } from "lucide-react";
 import {
-  useEditor, newQuiz, newPoll, newChart, newButton, newEmbed, newUi, toEmbedSrc,
-  UI_STYLE_THEMES, chartStylePatch, solidThemeBg, type ChartKind, type ButtonAction, type UiKind, type UiStyle,
+  useEditor,
+  newQuiz,
+  newPoll,
+  newChart,
+  newButton,
+  newEmbed,
+  newUi,
+  toEmbedSrc,
+  UI_STYLE_THEMES,
+  chartStylePatch,
+  solidThemeBg,
+  type ChartKind,
+  type ButtonAction,
+  type UiKind,
+  type UiStyle,
 } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
 import { UiRender } from "../UiRender";
@@ -73,10 +116,12 @@ export function ComponentsPanel() {
 
   return (
     <div className="space-y-4">
-      <PanelHeader title="Components" />
+      <PanelHeader title="Presets" />
 
       <div className="brutal-border-2 space-y-2 bg-surface p-3">
-        <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Style</div>
+        <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+          ▸ Style
+        </div>
         <div className="grid grid-cols-4 gap-1.5">
           {STYLES.map((s) => {
             const t = UI_STYLE_THEMES[s];
@@ -88,7 +133,14 @@ export function ComponentsPanel() {
                 className={`brutal-press border px-1.5 py-2 font-display text-[9px] uppercase tracking-[0.12em] ${
                   active ? "border-teal glow-teal" : "border-teal/30"
                 }`}
-                style={{ background: t.bg.startsWith("#") ? t.bg : t.bg.includes("gradient") ? t.bg : "#2a3550", color: t.fg }}
+                style={{
+                  background: t.bg.startsWith("#")
+                    ? t.bg
+                    : t.bg.includes("gradient")
+                      ? t.bg
+                      : "#2a3550",
+                  color: t.fg,
+                }}
               >
                 {t.label}
               </button>
@@ -96,11 +148,14 @@ export function ComponentsPanel() {
           })}
         </div>
         <p className="font-mono text-[9px] text-teal/50">
-          &gt; Applies to new components, charts{selected?.type === "ui" || selected?.type === "chart" ? " and the selected one" : ""}.
+          &gt; Applies to new components, charts
+          {selected?.type === "ui" || selected?.type === "chart" ? " and the selected one" : ""}.
         </p>
       </div>
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Interfaces</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Interfaces
+      </div>
       <div className="grid grid-cols-2 gap-2">
         {REAL_UI_KINDS.map(({ kind, label, Icon }) => (
           <button
@@ -136,7 +191,9 @@ export function ComponentsPanel() {
         ))}
       </div>
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Interactive</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Interactive
+      </div>
       <button
         onClick={() => add(themedQuiz())}
         className="brutal-border-2 brutal-press flex w-full items-center justify-center gap-2 bg-blue px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink"
@@ -153,12 +210,14 @@ export function ComponentsPanel() {
         <HelpCircle className="h-3.5 w-3.5" strokeWidth={2.5} /> ADD LIVE POLL
       </button>
       <div className="grid grid-cols-2 gap-2">
-        {([
-          { label: "NEXT →", action: "next-slide" },
-          { label: "← BACK", action: "prev-slide" },
-          { label: "RESTART", action: "first-slide" },
-          { label: "LINK ↗", action: "link" },
-        ] as Array<{ label: string; action: ButtonAction }>).map((b) => {
+        {(
+          [
+            { label: "NEXT →", action: "next-slide" },
+            { label: "← BACK", action: "prev-slide" },
+            { label: "RESTART", action: "first-slide" },
+            { label: "LINK ↗", action: "link" },
+          ] as Array<{ label: string; action: ButtonAction }>
+        ).map((b) => {
           const t = UI_STYLE_THEMES[style];
           const bg = solidThemeBg(style);
           return (
@@ -187,7 +246,9 @@ export function ComponentsPanel() {
         })}
       </div>
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Embed</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Embed
+      </div>
       <div className="brutal-border-2 space-y-2 bg-surface p-3">
         <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
           <Globe className="h-3.5 w-3.5" /> IFRAME_URL
@@ -215,15 +276,19 @@ export function ComponentsPanel() {
         </p>
       </div>
 
-      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Charts & Graphs</div>
+      <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
+        ▸ Charts & Graphs
+      </div>
       <div className="grid grid-cols-2 gap-2">
-        {([
-          { kind: "bar", label: "Bar", Icon: BarChart3 },
-          { kind: "line", label: "Line", Icon: LineChart },
-          { kind: "area", label: "Area", Icon: AreaChart },
-          { kind: "pie", label: "Pie", Icon: PieChart },
-          { kind: "donut", label: "Donut", Icon: PieChart },
-        ] as Array<{ kind: ChartKind; label: string; Icon: typeof BarChart3 }>).map(({ kind, label, Icon }) => (
+        {(
+          [
+            { kind: "bar", label: "Bar", Icon: BarChart3 },
+            { kind: "line", label: "Line", Icon: LineChart },
+            { kind: "area", label: "Area", Icon: AreaChart },
+            { kind: "pie", label: "Pie", Icon: PieChart },
+            { kind: "donut", label: "Donut", Icon: PieChart },
+          ] as Array<{ kind: ChartKind; label: string; Icon: typeof BarChart3 }>
+        ).map(({ kind, label, Icon }) => (
           <button
             key={kind}
             onClick={() => add(themedChart(kind, label))}

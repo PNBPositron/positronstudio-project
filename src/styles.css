@@ -90,6 +90,38 @@
 }
 
 /* ---- Editor themes (mirrors the component style packs) ---- */
+[data-editor-theme="auto"] {
+  --ink: var(--auto-chrome, #0b1736);
+  --paper: color-mix(in srgb, var(--auto-slide-color, #2563eb) 8%, white);
+  --surface: color-mix(in srgb, var(--auto-chrome, #0b1736) 4%, white);
+  --surface-2: color-mix(in srgb, var(--auto-slide-color, #2563eb) 12%, white);
+  --grid: color-mix(in srgb, var(--auto-slide-color, #2563eb) 28%, white);
+  --teal: var(--auto-slide-ink, #0b1736);
+  --teal-deep: color-mix(
+    in srgb,
+    var(--auto-slide-ink, #0b1736) 82%,
+    var(--auto-slide-color, #2563eb)
+  );
+  --blue: var(--auto-slide-color, #2563eb);
+  --blue-deep: color-mix(in srgb, var(--auto-slide-color, #2563eb) 72%, white);
+  --background: var(--paper);
+  --foreground: var(--teal);
+  --card: var(--surface);
+  --card-foreground: var(--teal);
+  --popover: var(--surface);
+  --popover-foreground: var(--teal);
+  --primary: var(--blue);
+  --primary-foreground: var(--auto-slide-ink, #ffffff);
+  --secondary: var(--teal);
+  --secondary-foreground: var(--surface);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--teal-deep);
+  --accent: var(--blue-deep);
+  --accent-foreground: var(--teal);
+  --border: var(--teal-deep);
+  --input: var(--teal-deep);
+  --ring: var(--blue);
+}
 [data-editor-theme="everest"] {
   --ink: oklch(0.98 0.015 240);
   --paper: oklch(0.95 0.025 235);

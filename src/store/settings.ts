@@ -98,6 +98,7 @@ export const AI_MODELS: Array<{ id: string; label: string; hint: string }> = [
 export const DEFAULT_AI_MODEL = AI_MODELS[0].id;
 
 export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> = [
+  { id: "auto", label: "Auto", hint: "follows the current slide color" },
   { id: "cyber", label: "Cyber", hint: "teal neon on ink" },
   { id: "everest", label: "Everest", hint: "blue and white light" },
   { id: "glass", label: "Glass", hint: "soft frosted greys" },
