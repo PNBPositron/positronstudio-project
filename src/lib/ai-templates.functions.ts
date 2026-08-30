@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Text models users can pick in Settings. Keep in sync with AI_MODELS in src/store/settings.ts.
 const ALLOWED_TEXT_MODELS = [
+  "moonshotai/kimi-k3",
   "google/gemini-3.6-flash",
   "google/gemini-3.1-flash-lite",
   "google/gemini-3.1-pro-preview",
@@ -36,32 +37,44 @@ async function chatComplete(
   extra: Record<string, unknown> = {},
 ): Promise<string> {
   const or = model.startsWith(OR_PREFIX);
-  const apiKey = or ? process.env.OPENROUTER_API_KEY : process.env.LOVABLE_API_KEY;
+  const kimi = model === "moonshotai/kimi-k3";
+  const apiKey = kimi
+    ? process.env.NVIDIA_API_KEY
+    : or
+      ? process.env.OPENROUTER_API_KEY
+      : process.env.LOVABLE_API_KEY;
   if (!apiKey) {
     throw new Error(
-      or
-        ? "OpenRouter is not configured yet — add an OPENROUTER_API_KEY to use free models."
-        : "Missing LOVABLE_API_KEY",
+      kimi
+        ? "NVIDIA is not configured yet — add an NVIDIA_API_KEY to use Kimi K3."
+        : or
+          ? "OpenRouter is not configured yet — add an OPENROUTER_API_KEY to use free models."
+          : "Missing LOVABLE_API_KEY",
     );
   }
   const res = await fetch(
-    or ? "https://openrouter.ai/api/v1/chat/completions" : "https://ai.gateway.lovable.dev/v1/chat/completions",
+    kimi
+      ? "https://integrate.api.nvidia.com/v1/chat/completions"
+      : or
+        ? "https://openrouter.ai/api/v1/chat/completions"
+        : "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(or ? { Authorization: `Bearer ${apiKey}` } : { "Lovable-API-Key": apiKey }),
+        ...(kimi || or ? { Authorization: `Bearer ${apiKey}` } : { "Lovable-API-Key": apiKey }),
       },
       body: JSON.stringify({
-        model: or ? model.slice(OR_PREFIX.length) : model,
-        ...(or ? {} : reasoningFor(model)),
+        model: kimi ? "moonshotai/kimi-k3" : or ? model.slice(OR_PREFIX.length) : model,
+        ...(or || kimi ? {} : reasoningFor(model)),
         messages,
         ...extra,
       }),
     },
   );
   if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
+  if (res.status === 402)
+    throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
   if (!res.ok) throw new Error(`AI error ${res.status}: ${await res.text()}`);
   const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const content = json.choices?.[0]?.message?.content;
@@ -73,12 +86,21 @@ async function chatComplete(
 // markdown fences, prose, or multiple back-to-back objects.
 function parseLooseJson<T>(raw: string): T {
   let s = (raw ?? "").trim();
-  s = s.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-  try { return JSON.parse(s) as T; } catch { /* fall through */ }
+  s = s
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+  try {
+    return JSON.parse(s) as T;
+  } catch {
+    /* fall through */
+  }
   const start = s.indexOf("{");
   if (start === -1) throw new Error("AI returned invalid JSON");
   // Walk braces respecting strings to find the matching close.
-  let depth = 0, inStr = false, esc = false;
+  let depth = 0,
+    inStr = false,
+    esc = false;
   for (let i = start; i < s.length; i++) {
     const c = s[i];
     if (inStr) {
@@ -120,10 +142,21 @@ export type AiElementInput =
   | {
       type: "shape";
       shape:
-        | "rect" | "circle" | "triangle" | "star" | "arrow"
-        | "heart" | "diamond" | "hexagon" | "pentagon"
-        | "parallelogram" | "trapezoid" | "cross"
-        | "lightning" | "cloud" | "speech";
+        | "rect"
+        | "circle"
+        | "triangle"
+        | "star"
+        | "arrow"
+        | "heart"
+        | "diamond"
+        | "hexagon"
+        | "pentagon"
+        | "parallelogram"
+        | "trapezoid"
+        | "cross"
+        | "lightning"
+        | "cloud"
+        | "speech";
       x: number;
       y: number;
       width: number;
@@ -179,8 +212,7 @@ export type AiStyle =
   | "y2k";
 
 const STYLE_GUIDES: Record<AiStyle, string> = {
-  auto:
-    "AUTO-DETECT STYLE. Read the user's prompt (and reference image if provided) carefully, then pick the single most appropriate visual style from this list: cyberpunk, liquid_glass, minimal, editorial, brutalist, retro_80s, organic, art_deco, memphis, y2k — or invent a closely related one if none fits. Treat keywords as required signals: 'corporate/clean/SaaS' → minimal; 'magazine/editorial/serif' → editorial; 'rave/neon/synthwave/cyber' → cyberpunk or retro_80s; 'glass/translucent/dreamy/iOS' → liquid_glass; 'raw/print/zine/punk' → brutalist; 'nature/wellness/calm/earth' → organic; 'luxury/gold/gatsby' → art_deco; 'playful/90s/squiggle/kids' → memphis; 'chrome/holographic/bubblegum/futuristic 2000s' → y2k. Commit to one direction with conviction — palette, type, shapes must all reinforce it. Use real hex codes and at least one shape effect (liquid_glass/neon/soft_shadow/inner_glow) appropriate to the chosen style. State the chosen style implicitly through the design — do NOT mention it in any text element.",
+  auto: "AUTO-DETECT STYLE. Read the user's prompt (and reference image if provided) carefully, then pick the single most appropriate visual style from this list: cyberpunk, liquid_glass, minimal, editorial, brutalist, retro_80s, organic, art_deco, memphis, y2k — or invent a closely related one if none fits. Treat keywords as required signals: 'corporate/clean/SaaS' → minimal; 'magazine/editorial/serif' → editorial; 'rave/neon/synthwave/cyber' → cyberpunk or retro_80s; 'glass/translucent/dreamy/iOS' → liquid_glass; 'raw/print/zine/punk' → brutalist; 'nature/wellness/calm/earth' → organic; 'luxury/gold/gatsby' → art_deco; 'playful/90s/squiggle/kids' → memphis; 'chrome/holographic/bubblegum/futuristic 2000s' → y2k. Commit to one direction with conviction — palette, type, shapes must all reinforce it. Use real hex codes and at least one shape effect (liquid_glass/neon/soft_shadow/inner_glow) appropriate to the chosen style. State the chosen style implicitly through the design — do NOT mention it in any text element.",
   cyberpunk:
     "CYBERPUNK / NEOBRUTALIST. Palette: ink #0a0f1f, surface #101a2e, neon teal #7df9ff, electric blue #4d7cff, hot magenta #ff0080. Heavy display type, dramatic scale contrast, geometric shapes, mono labels. Use shape effect 'neon' on key shapes.",
   liquid_glass:
@@ -199,11 +231,15 @@ const STYLE_GUIDES: Record<AiStyle, string> = {
     "ART DECO. Palette: black #0a0a0a, gold #d4a017, ivory #f5e6c8. Symmetric geometric ornament, tall display type, gilded accents.",
   memphis:
     "MEMPHIS DESIGN. Palette: hot pink #ff5d8f, electric blue #1e88e5, lemon #ffeb3b, mint #4ecdc4, black on white. Squiggles, dots, zigzags, playful chaos.",
-  y2k:
-    "Y2K FUTURISM. Palette: chrome silver, holographic pastels (#c4b5fd, #67e8f9, #f0abfc), candy pink. Translucent bubble shapes — use 'liquid_glass' effect heavily — glossy feel, futuristic display.",
+  y2k: "Y2K FUTURISM. Palette: chrome silver, holographic pastels (#c4b5fd, #67e8f9, #f0abfc), candy pink. Translucent bubble shapes — use 'liquid_glass' effect heavily — glossy feel, futuristic display.",
 };
 
-const buildSystem = (W: number, H: number, style: AiStyle, hasImage: boolean) => `You are an elite graphic designer generating a MULTI-SLIDE deck for a ${W}×${H}px canvas.
+const buildSystem = (
+  W: number,
+  H: number,
+  style: AiStyle,
+  hasImage: boolean,
+) => `You are an elite graphic designer generating a MULTI-SLIDE deck for a ${W}×${H}px canvas.
 Aspect ratio: ${(W / H).toFixed(3)} (${W >= H ? "landscape/wide" : "portrait/tall"}). Compose every slide for this exact shape — fill the full ${W}px width and ${H}px height.
 
 THINK BEFORE YOU DESIGN (do this silently, do NOT emit it):
@@ -245,37 +281,67 @@ Each slide aims for 5-12 elements. Across the deck, include at least one shape w
 
 export const generateAiTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { prompt: string; width?: number; height?: number; style?: AiStyle; imageDataUrl?: string; slideCount?: number; model?: string }) => {
-    if (!data || typeof data.prompt !== "string") throw new Error("Prompt is required");
-    if (!data.prompt.trim() && !data.imageDataUrl) throw new Error("Provide a prompt or an image");
-    const clamp = (n: unknown, def: number) => {
-      const v = typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def;
-      return Math.max(320, Math.min(4096, v));
-    };
-    const validStyles: AiStyle[] = [
-      "auto", "cyberpunk", "liquid_glass", "minimal", "editorial", "brutalist",
-      "retro_80s", "organic", "art_deco", "memphis", "y2k",
-    ];
-    const style: AiStyle = (data.style && validStyles.includes(data.style)) ? data.style : "auto";
-    const img = typeof data.imageDataUrl === "string" && data.imageDataUrl.startsWith("data:image/")
-      ? data.imageDataUrl.slice(0, 8_000_000)
-      : undefined;
-    const slideCount = Math.max(1, Math.min(10,
-      typeof data.slideCount === "number" && Number.isFinite(data.slideCount) ? Math.round(data.slideCount) : 5
-    ));
-    return {
-      prompt: data.prompt.slice(0, 1000),
-      width: clamp(data.width, 1920),
-      height: clamp(data.height, 1080),
-      style,
-      imageDataUrl: img,
-      slideCount,
-      model: pickModel(data.model),
-    };
-  })
+  .inputValidator(
+    (data: {
+      prompt: string;
+      width?: number;
+      height?: number;
+      style?: AiStyle;
+      imageDataUrl?: string;
+      slideCount?: number;
+      model?: string;
+    }) => {
+      if (!data || typeof data.prompt !== "string") throw new Error("Prompt is required");
+      if (!data.prompt.trim() && !data.imageDataUrl)
+        throw new Error("Provide a prompt or an image");
+      const clamp = (n: unknown, def: number) => {
+        const v = typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def;
+        return Math.max(320, Math.min(4096, v));
+      };
+      const validStyles: AiStyle[] = [
+        "auto",
+        "cyberpunk",
+        "liquid_glass",
+        "minimal",
+        "editorial",
+        "brutalist",
+        "retro_80s",
+        "organic",
+        "art_deco",
+        "memphis",
+        "y2k",
+      ];
+      const style: AiStyle = data.style && validStyles.includes(data.style) ? data.style : "auto";
+      const img =
+        typeof data.imageDataUrl === "string" && data.imageDataUrl.startsWith("data:image/")
+          ? data.imageDataUrl.slice(0, 8_000_000)
+          : undefined;
+      const slideCount = Math.max(
+        1,
+        Math.min(
+          10,
+          typeof data.slideCount === "number" && Number.isFinite(data.slideCount)
+            ? Math.round(data.slideCount)
+            : 5,
+        ),
+      );
+      return {
+        prompt: data.prompt.slice(0, 1000),
+        width: clamp(data.width, 1920),
+        height: clamp(data.height, 1080),
+        style,
+        imageDataUrl: img,
+        slideCount,
+        model: pickModel(data.model),
+      };
+    },
+  )
   .handler(async ({ data }): Promise<AiDeck> => {
     const userContent: Array<Record<string, unknown>> = [
-      { type: "text", text: `Design concept: ${data.prompt || "(use the attached image as the brief)"}\n\nProduce exactly ${data.slideCount} slides.` },
+      {
+        type: "text",
+        text: `Design concept: ${data.prompt || "(use the attached image as the brief)"}\n\nProduce exactly ${data.slideCount} slides.`,
+      },
     ];
     if (data.imageDataUrl) {
       userContent.push({ type: "image_url", image_url: { url: data.imageDataUrl } });
@@ -284,7 +350,10 @@ export const generateAiTemplate = createServerFn({ method: "POST" })
     const content = await chatComplete(
       data.model,
       [
-        { role: "system", content: buildSystem(data.width, data.height, data.style, !!data.imageDataUrl) },
+        {
+          role: "system",
+          content: buildSystem(data.width, data.height, data.style, !!data.imageDataUrl),
+        },
         { role: "user", content: userContent },
       ],
       { response_format: { type: "json_object" } },
@@ -344,7 +413,9 @@ export const suggestIcons = createServerFn({ method: "POST" })
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = json.choices?.[0]?.message?.content ?? "";
     let parsed: { icons?: unknown };
-    try { parsed = JSON.parse(content); } catch {
+    try {
+      parsed = JSON.parse(content);
+    } catch {
       const m = content.match(/\{[\s\S]*\}/);
       parsed = m ? JSON.parse(m[0]) : {};
     }
@@ -376,7 +447,10 @@ export const generate3DScene = createServerFn({ method: "POST" })
   .inputValidator((data: { prompt: string; width?: number; height?: number }) => {
     if (!data?.prompt?.trim()) throw new Error("Prompt is required");
     const clamp = (n: unknown, def: number) =>
-      Math.max(320, Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def));
+      Math.max(
+        320,
+        Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def),
+      );
     return {
       prompt: data.prompt.slice(0, 500),
       width: clamp(data.width, 1920),
@@ -409,7 +483,9 @@ spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = json.choices?.[0]?.message?.content ?? "";
     let parsed: Ai3DScene;
-    try { parsed = JSON.parse(content); } catch {
+    try {
+      parsed = JSON.parse(content);
+    } catch {
       const m = content.match(/\{[\s\S]*\}/);
       if (!m) throw new Error("AI returned invalid JSON");
       parsed = JSON.parse(m[0]);
@@ -424,25 +500,30 @@ spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
 
 export const editCurrentSlide = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    prompt: string;
-    width: number;
-    height: number;
-    page: { bg: string; elements: AiElementInput[] };
-    model?: string;
-  }) => {
-    if (!data?.prompt?.trim()) throw new Error("Prompt is required");
-    if (!data.page || !Array.isArray(data.page.elements)) throw new Error("Page is required");
-    const clamp = (n: unknown, def: number) =>
-      Math.max(320, Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def));
-    return {
-      prompt: data.prompt.slice(0, 1000),
-      width: clamp(data.width, 1920),
-      height: clamp(data.height, 1080),
-      page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
-      model: pickModel(data.model),
-    };
-  })
+  .inputValidator(
+    (data: {
+      prompt: string;
+      width: number;
+      height: number;
+      page: { bg: string; elements: AiElementInput[] };
+      model?: string;
+    }) => {
+      if (!data?.prompt?.trim()) throw new Error("Prompt is required");
+      if (!data.page || !Array.isArray(data.page.elements)) throw new Error("Page is required");
+      const clamp = (n: unknown, def: number) =>
+        Math.max(
+          320,
+          Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def),
+        );
+      return {
+        prompt: data.prompt.slice(0, 1000),
+        width: clamp(data.width, 1920),
+        height: clamp(data.height, 1080),
+        page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
+        model: pickModel(data.model),
+      };
+    },
+  )
   .handler(async ({ data }): Promise<AiPage> => {
     const sys = `You are an elite graphic designer EDITING an existing slide on a ${data.width}×${data.height}px canvas.
 You will receive the CURRENT slide as JSON and a user instruction. Apply the instruction and return the FULL updated slide.
@@ -461,7 +542,10 @@ Return ONLY valid JSON, no commentary:
       data.model,
       [
         { role: "system", content: sys },
-        { role: "user", content: `Current slide:\n${JSON.stringify(data.page)}\n\nInstruction: ${data.prompt}` },
+        {
+          role: "user",
+          content: `Current slide:\n${JSON.stringify(data.page)}\n\nInstruction: ${data.prompt}`,
+        },
       ],
       { response_format: { type: "json_object" } },
     );
@@ -474,32 +558,49 @@ Return ONLY valid JSON, no commentary:
 
 export const redesignSlideVariations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    width: number;
-    height: number;
-    page: { bg: string; elements: AiElementInput[] };
-    count?: number;
-    style?: AiStyle;
-    model?: string;
-  }) => {
-    if (!data.page || !Array.isArray(data.page.elements)) throw new Error("Page is required");
-    const clamp = (n: unknown, def: number) =>
-      Math.max(320, Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def));
-    const count = Math.max(2, Math.min(4, typeof data.count === "number" ? Math.round(data.count) : 3));
-    const validStyles: AiStyle[] = [
-      "auto", "cyberpunk", "liquid_glass", "minimal", "editorial", "brutalist",
-      "retro_80s", "organic", "art_deco", "memphis", "y2k",
-    ];
-    const style: AiStyle = (data.style && validStyles.includes(data.style)) ? data.style : "auto";
-    return {
-      width: clamp(data.width, 1920),
-      height: clamp(data.height, 1080),
-      page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
-      count,
-      style,
-      model: pickModel(data.model),
-    };
-  })
+  .inputValidator(
+    (data: {
+      width: number;
+      height: number;
+      page: { bg: string; elements: AiElementInput[] };
+      count?: number;
+      style?: AiStyle;
+      model?: string;
+    }) => {
+      if (!data.page || !Array.isArray(data.page.elements)) throw new Error("Page is required");
+      const clamp = (n: unknown, def: number) =>
+        Math.max(
+          320,
+          Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def),
+        );
+      const count = Math.max(
+        2,
+        Math.min(4, typeof data.count === "number" ? Math.round(data.count) : 3),
+      );
+      const validStyles: AiStyle[] = [
+        "auto",
+        "cyberpunk",
+        "liquid_glass",
+        "minimal",
+        "editorial",
+        "brutalist",
+        "retro_80s",
+        "organic",
+        "art_deco",
+        "memphis",
+        "y2k",
+      ];
+      const style: AiStyle = data.style && validStyles.includes(data.style) ? data.style : "auto";
+      return {
+        width: clamp(data.width, 1920),
+        height: clamp(data.height, 1080),
+        page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
+        count,
+        style,
+        model: pickModel(data.model),
+      };
+    },
+  )
   .handler(async ({ data }): Promise<{ variants: AiPage[] }> => {
     const sys = `You are an elite designer producing ${data.count} DISTINCT LAYOUT VARIATIONS of an existing slide.
 
@@ -522,14 +623,19 @@ Return ONLY valid JSON, no commentary:
       data.model,
       [
         { role: "system", content: sys },
-        { role: "user", content: `Current slide:\n${JSON.stringify(data.page)}\n\nProduce ${data.count} distinct layout variations.` },
+        {
+          role: "user",
+          content: `Current slide:\n${JSON.stringify(data.page)}\n\nProduce ${data.count} distinct layout variations.`,
+        },
       ],
       { response_format: { type: "json_object" } },
     );
     const parsed = parseLooseJson<{ variants?: unknown }>(content);
     const arr = Array.isArray(parsed.variants) ? parsed.variants : [];
     const variants: AiPage[] = arr
-      .filter((v): v is AiPage => !!v && typeof v === "object" && Array.isArray((v as AiPage).elements))
+      .filter(
+        (v): v is AiPage => !!v && typeof v === "object" && Array.isArray((v as AiPage).elements),
+      )
       .map((v) => ({ bg: v.bg ?? data.page.bg, elements: v.elements }));
     if (variants.length === 0) throw new Error("AI returned no variations");
     return { variants };
@@ -543,7 +649,9 @@ export const translateTexts = createServerFn({ method: "POST" })
     if (!Array.isArray(data?.texts)) throw new Error("texts required");
     const target = (data.target ?? "").toString().slice(0, 60).trim();
     if (!target) throw new Error("target language required");
-    const texts = data.texts.slice(0, 500).map((t) => (typeof t === "string" ? t.slice(0, 4000) : ""));
+    const texts = data.texts
+      .slice(0, 500)
+      .map((t) => (typeof t === "string" ? t.slice(0, 4000) : ""));
     return { texts, target };
   })
   .handler(async ({ data }): Promise<{ translations: string[] }> => {
@@ -589,26 +697,29 @@ Return ONLY JSON: { "translations": string[] } with exactly ${data.texts.length}
 
 export const generateAiAsset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    prompt: string;
-    size?: "1024x1024" | "1024x1536" | "1536x1024";
-    model?: string;
-    quality?: "low" | "medium" | "high";
-  }) => {
-    if (!data?.prompt?.trim()) throw new Error("Prompt is required");
-    const size = data.size === "1024x1536" || data.size === "1536x1024" ? data.size : "1024x1024";
-    const allowedModels = [
-      "openai/gpt-image-2",
-      "openai/gpt-image-1-mini",
-      "google/gemini-2.5-flash-image",
-      "google/gemini-3.1-flash-image-preview",
-      "google/gemini-3-pro-image-preview",
-    ];
-    const model = data.model && allowedModels.includes(data.model) ? data.model : "openai/gpt-image-2";
-    const quality: "low" | "medium" | "high" =
-      data.quality === "medium" || data.quality === "high" ? data.quality : "low";
-    return { prompt: data.prompt.slice(0, 1000), size, model, quality };
-  })
+  .inputValidator(
+    (data: {
+      prompt: string;
+      size?: "1024x1024" | "1024x1536" | "1536x1024";
+      model?: string;
+      quality?: "low" | "medium" | "high";
+    }) => {
+      if (!data?.prompt?.trim()) throw new Error("Prompt is required");
+      const size = data.size === "1024x1536" || data.size === "1536x1024" ? data.size : "1024x1024";
+      const allowedModels = [
+        "openai/gpt-image-2",
+        "openai/gpt-image-1-mini",
+        "google/gemini-2.5-flash-image",
+        "google/gemini-3.1-flash-image-preview",
+        "google/gemini-3-pro-image-preview",
+      ];
+      const model =
+        data.model && allowedModels.includes(data.model) ? data.model : "openai/gpt-image-2";
+      const quality: "low" | "medium" | "high" =
+        data.quality === "medium" || data.quality === "high" ? data.quality : "low";
+      return { prompt: data.prompt.slice(0, 1000), size, model, quality };
+    },
+  )
   .handler(async ({ data }): Promise<{ dataUrl: string }> => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
@@ -655,7 +766,10 @@ export type StockImage = {
 export const stockSearch = createServerFn({ method: "POST" })
   .inputValidator((data: { query: string; page?: number }) => {
     const query = (data?.query ?? "").toString().slice(0, 100).trim() || "abstract";
-    const page = Math.max(1, Math.min(20, typeof data?.page === "number" ? Math.round(data.page) : 1));
+    const page = Math.max(
+      1,
+      Math.min(20, typeof data?.page === "number" ? Math.round(data.page) : 1),
+    );
     return { query, page };
   })
   .handler(async ({ data }): Promise<{ results: StockImage[] }> => {
@@ -691,34 +805,48 @@ export const stockSearch = createServerFn({ method: "POST" })
 
 export const importTemplateFromFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    fileDataUrl: string;
-    fileName?: string;
-    width?: number;
-    height?: number;
-    style?: AiStyle;
-  }) => {
-    if (!data?.fileDataUrl || !data.fileDataUrl.startsWith("data:")) {
-      throw new Error("A PDF or PPTX file is required");
-    }
-    // Hard cap to keep request size sane (~15MB base64).
-    if (data.fileDataUrl.length > 20_000_000) {
-      throw new Error("File too large (max ~15MB). Please upload a smaller file.");
-    }
-    const clamp = (n: unknown, def: number) =>
-      Math.max(320, Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def));
-    const validStyles: AiStyle[] = [
-      "auto", "cyberpunk", "liquid_glass", "minimal", "editorial", "brutalist",
-      "retro_80s", "organic", "art_deco", "memphis", "y2k",
-    ];
-    return {
-      fileDataUrl: data.fileDataUrl,
-      fileName: (data.fileName ?? "").toString().slice(0, 200),
-      width: clamp(data.width, 1920),
-      height: clamp(data.height, 1080),
-      style: (data.style && validStyles.includes(data.style)) ? data.style : "auto",
-    };
-  })
+  .inputValidator(
+    (data: {
+      fileDataUrl: string;
+      fileName?: string;
+      width?: number;
+      height?: number;
+      style?: AiStyle;
+    }) => {
+      if (!data?.fileDataUrl || !data.fileDataUrl.startsWith("data:")) {
+        throw new Error("A PDF or PPTX file is required");
+      }
+      // Hard cap to keep request size sane (~15MB base64).
+      if (data.fileDataUrl.length > 20_000_000) {
+        throw new Error("File too large (max ~15MB). Please upload a smaller file.");
+      }
+      const clamp = (n: unknown, def: number) =>
+        Math.max(
+          320,
+          Math.min(4096, typeof n === "number" && Number.isFinite(n) ? Math.round(n) : def),
+        );
+      const validStyles: AiStyle[] = [
+        "auto",
+        "cyberpunk",
+        "liquid_glass",
+        "minimal",
+        "editorial",
+        "brutalist",
+        "retro_80s",
+        "organic",
+        "art_deco",
+        "memphis",
+        "y2k",
+      ];
+      return {
+        fileDataUrl: data.fileDataUrl,
+        fileName: (data.fileName ?? "").toString().slice(0, 200),
+        width: clamp(data.width, 1920),
+        height: clamp(data.height, 1080),
+        style: data.style && validStyles.includes(data.style) ? data.style : "auto",
+      };
+    },
+  )
   .handler(async ({ data }): Promise<AiDeck> => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
@@ -743,7 +871,10 @@ Rules:
           {
             role: "user",
             content: [
-              { type: "text", text: `Imported file: ${data.fileName || "(unnamed)"}. Read its slides and rebuild them as a designed template.` },
+              {
+                type: "text",
+                text: `Imported file: ${data.fileName || "(unnamed)"}. Read its slides and rebuild them as a designed template.`,
+              },
               { type: "image_url", image_url: { url: data.fileDataUrl } },
             ],
           },
@@ -752,7 +883,8 @@ Rules:
       }),
     });
     if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
+    if (res.status === 402)
+      throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
     if (!res.ok) throw new Error(`AI gateway error ${res.status}: ${await res.text()}`);
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = json.choices?.[0]?.message?.content;
