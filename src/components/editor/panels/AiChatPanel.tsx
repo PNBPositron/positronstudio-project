@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Sparkles, Wand2, X } from "lucide-react";
-import {
-  useEditor,
-  newText,
-  newShape,
-  newIcon,
-  type AnyElement,
-  type Page,
-} from "@/store/editor";
+import { useEditor, newText, newShape, newIcon, type AnyElement, type Page } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
 import { useSettings } from "@/store/settings";
-import { editCurrentSlide, redesignSlideVariations, type AiElementInput, type AiPage } from "@/lib/ai-templates.functions";
+import {
+  askKimiAdvisor,
+  editCurrentSlide,
+  redesignSlideVariations,
+  type AiElementInput,
+  type AiPage,
+} from "@/lib/ai-templates.functions";
 import { SlideThumbnail } from "../SlideThumbnail";
 
 function buildFromAi(els: AiElementInput[]): AnyElement[] {
@@ -19,25 +18,43 @@ function buildFromAi(els: AiElementInput[]): AnyElement[] {
     .map((e): AnyElement | null => {
       if (e.type === "text") {
         return newText({
-          text: e.text, x: e.x, y: e.y, width: e.width, height: e.height,
-          fontSize: e.fontSize, color: e.color,
+          text: e.text,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fontSize: e.fontSize,
+          color: e.color,
           fontFamily: e.fontFamily ?? "Archivo Black",
           fontWeight: e.fontWeight ?? 700,
           align: e.align ?? "left",
-          italic: e.italic, underline: e.underline, bullet: e.bullet, href: e.href,
+          italic: e.italic,
+          underline: e.underline,
+          bullet: e.bullet,
+          href: e.href,
         });
       }
       if (e.type === "shape") {
         return newShape(e.shape, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth,
-          effect: e.effect, shadow: e.shadow,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fill: e.fill,
+          stroke: e.stroke,
+          strokeWidth: e.strokeWidth,
+          effect: e.effect,
+          shadow: e.shadow,
         });
       }
       if (e.type === "icon") {
         return newIcon(e.name, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          color: e.color, strokeWidth: e.strokeWidth ?? 2,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          color: e.color,
+          strokeWidth: e.strokeWidth ?? 2,
         });
       }
       return null;
@@ -47,23 +64,54 @@ function buildFromAi(els: AiElementInput[]): AnyElement[] {
 
 // Convert current page elements back to AI shape for context
 function toAi(els: AnyElement[]): AiElementInput[] {
-  return els.map((e): AiElementInput | null => {
-    if (e.type === "text") return {
-      type: "text", text: e.text, x: e.x, y: e.y, width: e.width, height: e.height,
-      fontSize: e.fontSize, color: e.color, fontFamily: e.fontFamily,
-      fontWeight: e.fontWeight, align: e.align, italic: e.italic, underline: e.underline,
-      bullet: e.bullet, href: e.href,
-    };
-    if (e.type === "shape") return {
-      type: "shape", shape: e.shape, x: e.x, y: e.y, width: e.width, height: e.height,
-      fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth, effect: e.effect, shadow: e.shadow,
-    };
-    if (e.type === "icon") return {
-      type: "icon", name: e.name, x: e.x, y: e.y, width: e.width, height: e.height,
-      color: e.color, strokeWidth: e.strokeWidth,
-    };
-    return null;
-  }).filter((x): x is AiElementInput => x !== null);
+  return els
+    .map((e): AiElementInput | null => {
+      if (e.type === "text")
+        return {
+          type: "text",
+          text: e.text,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fontSize: e.fontSize,
+          color: e.color,
+          fontFamily: e.fontFamily,
+          fontWeight: e.fontWeight,
+          align: e.align,
+          italic: e.italic,
+          underline: e.underline,
+          bullet: e.bullet,
+          href: e.href,
+        };
+      if (e.type === "shape")
+        return {
+          type: "shape",
+          shape: e.shape,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          fill: e.fill,
+          stroke: e.stroke,
+          strokeWidth: e.strokeWidth,
+          effect: e.effect,
+          shadow: e.shadow,
+        };
+      if (e.type === "icon")
+        return {
+          type: "icon",
+          name: e.name,
+          x: e.x,
+          y: e.y,
+          width: e.width,
+          height: e.height,
+          color: e.color,
+          strokeWidth: e.strokeWidth,
+        };
+      return null;
+    })
+    .filter((x): x is AiElementInput => x !== null);
 }
 
 type ChatMsg = { role: "user" | "assistant"; text: string };
@@ -81,12 +129,40 @@ export function AiChatPanel() {
   const aiModel = useSettings((s) => s.aiModel);
   const edit = useServerFn(editCurrentSlide);
   const redesign = useServerFn(redesignSlideVariations);
+  const askAdvisor = useServerFn(askKimiAdvisor);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [variants, setVariants] = useState<AiPage[] | null>(null);
   const [redesigning, setRedesigning] = useState(false);
+  const [advisorInput, setAdvisorInput] = useState("");
+  const [advisorMsgs, setAdvisorMsgs] = useState<ChatMsg[]>([]);
+  const [advisorBusy, setAdvisorBusy] = useState(false);
+
+  const askForAdvice = async () => {
+    const prompt = advisorInput.trim();
+    if (!prompt || advisorBusy) return;
+    setAdvisorBusy(true);
+    setAdvisorMsgs((m) => [...m, { role: "user", text: prompt }]);
+    setAdvisorInput("");
+    try {
+      const res = await askAdvisor({
+        data: {
+          prompt,
+          context: `Canvas ${canvasW}x${canvasH}, background ${bgColor}, ${elements.length} elements.`,
+        },
+      });
+      setAdvisorMsgs((m) => [...m, { role: "assistant", text: res.answer }]);
+    } catch (e) {
+      setAdvisorMsgs((m) => [
+        ...m,
+        { role: "assistant", text: e instanceof Error ? e.message : "Kimi could not answer." },
+      ]);
+    } finally {
+      setAdvisorBusy(false);
+    }
+  };
 
   const run = async (prompt: string) => {
     if (!prompt.trim() || busy) return;
@@ -147,12 +223,80 @@ export function AiChatPanel() {
         &gt; Chat to edit the CURRENT slide. Restyle, add elements, rewrite copy.
       </p>
 
+      <section className="brutal-border-2 bg-surface p-3" aria-labelledby="kimi-advisor-title">
+        <div className="flex items-center justify-between gap-2">
+          <h2
+            id="kimi-advisor-title"
+            className="font-display text-[11px] tracking-[0.16em] text-teal"
+          >
+            KIMI ADVISOR
+          </h2>
+          <span className="border border-teal/40 px-1.5 py-0.5 font-mono text-[8px] text-teal/60">
+            ADVICE ONLY
+          </span>
+        </div>
+        <p className="mt-1 font-mono text-[9px] leading-relaxed text-teal/60">
+          Ask for critique and design direction. Kimi cannot create or modify slides.
+        </p>
+        <div className="mt-2 max-h-44 min-h-16 overflow-y-auto border border-teal/20 bg-ink/5 p-2">
+          {advisorMsgs.length === 0 ? (
+            <p className="font-mono text-[10px] text-teal/45">&gt; ask Kimi about this slide_</p>
+          ) : (
+            advisorMsgs.map((m, i) => (
+              <div
+                key={i}
+                className="mb-2 font-mono text-[10px] leading-relaxed text-teal last:mb-0"
+              >
+                <span className="opacity-50">{m.role === "user" ? "▸ you: " : "▹ kimi: "}</span>
+                {m.text}
+              </div>
+            ))
+          )}
+          {advisorBusy && (
+            <div className="font-mono text-[10px] text-teal/60">Kimi is thinking…</div>
+          )}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <textarea
+            value={advisorInput}
+            onChange={(e) => setAdvisorInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                (e.metaKey || e.ctrlKey) &&
+                !e.nativeEvent.isComposing &&
+                e.keyCode !== 229
+              ) {
+                e.preventDefault();
+                askForAdvice();
+              }
+            }}
+            placeholder="How can I improve this slide?"
+            rows={2}
+            aria-label="Ask Kimi for advice"
+            className="min-w-0 flex-1 resize-none border border-teal/40 bg-ink p-2 font-mono text-[10px] text-teal placeholder:text-teal/30 focus:border-teal focus:outline-none"
+          />
+          <button
+            onClick={askForAdvice}
+            disabled={advisorBusy || !advisorInput.trim()}
+            aria-label="Ask Kimi"
+            className="brutal-border brutal-press self-end bg-blue px-3 py-2 text-ink disabled:opacity-50"
+          >
+            <Send className="size-4" />
+          </button>
+        </div>
+      </section>
+
       <button
         onClick={runRedesign}
         disabled={redesigning || busy}
         className="brutal-border-2 brutal-press flex w-full items-center justify-center gap-2 bg-[#ff0080] px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
       >
-        {redesigning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" strokeWidth={2.5} />}
+        {redesigning ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Wand2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+        )}
         {redesigning ? "REDESIGNING..." : "REDESIGN THIS SLIDE"}
       </button>
       <p className="font-mono text-[9px] text-teal/50">
@@ -232,7 +376,11 @@ export function AiChatPanel() {
 }
 
 function VariationPicker({
-  variants, canvasW, canvasH, onPick, onClose,
+  variants,
+  canvasW,
+  canvasH,
+  onPick,
+  onClose,
 }: {
   variants: AiPage[];
   canvasW: number;
@@ -248,7 +396,10 @@ function VariationPicker({
     elements: buildFromAi(v.elements),
   });
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/85 p-6" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/85 p-6"
+      onClick={onClose}
+    >
       <div
         className="brutal-border-2 relative w-full max-w-6xl bg-ink p-6"
         onClick={(e) => e.stopPropagation()}
@@ -271,7 +422,12 @@ function VariationPicker({
               onClick={() => onPick(v)}
               className="brutal-border-2 brutal-press group flex flex-col gap-2 bg-surface p-2 text-left hover:border-teal"
             >
-              <SlideThumbnail page={asPage(v)} canvasW={canvasW} canvasH={canvasH} className="w-full" />
+              <SlideThumbnail
+                page={asPage(v)}
+                canvasW={canvasW}
+                canvasH={canvasH}
+                className="w-full"
+              />
               <div className="flex items-center justify-between px-1 pb-1 font-display text-[11px] tracking-[0.2em] text-teal">
                 <span>VARIATION {i + 1}</span>
                 <span className="text-[10px] text-teal/60 group-hover:text-teal">APPLY →</span>
