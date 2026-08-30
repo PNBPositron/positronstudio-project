@@ -7,7 +7,6 @@ import {
   Trash2,
   Download,
   Play,
-  Zap,
   Save,
   Cloud,
   FolderOpen,
@@ -247,14 +246,7 @@ export function Toolbar() {
     <header className="relative flex items-center justify-between gap-4 border-b border-teal/40 bg-ink px-5 py-3">
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-teal to-transparent opacity-80" />
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center bg-blue-deep brutal-border glow-blue">
-            <Zap className="h-5 w-5 text-teal" strokeWidth={2.5} fill="currentColor" />
-          </div>
-          <div className="font-display text-xl tracking-[0.18em] text-teal text-glow">
-            POSITRON<span className="text-blue text-glow-blue">//</span>STUDIO
-          </div>
-        </div>
+        <div className="flex items-center gap-3"></div>
         <div className="ml-4 hidden items-center gap-2 md:flex">
           <input
             value={designName}

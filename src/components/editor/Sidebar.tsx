@@ -131,16 +131,6 @@ export function Sidebar() {
         </button>
       </nav>
       <div
-        className="pointer-events-none absolute left-20 top-0 z-40 flex h-12 w-72 items-center gap-2 border-r border-b border-teal/30 bg-paper px-4"
-        aria-hidden="true"
-      >
-        <span className="size-2 bg-blue shadow-[0_0_0_3px_var(--blue-deep)]" />
-        <span className="font-display text-[10px] font-bold uppercase tracking-[0.22em] text-teal">
-          {TOOLS.find((item) => item.id === tool)?.label}
-        </span>
-        <span className="ml-auto font-mono text-[9px] text-teal/50">EDITOR</span>
-      </div>
-      <div
         aria-hidden={!panelOpen}
         style={{ transition: panelTransition }}
         className={`absolute left-20 top-0 z-40 h-full w-72 origin-left overflow-y-auto border-r border-teal/30 bg-paper p-4 shadow-2xl will-change-[transform,opacity,filter] ${
