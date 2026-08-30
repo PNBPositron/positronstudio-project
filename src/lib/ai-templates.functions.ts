@@ -3,7 +3,6 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Text models users can pick in Settings. Keep in sync with AI_MODELS in src/store/settings.ts.
 const ALLOWED_TEXT_MODELS = [
-  "moonshotai/kimi-k3",
   "google/gemini-3.6-flash",
   "google/gemini-3.1-flash-lite",
   "google/gemini-3.1-pro-preview",
@@ -38,11 +37,15 @@ async function chatComplete(
 ): Promise<string> {
   const or = model.startsWith(OR_PREFIX);
   const kimi = model === "moonshotai/kimi-k3";
-  const apiKey = kimi
-    ? process.env.NVIDIA_API_KEY
-    : or
-      ? process.env.OPENROUTER_API_KEY
-      : process.env.LOVABLE_API_KEY;
+  const apiKey = (
+    kimi
+      ? process.env.NVIDIA_API_KEY
+      : or
+        ? process.env.OPENROUTER_API_KEY
+        : process.env.LOVABLE_API_KEY
+  )
+    ?.trim()
+    .replace(/^Bearer\s+/i, "");
   if (!apiKey) {
     throw new Error(
       kimi
@@ -62,6 +65,7 @@ async function chatComplete(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         ...(kimi || or ? { Authorization: `Bearer ${apiKey}` } : { "Lovable-API-Key": apiKey }),
       },
       body: JSON.stringify({
@@ -494,6 +498,33 @@ spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
     // force sphere
     parsed.models = parsed.models.map((m) => ({ ...m, shape: "sphere" as const }));
     return parsed;
+  });
+
+// ---------------- Kimi advisor chat ----------------
+
+export const askKimiAdvisor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { prompt: string; context?: string }) => {
+    const prompt = (data?.prompt ?? "").toString().slice(0, 2000).trim();
+    if (!prompt) throw new Error("Message is required");
+    return { prompt, context: (data?.context ?? "").toString().slice(0, 4000) };
+  })
+  .handler(async ({ data }) => {
+    const content = await chatComplete(
+      [
+        {
+          role: "system",
+          content:
+            "You are Kimi, a helpful presentation design advisor inside Positron Studio. Give concise, practical advice about layout, typography, color, hierarchy, storytelling, and presentation clarity. You may analyze the current slide context. You must never create, modify, generate, or return slide elements, JSON, or code. Clearly state that you are advising only when relevant.",
+        },
+        {
+          role: "user",
+          content: `Current slide context:\n${data.context || "No slide context provided."}\n\nUser question:\n${data.prompt}`,
+        },
+      ],
+      { temperature: 0.7, max_tokens: 700 },
+    );
+    return { answer: content };
   });
 
 // ---------------- Edit current slide via chat ----------------

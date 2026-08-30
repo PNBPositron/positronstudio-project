@@ -66,7 +66,6 @@ export const springEasing = (stiffness: number) => {
 };
 
 export const AI_MODELS: Array<{ id: string; label: string; hint: string }> = [
-  { id: "moonshotai/kimi-k3", label: "Kimi K3", hint: "NVIDIA NIM · hosted" },
   { id: "google/gemini-3.6-flash", label: "Gemini 3.6 Flash", hint: "fast · balanced" },
   {
     id: "google/gemini-3.1-flash-lite",

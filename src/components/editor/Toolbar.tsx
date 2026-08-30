@@ -19,6 +19,7 @@ import {
   Upload,
   Languages,
   Settings,
+  Zap,
 } from "lucide-react";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { saveDesign, publishAsTemplate } from "@/lib/designs";
@@ -246,7 +247,14 @@ export function Toolbar() {
     <header className="relative flex items-center justify-between gap-4 border-b border-teal/40 bg-ink px-5 py-3">
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-teal to-transparent opacity-80" />
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-3"></div>
+        <div className="flex items-center gap-3">
+          <div className="grid size-10 place-items-center border-2 border-teal bg-blue-deep shadow-[0_0_14px_var(--blue)]">
+            <Zap className="size-5 text-teal" strokeWidth={2.5} fill="currentColor" />
+          </div>
+          <div className="font-display text-xl tracking-[0.18em] text-teal">
+            POSITRON<span className="text-blue">//</span>STUDIO
+          </div>
+        </div>
         <div className="ml-4 hidden items-center gap-2 md:flex">
           <input
             value={designName}
