@@ -38,11 +38,15 @@ async function chatComplete(
 ): Promise<string> {
   const or = model.startsWith(OR_PREFIX);
   const kimi = model === "moonshotai/kimi-k3";
-  const apiKey = kimi
-    ? process.env.NVIDIA_API_KEY
-    : or
-      ? process.env.OPENROUTER_API_KEY
-      : process.env.LOVABLE_API_KEY;
+  const apiKey = (
+    kimi
+      ? process.env.NVIDIA_API_KEY
+      : or
+        ? process.env.OPENROUTER_API_KEY
+        : process.env.LOVABLE_API_KEY
+  )
+    ?.trim()
+    .replace(/^Bearer\s+/i, "");
   if (!apiKey) {
     throw new Error(
       kimi
@@ -62,6 +66,7 @@ async function chatComplete(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         ...(kimi || or ? { Authorization: `Bearer ${apiKey}` } : { "Lovable-API-Key": apiKey }),
       },
       body: JSON.stringify({
