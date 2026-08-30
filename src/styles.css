@@ -90,7 +90,9 @@
 }
 
 /* ---- Editor themes (mirrors the component style packs) ---- */
-[data-editor-theme="auto"] {
+[data-editor-theme="auto-light"],
+[data-editor-theme="auto"],
+[data-editor-theme="auto-dark"] {
   --ink: var(--auto-chrome, #0b1736);
   --paper: color-mix(in srgb, var(--auto-slide-color, #2563eb) 8%, white);
   --surface: color-mix(in srgb, var(--auto-chrome, #0b1736) 4%, white);
@@ -121,6 +123,22 @@
   --border: var(--teal-deep);
   --input: var(--teal-deep);
   --ring: var(--blue);
+}
+[data-editor-theme="auto-light"] {
+  --ink: #f7fbff;
+  --paper: #eef5fb;
+  --surface: #ffffff;
+  --surface-2: #dbe8f3;
+  --teal: #10233f;
+  --teal-deep: #48627d;
+}
+[data-editor-theme="auto-dark"] {
+  --ink: #07111f;
+  --paper: #0b1730;
+  --surface: #11223d;
+  --surface-2: #193355;
+  --teal: #e5f5ff;
+  --teal-deep: #9fc1dc;
 }
 [data-editor-theme="everest"] {
   --ink: oklch(0.98 0.015 240);

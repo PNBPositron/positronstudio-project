@@ -39,7 +39,7 @@ async function chatComplete(
   const kimi = model === "moonshotai/kimi-k3";
   const apiKey = (
     kimi
-      ? process.env.NVIDIA_API_KEY
+      ? process.env.NVIDIA_API_KEY || process.env.NVIDIA_NIM_API_KEY
       : or
         ? process.env.OPENROUTER_API_KEY
         : process.env.LOVABLE_API_KEY
@@ -80,8 +80,12 @@ async function chatComplete(
   if (res.status === 402)
     throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
   if (!res.ok) throw new Error(`AI error ${res.status}: ${await res.text()}`);
-  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = json.choices?.[0]?.message?.content;
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string; reasoning_content?: string }; text?: string }>;
+    output_text?: string;
+  };
+  const content =
+    json.choices?.[0]?.message?.content || json.choices?.[0]?.text || json.output_text;
   if (!content) throw new Error("Empty AI response");
   return content;
 }

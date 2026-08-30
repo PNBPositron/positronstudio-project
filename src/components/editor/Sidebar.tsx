@@ -5,7 +5,7 @@ import { useUi } from "@/store/ui";
 import {
   LayoutTemplate,
   Type,
-  Image,
+  Shapes,
   SlidersHorizontal,
   Bot,
   Blocks,
@@ -23,7 +23,7 @@ const TOOLS = [
   { id: "home", label: "Home", icon: LayoutTemplate },
   { id: "ai", label: "AI Edit", icon: Bot },
   { id: "text", label: "Text", icon: Type },
-  { id: "elements", label: "Elements", icon: Image },
+  { id: "elements", label: "Elements", icon: Shapes },
   { id: "components", label: "Presets", icon: Blocks },
   { id: "design", label: "Design", icon: SlidersHorizontal },
 ] as const;
@@ -42,7 +42,7 @@ export function Sidebar() {
     const root = document.documentElement;
     root.dataset.editorTheme = editorTheme;
 
-    if (editorTheme !== "auto") {
+    if (editorTheme !== "auto" && editorTheme !== "auto-light" && editorTheme !== "auto-dark") {
       root.style.removeProperty("--auto-slide-color");
       root.style.removeProperty("--auto-slide-ink");
       root.style.removeProperty("--auto-chrome");
@@ -58,7 +58,14 @@ export function Sidebar() {
     );
     const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
     const foreground = luminance > 0.55 ? "#0b1736" : "#ffffff";
-    const chrome = luminance > 0.55 ? "#ffffff" : "#0b1736";
+    const chrome =
+      editorTheme === "auto-light"
+        ? "#ffffff"
+        : editorTheme === "auto-dark"
+          ? "#0b1736"
+          : luminance > 0.55
+            ? "#ffffff"
+            : "#0b1736";
     root.style.setProperty("--auto-slide-color", normalized);
     root.style.setProperty("--auto-slide-ink", foreground);
     root.style.setProperty("--auto-chrome", chrome);
@@ -95,7 +102,7 @@ export function Sidebar() {
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <nav className="flex w-20 flex-col gap-2 border-r border-teal/30 bg-ink p-2">
+      <nav className="flex w-16 flex-col gap-1 border-r border-teal/30 bg-ink p-1.5">
         {visible.map((t) => {
           const Icon = t.icon;
           const active = tool === t.id;
@@ -133,7 +140,7 @@ export function Sidebar() {
       <div
         aria-hidden={!panelOpen}
         style={{ transition: panelTransition }}
-        className={`absolute left-20 top-0 z-40 h-full w-72 origin-left overflow-y-auto border-r border-teal/30 bg-paper p-4 shadow-2xl will-change-[transform,opacity,filter] ${
+        className={`absolute left-16 top-0 z-40 h-full w-64 origin-left overflow-y-auto border-r border-teal/30 bg-paper p-3 shadow-2xl will-change-[transform,opacity,filter] ${
           panelOpen
             ? `translate-x-0 opacity-100 ${noMotion ? "" : "scale-x-100 blur-0"}`
             : `pointer-events-none -translate-x-[106%] opacity-0 ${noMotion ? "" : "scale-x-[0.97] blur-[2px]"}`
