@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSettings } from "@/store/settings";
 import { ImagePlus, Sparkles } from "lucide-react";
 import { useEditor, newImage } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
@@ -126,6 +127,8 @@ const ASSETS = HIGHLIGHTS.map((file) => ({ file, group: "Highlights" }));
 
 export function IllustrationsPanel() {
   const { add } = useEditor();
+  const editorTheme = useSettings((s) => s.editorTheme);
+  const [tint, setTint] = useState("#0a0f1f");
   const [group, setGroup] = useState<"All" | "Highlights">("All");
   const assets = useMemo(
     () => (group === "All" ? ASSETS : ASSETS.filter((asset) => asset.group === group)),
@@ -141,8 +144,18 @@ export function IllustrationsPanel() {
           50+ CC0 assets. Click an illustration to place it on the canvas.
         </p>
       </div>
-      <div className="grid grid-cols-3 gap-1">
-        {(["All", "Highlights", "Open Peeps"] as const).map((item) => (
+      <label className="flex items-center justify-between border border-teal/25 bg-surface px-2 py-1.5 font-mono text-[9px] uppercase text-teal/70">
+        Illustration color
+        <input
+          type="color"
+          value={tint}
+          onChange={(event) => setTint(event.target.value)}
+          aria-label="Illustration color"
+          className="size-5 cursor-pointer border-0 bg-transparent p-0"
+        />
+      </label>
+      <div className="grid grid-cols-2 gap-1">
+        {(["All", "Highlights"] as const).map((item) => (
           <button
             key={item}
             onClick={() => setGroup(item)}
@@ -159,7 +172,9 @@ export function IllustrationsPanel() {
           return (
             <button
               key={file}
-              onClick={() => add(newImage(src))}
+              onClick={() =>
+                add(newImage(src, { tint: editorTheme.includes("dark") ? "#ffffff" : tint }))
+              }
               title={`Add ${name}`}
               className="group brutal-border-2 brutal-press overflow-hidden bg-surface p-1 hover:border-teal"
             >
