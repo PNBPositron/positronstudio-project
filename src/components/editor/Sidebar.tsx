@@ -33,8 +33,15 @@ const TOOLS = [
 
 export function Sidebar() {
   const { tool, setTool, bgColor } = useEditor();
-  const { panels, aiEnabled, panelDurationMs, panelStiffness, reduceMotion, editorTheme } =
-    useSettings();
+  const {
+    panels,
+    aiEnabled,
+    panelDurationMs,
+    panelStiffness,
+    reduceMotion,
+    editorTheme,
+    setEditorTheme,
+  } = useSettings();
   const settingsOpen = useUi((s) => s.settingsOpen);
   const setSettingsOpen = useUi((s) => s.setSettingsOpen);
   const [hovering, setHovering] = useState(false);
@@ -61,6 +68,8 @@ export function Sidebar() {
     );
     const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
     const foreground = luminance > 0.55 ? "#0b1736" : "#ffffff";
+    const autoTheme = luminance > 0.55 ? "auto-light" : "auto-dark";
+    if (editorTheme !== autoTheme) setEditorTheme(autoTheme);
     const chrome =
       editorTheme === "auto-light"
         ? "#ffffff"
@@ -72,7 +81,7 @@ export function Sidebar() {
     root.style.setProperty("--auto-slide-color", normalized);
     root.style.setProperty("--auto-slide-ink", foreground);
     root.style.setProperty("--auto-chrome", chrome);
-  }, [editorTheme, bgColor]);
+  }, [editorTheme, bgColor, setEditorTheme]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
