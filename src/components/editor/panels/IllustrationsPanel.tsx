@@ -57,48 +57,76 @@ const HIGHLIGHTS = [
   "Spiral-2.svg",
   "Scribble-1.svg",
   "Scribble-2.svg",
+  "Line-3.svg",
+  "Line-4.svg",
+  "Line-5.svg",
+  "Line-6.svg",
+  "Line-7.svg",
+  "Line-8.svg",
+  "Line-9.svg",
+  "Line-10.svg",
+  "Line-11.svg",
+  "Loop-3.svg",
+  "Loop-4.svg",
+  "Loop-5.svg",
+  "Loop-6.svg",
+  "Loop-7.svg",
+  "Loop-8.svg",
+  "Spiral-3.svg",
+  "Spiral-4.svg",
+  "Spiral-5.svg",
+  "Spiral-6.svg",
+  "Spiral-7.svg",
+  "Spiral-8.svg",
+  "Scribble-3.svg",
+  "Scribble-4.svg",
+  "Scribble-5.svg",
+  "Scribble-6.svg",
+  "Scribble-7.svg",
+  "Scribble-8.svg",
+  "Scribble-9.svg",
+  "Scribble-10.svg",
+  "Punctuation-1.svg",
+  "Punctuation-2.svg",
+  "Punctuation-3.svg",
+  "Punctuation-4.svg",
+  "Punctuation-5.svg",
+  "Punctuation-6.svg",
+  "Punctuation-7.svg",
+  "Punctuation-8.svg",
+  "Punctuation-9.svg",
+  "Sprinkle-1.svg",
+  "Sprinkle-2.svg",
+  "Sprinkle-3.svg",
+  "Sprinkle-4.svg",
+  "Sprinkle-5.svg",
+  "Sprinkle-6.svg",
+  "Sprinkle-7.svg",
+  "Sprinkle-8.svg",
+  "Underline-1.svg",
+  "Underline-2.svg",
+  "Underline-3.svg",
+  "Underline-4.svg",
+  "Underline-5.svg",
+  "Underline-6.svg",
+  "Underline-7.svg",
+  "Underline-8.svg",
+  "Underline-9.svg",
+  "Underline-10.svg",
+  "Whirl-1.svg",
+  "Whirl-2.svg",
+  "Whirl-3.svg",
+  "Whirl-4.svg",
+  "Whirl-5.svg",
+  "Whirl-6.svg",
+  "Whirl-7.svg",
+  "Whirl-8.svg",
 ];
-const OPEN_PEEPS = [
-  "Afro.svg",
-  "Airy.svg",
-  "Baggy-Pants.svg",
-  "Ball.svg",
-  "Caesar.svg",
-  "Chongo.svg",
-  "Cube.svg",
-  "Cube-2.svg",
-  "Curly.svg",
-  "Hijab-1.svg",
-  "Hijab2.svg",
-  "Home.svg",
-  "Hoodie.svg",
-  "Jacket.svg",
-  "Jacket-2.svg",
-  "Long.svg",
-  "Long-Sleeve.svg",
-  "No-Hair.svg",
-  "Plants.svg",
-  "Pointing-Forward.svg",
-  "Pointing-Up.svg",
-  "Pony.svg",
-  "Pregnant.svg",
-  "Rad.svg",
-  "Short-1.svg",
-  "Short-2.svg",
-  "Short-Beard.svg",
-  "Shorts.svg",
-  "Skinny-Jeans.svg",
-  "Skinny-Jeans-Walk.svg",
-  "Skirt.svg",
-];
-const ASSETS = [
-  ...HIGHLIGHTS.map((file) => ({ file, group: "Highlights" })),
-  ...OPEN_PEEPS.map((file) => ({ file, group: "Open Peeps" })),
-];
+const ASSETS = HIGHLIGHTS.map((file) => ({ file, group: "Highlights" }));
 
 export function IllustrationsPanel() {
   const { add } = useEditor();
-  const [group, setGroup] = useState<"All" | "Highlights" | "Open Peeps">("All");
+  const [group, setGroup] = useState<"All" | "Highlights">("All");
   const assets = useMemo(
     () => (group === "All" ? ASSETS : ASSETS.filter((asset) => asset.group === group)),
     [group],
@@ -142,12 +170,6 @@ export function IllustrationsPanel() {
                     alt={`${assetGroup} illustration: ${name}`}
                     className="max-h-full max-w-full object-contain"
                     draggable={false}
-                    onError={(event) => {
-                      const fallback = src.replace(/\.svg$/i, ".png");
-                      if (event.currentTarget.src.endsWith(fallback))
-                        event.currentTarget.style.display = "none";
-                      else event.currentTarget.src = fallback;
-                    }}
                   />
                 </div>
               </div>
@@ -160,8 +182,7 @@ export function IllustrationsPanel() {
         })}
       </div>
       <p className="font-mono text-[8px] leading-relaxed text-teal/45">
-        Illustrations: Highlights by Outdraw Design and Open Peeps-style character assets. CC0
-        attribution per supplied collections.
+        Illustrations: Highlights by Outdraw Design. CC0 attribution per supplied collection.
       </p>
     </div>
   );
