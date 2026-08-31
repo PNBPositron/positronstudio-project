@@ -366,7 +366,7 @@ export function Toolbar() {
           <button
             onClick={() => setExportOpen((v) => !v)}
             disabled={!!exporting}
-            className="brutal-border brutal-shadow-sm brutal-press flex items-center gap-2 bg-blue px-4 py-2 font-display text-xs tracking-[0.2em] text-ink disabled:opacity-60"
+            className="brutal-border brutal-shadow-sm brutal-press flex items-center gap-2 bg-blue px-4 py-2 font-display text-xs tracking-[0.2em] text-black disabled:opacity-60"
           >
             {exporting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={3} />

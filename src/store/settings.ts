@@ -1,7 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type PanelId = "home" | "ai" | "text" | "components" | "elements" | "design";
+export type PanelId =
+  | "home"
+  | "ai"
+  | "text"
+  | "components"
+  | "elements"
+  | "illustrations"
+  | "design";
 
 export const PANEL_LABELS: Record<PanelId, string> = {
   home: "Home",
@@ -9,6 +16,7 @@ export const PANEL_LABELS: Record<PanelId, string> = {
   text: "Text",
   components: "Components",
   elements: "Elements",
+  illustrations: "Illustrations",
   design: "Design",
 };
 
@@ -109,7 +117,7 @@ export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> =
   { id: "midnight", label: "Midnight", hint: "deep indigo dark" },
 ];
 
-export const DEFAULT_EDITOR_THEME = "cyber";
+export const DEFAULT_EDITOR_THEME = "auto-light";
 
 const ALL_ON: Record<PanelId, boolean> = {
   home: true,
@@ -117,6 +125,7 @@ const ALL_ON: Record<PanelId, boolean> = {
   text: true,
   components: true,
   elements: true,
+  illustrations: true,
   design: true,
 };
 
@@ -158,9 +167,10 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "positron.settings",
-      version: 3,
+      version: 4,
       migrate: (state) => ({
         ...(state as SettingsState),
+        editorTheme: "auto-light",
         reduceMotion: true,
         brandKit: { ...DEFAULT_BRAND_KIT, ...((state as SettingsState)?.brandKit ?? {}) },
       }),
