@@ -58,7 +58,7 @@ const HIGHLIGHTS = [
   "Scribble-1.svg",
   "Scribble-2.svg",
 ];
-const HUMAANS = [
+const OPEN_PEEPS = [
   "Afro.svg",
   "Airy.svg",
   "Baggy-Pants.svg",
@@ -93,12 +93,12 @@ const HUMAANS = [
 ];
 const ASSETS = [
   ...HIGHLIGHTS.map((file) => ({ file, group: "Highlights" })),
-  ...HUMAANS.map((file) => ({ file, group: "Humaans" })),
+  ...OPEN_PEEPS.map((file) => ({ file, group: "Open Peeps" })),
 ];
 
 export function IllustrationsPanel() {
   const { add } = useEditor();
-  const [group, setGroup] = useState<"All" | "Highlights" | "Humaans">("All");
+  const [group, setGroup] = useState<"All" | "Highlights" | "Open Peeps">("All");
   const assets = useMemo(
     () => (group === "All" ? ASSETS : ASSETS.filter((asset) => asset.group === group)),
     [group],
@@ -114,7 +114,7 @@ export function IllustrationsPanel() {
         </p>
       </div>
       <div className="grid grid-cols-3 gap-1">
-        {(["All", "Highlights", "Humaans"] as const).map((item) => (
+        {(["All", "Highlights", "Open Peeps"] as const).map((item) => (
           <button
             key={item}
             onClick={() => setGroup(item)}
@@ -135,13 +135,21 @@ export function IllustrationsPanel() {
               title={`Add ${name}`}
               className="group brutal-border-2 brutal-press overflow-hidden bg-surface p-1 hover:border-teal"
             >
-              <div className="grid h-24 place-items-center bg-paper p-2">
-                <img
-                  src={src}
-                  alt={`${assetGroup} illustration: ${name}`}
-                  className="max-h-full max-w-full object-contain"
-                  draggable={false}
-                />
+              <div className="grid h-24 place-items-center bg-surface-2 p-2">
+                <div className="grid size-full place-items-center bg-paper/80">
+                  <img
+                    src={src}
+                    alt={`${assetGroup} illustration: ${name}`}
+                    className="max-h-full max-w-full object-contain"
+                    draggable={false}
+                    onError={(event) => {
+                      const fallback = src.replace(/\.svg$/i, ".png");
+                      if (event.currentTarget.src.endsWith(fallback))
+                        event.currentTarget.style.display = "none";
+                      else event.currentTarget.src = fallback;
+                    }}
+                  />
+                </div>
               </div>
               <span className="flex items-center gap-1 truncate px-1 py-1 font-mono text-[9px] text-teal/70">
                 <ImagePlus className="size-3 shrink-0" />
@@ -152,8 +160,8 @@ export function IllustrationsPanel() {
         })}
       </div>
       <p className="font-mono text-[8px] leading-relaxed text-teal/45">
-        Illustrations: Highlights by Outdraw Design and Humaans-style Flat Assets. CC0 attribution
-        per supplied collections.
+        Illustrations: Highlights by Outdraw Design and Open Peeps-style character assets. CC0
+        attribution per supplied collections.
       </p>
     </div>
   );
