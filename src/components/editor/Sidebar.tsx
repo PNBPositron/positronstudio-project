@@ -10,6 +10,7 @@ import {
   Bot,
   Blocks,
   Settings,
+  Images,
 } from "lucide-react";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { TextPanel } from "./panels/TextPanel";
@@ -17,6 +18,7 @@ import { ElementsPanel } from "./panels/ElementsPanel";
 import { DesignPanel } from "./panels/DesignPanel";
 import { AiChatPanel } from "./panels/AiChatPanel";
 import { ComponentsPanel } from "./panels/ComponentsPanel";
+import { IllustrationsPanel } from "./panels/IllustrationsPanel";
 import { SettingsDialog } from "./SettingsDialog";
 
 const TOOLS = [
@@ -24,6 +26,7 @@ const TOOLS = [
   { id: "ai", label: "AI Edit", icon: Bot },
   { id: "text", label: "Text", icon: Type },
   { id: "elements", label: "Elements", icon: Shapes },
+  { id: "illustrations", label: "Illustrations", icon: Images },
   { id: "components", label: "Presets", icon: Blocks },
   { id: "design", label: "Design", icon: SlidersHorizontal },
 ] as const;
@@ -113,7 +116,7 @@ export function Sidebar() {
                 setTool(t.id);
                 setHovering(true);
               }}
-              className={`group relative flex flex-col items-center gap-1 px-1 py-3 text-[10px] font-bold uppercase tracking-[0.15em] transition-all ${
+              className={`group relative flex flex-col items-center gap-0.5 px-0.5 py-2 text-[8px] font-bold uppercase tracking-[0.08em] transition-all ${
                 active
                   ? "bg-blue-deep text-teal border border-teal glow-blue"
                   : "border border-teal/20 bg-surface text-teal/70 hover:text-teal hover:border-teal/60 hover:bg-surface-2"
@@ -122,7 +125,7 @@ export function Sidebar() {
               {active && (
                 <span className="absolute left-0 top-0 h-full w-[3px] bg-teal glow-teal" />
               )}
-              <Icon className="h-5 w-5" strokeWidth={2} />
+              <Icon className="h-4 w-4" strokeWidth={2} />
               {t.label}
             </button>
           );
@@ -131,7 +134,7 @@ export function Sidebar() {
           onClick={() => setSettingsOpen(true)}
           title="Settings"
           aria-label="Settings"
-          className="mt-auto flex flex-col items-center gap-1 border border-teal/20 bg-surface px-1 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-teal/70 transition-colors duration-200 hover:border-teal/60 hover:bg-surface-2 hover:text-teal"
+          className="mt-auto flex flex-col items-center gap-0.5 border border-teal/20 bg-surface px-0.5 py-2 text-[8px] font-bold uppercase tracking-[0.08em] text-teal/70 transition-colors duration-200 hover:border-teal/60 hover:bg-surface-2 hover:text-teal"
         >
           <Settings className="h-5 w-5" strokeWidth={2} />
           Settings
@@ -151,6 +154,7 @@ export function Sidebar() {
         {tool === "text" && <TextPanel />}
         {tool === "components" && <ComponentsPanel />}
         {tool === "elements" && <ElementsPanel />}
+        {tool === "illustrations" && <IllustrationsPanel />}
         {tool === "design" && <DesignPanel />}
       </div>
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}

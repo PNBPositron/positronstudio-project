@@ -1,7 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type PanelId = "home" | "ai" | "text" | "components" | "elements" | "design";
+export type PanelId =
+  | "home"
+  | "ai"
+  | "text"
+  | "components"
+  | "elements"
+  | "illustrations"
+  | "design";
 
 export const PANEL_LABELS: Record<PanelId, string> = {
   home: "Home",
@@ -9,6 +16,7 @@ export const PANEL_LABELS: Record<PanelId, string> = {
   text: "Text",
   components: "Components",
   elements: "Elements",
+  illustrations: "Illustrations",
   design: "Design",
 };
 
