@@ -20,6 +20,7 @@ import {
   Languages,
   Settings,
   Zap,
+  Info,
 } from "lucide-react";
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { saveDesign, publishAsTemplate } from "@/lib/designs";
@@ -37,6 +38,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { translateTexts } from "@/lib/ai-templates.functions";
 import { useSettings } from "@/store/settings";
 import { useUi } from "@/store/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const LANGUAGES = [
   "Spanish",
@@ -72,6 +80,7 @@ export function Toolbar() {
   const translate = useServerFn(translateTexts);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
     if (!savedAt) return;
@@ -278,6 +287,7 @@ export function Toolbar() {
             onNewDesign={newDesign}
             onMyDesigns={() => setOpen(true)}
             onShare={handlePublish}
+            onAbout={() => setAboutOpen(true)}
             onExport={() => setExportOpen((v) => !v)}
             publishing={publishing}
             exporting={!!exporting}
@@ -404,6 +414,41 @@ export function Toolbar() {
       </div>
 
       {open && <MyDesignsDialog onClose={() => setOpen(false)} />}
+      <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
+        <DialogContent className="brutal-border-2 max-w-sm rounded-none border-teal bg-ink text-teal shadow-[8px_8px_0_var(--blue)]">
+          <DialogHeader className="text-left">
+            <DialogTitle className="font-display text-base tracking-[0.2em] text-teal">
+              ABOUT POSITRON
+            </DialogTitle>
+            <DialogDescription className="font-mono text-[11px] leading-relaxed text-teal/70">
+              Learn more about Positron Studio and its terms.
+            </DialogDescription>
+          </DialogHeader>
+          <nav aria-label="About links" className="flex flex-col gap-2">
+            <Link
+              to="/privacypolicy"
+              onClick={() => setAboutOpen(false)}
+              className="brutal-border flex items-center justify-between bg-surface px-3 py-3 font-display text-[11px] tracking-[0.16em] text-teal hover:bg-blue-deep"
+            >
+              PRIVACY POLICY <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              to="/license"
+              onClick={() => setAboutOpen(false)}
+              className="brutal-border flex items-center justify-between bg-surface px-3 py-3 font-display text-[11px] tracking-[0.16em] text-teal hover:bg-blue-deep"
+            >
+              LICENSE <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              to="/marketplace"
+              onClick={() => setAboutOpen(false)}
+              className="brutal-border flex items-center justify-between bg-surface px-3 py-3 font-display text-[11px] tracking-[0.16em] text-teal hover:bg-blue-deep"
+            >
+              MARKETPLACE <span aria-hidden="true">→</span>
+            </Link>
+          </nav>
+        </DialogContent>
+      </Dialog>
       {shareLink && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-ink/80 p-6">
           <div className="brutal-border-2 w-full max-w-md bg-surface p-6">
@@ -445,6 +490,7 @@ function BentoMenu({
   onNewDesign,
   onMyDesigns,
   onShare,
+  onAbout,
   onExport,
   publishing,
   exporting,
@@ -453,6 +499,7 @@ function BentoMenu({
   onNewDesign: () => void;
   onMyDesigns: () => void;
   onShare: () => void;
+  onAbout: () => void;
   onExport: () => void;
   publishing: boolean;
   exporting: boolean;
@@ -462,6 +509,7 @@ function BentoMenu({
     { label: "Settings", icon: Settings, action: onSettings },
     { label: "New design", icon: FilePlus, action: onNewDesign },
     { label: "My designs", icon: FolderOpen, action: onMyDesigns },
+    { label: "About", icon: Info, action: onAbout },
     {
       label: publishing ? "Sharing..." : "Share",
       icon: publishing ? Loader2 : Share2,
