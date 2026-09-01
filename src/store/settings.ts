@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { ThemeTokens } from "@/lib/themes";
 
 export type PanelId =
   | "home"
