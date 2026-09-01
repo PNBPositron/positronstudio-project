@@ -51,6 +51,9 @@ type SettingsState = {
   panelStiffness: number; // 0 = soft ease, 100 = springy overshoot
   reduceMotion: boolean; // force-disable panel motion
   brandKit: BrandKit;
+  customThemes: CustomTheme[];
+  addCustomTheme: (t: CustomTheme) => void;
+  removeCustomTheme: (id: string) => void;
   setBrandKit: (patch: Partial<BrandKit>) => void;
   resetBrandKit: () => void;
   setAiEnabled: (v: boolean) => void;
