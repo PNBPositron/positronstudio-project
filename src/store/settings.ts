@@ -147,6 +147,14 @@ export const useSettings = create<SettingsState>()(
       panelStiffness: DEFAULT_PANEL_STIFFNESS,
       reduceMotion: true,
       brandKit: { ...DEFAULT_BRAND_KIT },
+      customThemes: [],
+      addCustomTheme: (t) =>
+        set((s) => ({ customThemes: [...s.customThemes.filter((x) => x.id !== t.id), t] })),
+      removeCustomTheme: (id) =>
+        set((s) => ({
+          customThemes: s.customThemes.filter((x) => x.id !== id),
+          editorTheme: s.editorTheme === `custom:${id}` ? DEFAULT_EDITOR_THEME : s.editorTheme,
+        })),
       setBrandKit: (patch) => set((s) => ({ brandKit: { ...s.brandKit, ...patch } })),
       resetBrandKit: () => set({ brandKit: { ...DEFAULT_BRAND_KIT } }),
       setAiEnabled: (aiEnabled) => set({ aiEnabled }),
@@ -173,10 +181,11 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "positron.settings",
-      version: 4,
+      version: 5,
       migrate: (state) => ({
         ...(state as SettingsState),
-        editorTheme: "auto-light",
+        customThemes: (state as SettingsState)?.customThemes ?? [],
+        editorTheme: DEFAULT_EDITOR_THEME,
         reduceMotion: true,
         brandKit: { ...DEFAULT_BRAND_KIT, ...((state as SettingsState)?.brandKit ?? {}) },
       }),
