@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacypolicyRouteImport } from './routes/privacypolicy'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LicenseRouteImport } from './routes/license'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -34,6 +35,11 @@ const PrivacypolicyRoute = PrivacypolicyRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LicenseRoute = LicenseRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/license': typeof LicenseRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/license': typeof LicenseRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/license': typeof LicenseRoute
+  '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/license'
+    | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
     | '/sitemap.xml'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/license'
+    | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
     | '/sitemap.xml'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/license'
+    | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
     | '/sitemap.xml'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   LicenseRoute: typeof LicenseRoute
+  MarketplaceRoute: typeof MarketplaceRoute
   McpRoute: typeof McpRoute
   PrivacypolicyRoute: typeof PrivacypolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/license': {
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   LicenseRoute: LicenseRoute,
+  MarketplaceRoute: MarketplaceRoute,
   McpRoute: McpRoute,
   PrivacypolicyRoute: PrivacypolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
