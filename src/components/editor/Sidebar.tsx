@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useEditor } from "@/store/editor";
 import { useSettings, springEasing, type PanelId } from "@/store/settings";
 import { useUi } from "@/store/ui";
+import { CUSTOM_THEME_PREFIX, DEFAULT_THEME_TOKENS, themeCssVars } from "@/lib/themes";
 import {
   LayoutTemplate,
   Type,
