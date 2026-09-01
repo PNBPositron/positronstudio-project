@@ -1,4 +1,4 @@
-import { useEditor, DEFAULT_FILTERS, UI_STYLE_THEMES, chartStylePatch, type ImageFilters, type ElementShadow, type ShapeGradient, type QuizElement, type QuizOption, type ChartElement, type ButtonElement, type ChartKind, type ButtonAction, type UiStyle } from "@/store/editor";
+import { useEditor, DEFAULT_FILTERS, UI_STYLE_THEMES, chartStylePatch, type ImageFilters, type ElementShadow, type ShapeGradient, type HoverEffect, type QuizElement, type QuizOption, type ChartElement, type ButtonElement, type ChartKind, type ButtonAction, type UiStyle } from "@/store/editor";
 import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check } from "lucide-react";
 import { FONTS } from "./panels/TextPanel";
 
@@ -668,6 +668,11 @@ export function PropertiesPanel() {
         })()}
 
 
+        <InteractionEditor
+          interaction={el.interaction}
+          onChange={(interaction) => update(el.id, { interaction })}
+        />
+
         <Field label="Rotation">
           <input
             type="range"
@@ -715,6 +720,47 @@ export function PropertiesPanel() {
         </div>
       </div>
     </div>
+  );
+}
+
+function InteractionEditor({
+  interaction,
+  onChange,
+}: {
+  interaction?: { hoverEffect?: HoverEffect; hoverColor?: string; moveToSlide?: number };
+  onChange: (value: { hoverEffect?: HoverEffect; hoverColor?: string; moveToSlide?: number }) => void;
+}) {
+  const effect = interaction?.hoverEffect ?? "none";
+  return (
+    <Field label="Interactive on hover (present mode)">
+      <select
+        value={effect}
+        onChange={(e) => onChange({ ...interaction, hoverEffect: e.target.value as HoverEffect })}
+        className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal focus:outline-none"
+      >
+        <option value="none">none</option>
+        <option value="glitch">glitch</option>
+        <option value="color">change color</option>
+        <option value="gradient">gradient fill</option>
+      </select>
+      {(effect === "color" || effect === "gradient") && (
+        <input
+          type="color"
+          value={interaction?.hoverColor ?? "#ff0080"}
+          onChange={(e) => onChange({ ...interaction, hoverEffect: effect, hoverColor: e.target.value })}
+          className="brutal-border-2 h-8 w-full bg-surface"
+          aria-label="Hover color"
+        />
+      )}
+      <input
+        type="number"
+        min={1}
+        placeholder="Move to slide (optional)"
+        value={interaction?.moveToSlide ?? ""}
+        onChange={(e) => onChange({ ...interaction, moveToSlide: e.target.value ? Math.max(1, +e.target.value) : undefined })}
+        className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal focus:outline-none"
+      />
+    </Field>
   );
 }
 

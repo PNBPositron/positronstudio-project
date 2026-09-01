@@ -10,6 +10,7 @@ import {
   type ElementShadow,
   DEFAULT_FILTERS,
   type ImageFilters,
+  type ShapeGradient,
 } from "@/store/editor";
 import { ShapeRender } from "./ShapeRender";
 import { UiRender } from "./UiRender";
@@ -23,6 +24,11 @@ const filterCss = (f?: ImageFilters) => {
 
 const shadowFilter = (s?: ElementShadow) =>
   s ? `drop-shadow(${s.x}px ${s.y}px ${s.blur}px ${s.color})` : "";
+
+const gradientCss = (g: ShapeGradient) =>
+  (g.type ?? "linear") === "radial"
+    ? `radial-gradient(circle at 50% 50%, ${g.from}, ${g.to})`
+    : `linear-gradient(${g.angle}deg, ${g.from}, ${g.to})`;
 
 function shapeEffectStyle(el: ShapeElement): React.CSSProperties {
   const e = el.effect ?? "none";
@@ -67,10 +73,17 @@ export function CanvasElement({
   /** when true the node tweens position/size between slides (morph transition) */
   morph?: boolean;
 }) {
-  const { selectedId, select, update } = useEditor();
+  const { selectedId, select, update, setCurrentPage } = useEditor();
   const selected = selectedId === element.id;
   const ref = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const interaction = element.interaction;
+  const presenting = useEditor.getState().presenting;
+  const activateInteraction = () => {
+    if (!presenting || !interaction?.moveToSlide) return;
+    setCurrentPage(Math.max(0, interaction.moveToSlide - 1));
+  };
 
   const linkActive = element.type === "text" && !!element.href && useEditor.getState().presenting;
 
@@ -228,6 +241,9 @@ export function CanvasElement({
     <div
       ref={ref}
       onMouseDown={onDragStart}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={activateInteraction}
       onDoubleClick={(e) => {
         if (element.type === "text") {
           e.stopPropagation();
@@ -235,9 +251,10 @@ export function CanvasElement({
         }
       }}
       className={
-        useEditor.getState().presenting && element.animation && element.animation !== "none"
-          ? `el-anim-${element.animation}`
-          : undefined
+        [
+          presenting && element.animation && element.animation !== "none" ? `el-anim-${element.animation}` : "",
+          hovered && interaction?.hoverEffect === "glitch" ? "el-hover-glitch" : "",
+        ].filter(Boolean).join(" ") || undefined
       }
       style={{
         position: "absolute",
@@ -269,7 +286,11 @@ export function CanvasElement({
             width: "100%",
             height: "100%",
             fontSize: element.fontSize,
-            color: element.color,
+            color: hovered && interaction?.hoverEffect === "color" ? (interaction.hoverColor ?? element.color) : element.color,
+            backgroundImage: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? gradientCss(interaction.hoverGradient) : undefined,
+            backgroundClip: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "text" : undefined,
+            WebkitBackgroundClip: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "text" : undefined,
+            WebkitTextFillColor: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "transparent" : undefined,
             fontWeight: element.fontWeight,
             fontFamily: element.fontFamily,
             textAlign: element.align,
