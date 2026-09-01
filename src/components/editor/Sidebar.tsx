@@ -95,7 +95,7 @@ export function Sidebar() {
     root.style.setProperty("--auto-slide-color", normalized);
     root.style.setProperty("--auto-slide-ink", foreground);
     root.style.setProperty("--auto-chrome", chrome);
-  }, [editorTheme, bgColor, setEditorTheme]);
+  }, [editorTheme, bgColor, setEditorTheme, customThemes]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
