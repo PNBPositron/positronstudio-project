@@ -48,9 +48,23 @@ export function Sidebar() {
   const panelOpen = hovering;
   const [systemReduced, setSystemReduced] = useState(false);
 
+  const customThemes = useSettings((s) => s.customThemes);
+
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.editorTheme = editorTheme;
+    const custom = editorTheme.startsWith(CUSTOM_THEME_PREFIX)
+      ? customThemes.find((t) => `${CUSTOM_THEME_PREFIX}${t.id}` === editorTheme)
+      : undefined;
+    root.dataset.editorTheme = custom ? "custom" : editorTheme;
+
+    for (const key of Object.keys(themeCssVars(DEFAULT_THEME_TOKENS))) {
+      root.style.removeProperty(key);
+    }
+    if (custom) {
+      for (const [k, v] of Object.entries(themeCssVars(custom.tokens))) {
+        root.style.setProperty(k, v);
+      }
+    }
 
     if (editorTheme !== "auto" && editorTheme !== "auto-light" && editorTheme !== "auto-dark") {
       root.style.removeProperty("--auto-slide-color");
