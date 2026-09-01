@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacypolicyRouteImport } from './routes/privacypolicy'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
@@ -25,6 +26,11 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacypolicyRoute = PrivacypolicyRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/mcp': typeof McpRoute
   '/privacypolicy': typeof PrivacypolicyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
+    | '/settings'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
+    | '/settings'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/mcp'
     | '/privacypolicy'
+    | '/settings'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRoute
   McpRoute: typeof McpRoute
   PrivacypolicyRoute: typeof PrivacypolicyRoute
+  SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacypolicy': {
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRoute,
   McpRoute: McpRoute,
   PrivacypolicyRoute: PrivacypolicyRoute,
+  SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

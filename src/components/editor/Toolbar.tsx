@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEditor, type Page, type AnyElement } from "@/store/editor";
 import {
   Undo2,
@@ -37,7 +37,6 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { translateTexts } from "@/lib/ai-templates.functions";
 import { useSettings } from "@/store/settings";
-import { useUi } from "@/store/ui";
 import {
   Dialog,
   DialogContent,
@@ -69,8 +68,8 @@ export function Toolbar() {
   const { undo, redo, clear, designId, designName, setDesignName, setDesignMeta, newDesign } =
     useEditor();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const aiEnabled = useSettings((s) => s.aiEnabled);
-  const setSettingsOpen = useUi((s) => s.setSettingsOpen);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
@@ -283,7 +282,7 @@ export function Toolbar() {
         </IconBtn>
         {user ? (
           <BentoMenu
-            onSettings={() => setSettingsOpen(true)}
+            onSettings={() => navigate({ to: "/settings" })}
             onNewDesign={newDesign}
             onMyDesigns={() => setOpen(true)}
             onShare={handlePublish}
