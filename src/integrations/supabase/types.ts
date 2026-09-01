@@ -110,6 +110,30 @@ export type Database = {
         }
         Relationships: []
       }
+      public_themes: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          tokens: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          tokens: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          tokens?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       template_likes: {
         Row: {
           created_at: string
