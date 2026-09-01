@@ -487,7 +487,7 @@ export const CANVAS_PRESETS = [
   { name: "Slide 16:9", w: 1920, h: 1080 },
 ] as const;
 
-type Tool = "home" | "text" | "elements" | "design" | "ai" | "components";
+type Tool = "home" | "text" | "elements" | "design" | "ai" | "components" | "illustrations";
 
 type HistorySnap = { pages: Page[]; currentIndex: number };
 

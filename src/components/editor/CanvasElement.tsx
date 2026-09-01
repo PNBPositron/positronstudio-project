@@ -369,6 +369,7 @@ export function CanvasElement({
           />
           {element.gradient && (
             <div
+              aria-hidden="true"
               style={{
                 position: "absolute",
                 inset: 0,
@@ -377,6 +378,16 @@ export function CanvasElement({
                   (element.gradient.type ?? "linear") === "radial"
                     ? `radial-gradient(circle at 50% 50%, ${element.gradient.from}, ${element.gradient.to})`
                     : `linear-gradient(${element.gradient.angle}deg, ${element.gradient.from}, ${element.gradient.to})`,
+                // Clip the treatment to the source image alpha instead of tinting
+                // the full rectangular image box.
+                maskImage: `url("${element.src}")`,
+                maskSize: "100% 100%",
+                maskPosition: "center",
+                maskRepeat: "no-repeat",
+                WebkitMaskImage: `url("${element.src}")`,
+                WebkitMaskSize: "100% 100%",
+                WebkitMaskPosition: "center",
+                WebkitMaskRepeat: "no-repeat",
                 pointerEvents: "none",
               }}
             />
