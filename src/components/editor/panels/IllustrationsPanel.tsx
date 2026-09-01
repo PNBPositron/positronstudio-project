@@ -123,13 +123,26 @@ const HIGHLIGHTS = [
   "Whirl-7.svg",
   "Whirl-8.svg",
 ];
-const ASSETS = HIGHLIGHTS.map((file) => ({ file, group: "Highlights" }));
+const TRANSHUMANS = [
+  "Entertainment.svg", "Pilot.svg", "Walking Contradiction.svg", "Ecto Plasma.svg", "Roboto.svg",
+  "Gamestation.svg", "Wont Stop.svg", "Consumer.svg", "Mechanical Love.svg", "Whoa.svg",
+  "Cube Leg.svg", "Coffee.svg", "Rogue.svg", "Runner.svg", "Pacheco.svg", "Polka Pup.svg",
+  "Mask.svg", "Looking Ahead.svg", "Puppy.svg", "Bueno.svg", "Chaotic Good.svg", "Jumping.svg",
+  "Experiments.svg", "Fling.svg", "Waiting.svg", "Astro.svg", "Pondering.svg", "Late for Class.svg",
+  "Groceries.svg", "Kiddo.svg", "Growth.svg", "Meela Pantalones.svg", "Feliz.svg", "Reflecting.svg",
+  "Chilly.svg", "Chillin.svg",
+];
+const GROUPS = ["All", "Highlights", "Transhumans"] as const;
+const ASSETS = [
+  ...HIGHLIGHTS.map((file) => ({ file, group: "Highlights" as const })),
+  ...TRANSHUMANS.map((file) => ({ file, group: "Transhumans" as const })),
+];
 
 export function IllustrationsPanel() {
   const { add } = useEditor();
   const editorTheme = useSettings((s) => s.editorTheme);
   const [tint, setTint] = useState("#0a0f1f");
-  const [group, setGroup] = useState<"All" | "Highlights">("All");
+  const [group, setGroup] = useState<(typeof GROUPS)[number]>("All");
   const assets = useMemo(
     () => (group === "All" ? ASSETS : ASSETS.filter((asset) => asset.group === group)),
     [group],
@@ -155,7 +168,7 @@ export function IllustrationsPanel() {
         />
       </label>
       <div className="grid grid-cols-2 gap-1">
-        {(["All", "Highlights"] as const).map((item) => (
+        {GROUPS.map((item) => (
           <button
             key={item}
             onClick={() => setGroup(item)}

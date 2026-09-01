@@ -423,7 +423,16 @@ export function Toolbar() {
               Learn more about Positron Studio and its terms.
             </DialogDescription>
           </DialogHeader>
-          <nav aria-label="About links" className="flex flex-col gap-2">
+            <nav aria-label="About links" className="flex flex-col gap-2">
+            <a
+              href="https://github.com/PNBPositron/positronstudio-project"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setAboutOpen(false)}
+              className="brutal-border flex items-center justify-between bg-surface px-3 py-3 font-display text-[11px] tracking-[0.16em] text-teal hover:bg-blue-deep"
+            >
+              GITHUB <span aria-hidden="true">↗</span>
+            </a>
             <Link
               to="/privacypolicy"
               onClick={() => setAboutOpen(false)}

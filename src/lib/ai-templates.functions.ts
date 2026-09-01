@@ -27,55 +27,36 @@ function reasoningFor(model: string) {
   return model.startsWith("openai/gpt-5.6") ? { reasoning_effort: "none" as const } : {};
 }
 
-const OR_PREFIX = "openrouter/";
+const NVIDIA_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
+const NVIDIA_DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
 
-/** Chat completion against Lovable AI, or OpenRouter for `openrouter/*` models. */
+/** Chat completion through NVIDIA NIM, using the project NVIDIA credential. */
 async function chatComplete(
   model: string,
   messages: unknown[],
   extra: Record<string, unknown> = {},
 ): Promise<string> {
-  const or = model.startsWith(OR_PREFIX);
-  const kimi = model === "moonshotai/kimi-k3";
-  const apiKey = (
-    kimi
-      ? process.env.NVIDIA_API_KEY || process.env.NVIDIA_NIM_API_KEY
-      : or
-        ? process.env.OPENROUTER_API_KEY
-        : process.env.LOVABLE_API_KEY
-  )
+  const apiKey = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
     ?.trim()
     .replace(/^Bearer\s+/i, "");
-  if (!apiKey) {
-    throw new Error(
-      kimi
-        ? "NVIDIA is not configured yet — add an NVIDIA_API_KEY to use Kimi K3."
-        : or
-          ? "OpenRouter is not configured yet — add an OPENROUTER_API_KEY to use free models."
-          : "Missing LOVABLE_API_KEY",
-    );
-  }
-  const res = await fetch(
-    kimi
-      ? "https://integrate.api.nvidia.com/v1/chat/completions"
-      : or
-        ? "https://openrouter.ai/api/v1/chat/completions"
-        : "https://ai.gateway.lovable.dev/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        ...(kimi || or ? { Authorization: `Bearer ${apiKey}` } : { "Lovable-API-Key": apiKey }),
-      },
-      body: JSON.stringify({
-        model: kimi ? "moonshotai/kimi-k3" : or ? model.slice(OR_PREFIX.length) : model,
-        ...(or || kimi ? {} : reasoningFor(model)),
-        messages,
-        ...extra,
-      }),
+  if (!apiKey) throw new Error("NVIDIA AI is not configured.");
+  const requestedModel = model.startsWith("openrouter/") ? model.slice("openrouter/".length) : model;
+  const nvidiaModel = ["moonshotai/kimi-k3", "moonshotai/kimi-k2.6", NVIDIA_DEFAULT_MODEL].includes(requestedModel)
+    ? requestedModel
+    : NVIDIA_DEFAULT_MODEL;
+  const res = await fetch(NVIDIA_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
-  );
+    body: JSON.stringify({
+      model: nvidiaModel,
+      messages,
+      ...extra,
+    }),
+  });
   if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
   if (res.status === 402)
     throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
@@ -398,11 +379,11 @@ export const suggestIcons = createServerFn({ method: "POST" })
     return { prompt: data.prompt.slice(0, 300), count };
   })
   .handler(async ({ data }): Promise<{ icons: string[] }> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    if (!key) throw new Error("NVIDIA AI is not configured.");
+    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
         messages: [
@@ -466,16 +447,16 @@ export const generate3DScene = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<Ai3DScene> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    if (!key) throw new Error("NVIDIA AI is not configured.");
     const sys = `Design a 3D composition on a ${data.width}×${data.height}px canvas using ONLY spheres (planets, orbs, bubbles).
 Compose 3-7 spheres, varied sizes (80-700px), thoughtful color harmony.
 Coordinates absolute, must stay inside bounds.
 Return JSON only: { "bg": "#hex", "models": Array<{ "shape":"sphere", "x", "y", "width", "height", "color", "spinSpeed"?, "tiltX"?, "tiltY"? }> }.
 spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -690,8 +671,8 @@ export const translateTexts = createServerFn({ method: "POST" })
     return { texts, target };
   })
   .handler(async ({ data }): Promise<{ translations: string[] }> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    if (!key) throw new Error("NVIDIA AI is not configured.");
     if (data.texts.length === 0) return { translations: [] };
 
     const sys = `You are a professional translator. Translate each string in the input array into ${data.target}.
@@ -702,9 +683,9 @@ Rules:
 - If a string is empty or already in ${data.target}, return it unchanged.
 Return ONLY JSON: { "translations": string[] } with exactly ${data.texts.length} entries.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
@@ -756,8 +737,8 @@ export const generateAiAsset = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<{ dataUrl: string }> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    if (!key) throw new Error("NVIDIA AI is not configured.");
     const isGemini = data.model.startsWith("google/");
     const body = isGemini
       ? {
@@ -883,8 +864,8 @@ export const importTemplateFromFile = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<AiDeck> => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
+    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    if (!key) throw new Error("NVIDIA AI is not configured.");
 
     const sys = `${buildSystem(data.width, data.height, data.style, true)}
 
@@ -896,9 +877,9 @@ Rules:
 - Reinterpret the layout — do not copy the original layout. Use the style brief above.
 - If the source has charts/images, replace them with iconography or shapes that evoke the same idea.`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
