@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { ThemeTokens } from "@/lib/themes";
 
 export type PanelId =
   | "home"
@@ -50,6 +51,9 @@ type SettingsState = {
   panelStiffness: number; // 0 = soft ease, 100 = springy overshoot
   reduceMotion: boolean; // force-disable panel motion
   brandKit: BrandKit;
+  customThemes: CustomTheme[];
+  addCustomTheme: (t: CustomTheme) => void;
+  removeCustomTheme: (id: string) => void;
   setBrandKit: (patch: Partial<BrandKit>) => void;
   resetBrandKit: () => void;
   setAiEnabled: (v: boolean) => void;
@@ -105,6 +109,8 @@ export const AI_MODELS: Array<{ id: string; label: string; hint: string }> = [
 
 export const DEFAULT_AI_MODEL = AI_MODELS[0].id;
 
+export type CustomTheme = { id: string; name: string; tokens: ThemeTokens };
+
 export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> = [
   { id: "auto-light", label: "Auto Light", hint: "light chrome · follows slide" },
   { id: "auto-dark", label: "Auto Dark", hint: "dark chrome · follows slide" },
@@ -117,7 +123,7 @@ export const EDITOR_THEMES: Array<{ id: string; label: string; hint: string }> =
   { id: "midnight", label: "Midnight", hint: "deep indigo dark" },
 ];
 
-export const DEFAULT_EDITOR_THEME = "auto-light";
+export const DEFAULT_EDITOR_THEME = "glass";
 
 const ALL_ON: Record<PanelId, boolean> = {
   home: true,
@@ -141,6 +147,14 @@ export const useSettings = create<SettingsState>()(
       panelStiffness: DEFAULT_PANEL_STIFFNESS,
       reduceMotion: true,
       brandKit: { ...DEFAULT_BRAND_KIT },
+      customThemes: [],
+      addCustomTheme: (t) =>
+        set((s) => ({ customThemes: [...s.customThemes.filter((x) => x.id !== t.id), t] })),
+      removeCustomTheme: (id) =>
+        set((s) => ({
+          customThemes: s.customThemes.filter((x) => x.id !== id),
+          editorTheme: s.editorTheme === `custom:${id}` ? DEFAULT_EDITOR_THEME : s.editorTheme,
+        })),
       setBrandKit: (patch) => set((s) => ({ brandKit: { ...s.brandKit, ...patch } })),
       resetBrandKit: () => set({ brandKit: { ...DEFAULT_BRAND_KIT } }),
       setAiEnabled: (aiEnabled) => set({ aiEnabled }),
@@ -167,10 +181,11 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "positron.settings",
-      version: 4,
+      version: 5,
       migrate: (state) => ({
         ...(state as SettingsState),
-        editorTheme: "auto-light",
+        customThemes: (state as SettingsState)?.customThemes ?? [],
+        editorTheme: DEFAULT_EDITOR_THEME,
         reduceMotion: true,
         brandKit: { ...DEFAULT_BRAND_KIT, ...((state as SettingsState)?.brandKit ?? {}) },
       }),

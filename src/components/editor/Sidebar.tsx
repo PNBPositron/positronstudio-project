@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useEditor } from "@/store/editor";
 import { useSettings, springEasing, type PanelId } from "@/store/settings";
 import { useUi } from "@/store/ui";
+import { CUSTOM_THEME_PREFIX, DEFAULT_THEME_TOKENS, themeCssVars } from "@/lib/themes";
 import {
   LayoutTemplate,
   Type,
@@ -48,9 +49,23 @@ export function Sidebar() {
   const panelOpen = hovering;
   const [systemReduced, setSystemReduced] = useState(false);
 
+  const customThemes = useSettings((s) => s.customThemes);
+
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.editorTheme = editorTheme;
+    const custom = editorTheme.startsWith(CUSTOM_THEME_PREFIX)
+      ? customThemes.find((t) => `${CUSTOM_THEME_PREFIX}${t.id}` === editorTheme)
+      : undefined;
+    root.dataset.editorTheme = custom ? "custom" : editorTheme;
+
+    for (const key of Object.keys(themeCssVars(DEFAULT_THEME_TOKENS))) {
+      root.style.removeProperty(key);
+    }
+    if (custom) {
+      for (const [k, v] of Object.entries(themeCssVars(custom.tokens))) {
+        root.style.setProperty(k, v);
+      }
+    }
 
     if (editorTheme !== "auto" && editorTheme !== "auto-light" && editorTheme !== "auto-dark") {
       root.style.removeProperty("--auto-slide-color");
@@ -81,7 +96,7 @@ export function Sidebar() {
     root.style.setProperty("--auto-slide-color", normalized);
     root.style.setProperty("--auto-slide-ink", foreground);
     root.style.setProperty("--auto-chrome", chrome);
-  }, [editorTheme, bgColor, setEditorTheme]);
+  }, [editorTheme, bgColor, setEditorTheme, customThemes]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
