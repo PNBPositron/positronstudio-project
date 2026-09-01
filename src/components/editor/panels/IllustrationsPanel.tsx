@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSettings } from "@/store/settings";
 import { ImagePlus, Sparkles } from "lucide-react";
-import { useEditor, newImage } from "@/store/editor";
+import { type ShapeGradient, useEditor, newImage } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
 
 const HIGHLIGHTS = [
@@ -134,15 +134,33 @@ const TRANSHUMANS = [
 ];
 const GROUPS = ["All", "Highlights", "Transhumans"] as const;
 const ASSETS = [
-  ...HIGHLIGHTS.map((file) => ({ file, group: "Highlights" as const })),
-  ...TRANSHUMANS.map((file) => ({ file, group: "Transhumans" as const })),
+  ...HIGHLIGHTS.map((file) => ({ file, group: "Highlights" as const, src: `/illustrations/${file}`, format: "SVG" })),
+  ...TRANSHUMANS.flatMap((file) => {
+    const base = file.replace(/\.svg$/i, "").toLowerCase().replaceAll(" ", "-");
+    const pngBase = base === "jumping" ? "jumping-air" : base;
+    return [
+      { file, group: "Transhumans" as const, src: `/illustrations/${file}`, format: "SVG" },
+      { file: `${pngBase}.png`, group: "Transhumans" as const, src: `/illustrations/transhumans/${pngBase}.png`, format: "PNG" },
+    ];
+  }),
 ];
 
 export function IllustrationsPanel() {
   const { add } = useEditor();
   const editorTheme = useSettings((s) => s.editorTheme);
   const [tint, setTint] = useState("#0a0f1f");
+  const [treatment, setTreatment] = useState<"solid" | "linear" | "radial">("solid");
+  const [gradientFrom, setGradientFrom] = useState("#7df9ff");
+  const [gradientTo, setGradientTo] = useState("#ff0080");
+  const [gradientAngle, setGradientAngle] = useState(45);
+  const [gradientOpacity, setGradientOpacity] = useState(0.65);
   const [group, setGroup] = useState<(typeof GROUPS)[number]>("All");
+  const gradient: ShapeGradient | undefined = treatment === "solid" ? undefined : {
+    from: gradientFrom,
+    to: gradientTo,
+    angle: gradientAngle,
+    type: treatment,
+  };
   const assets = useMemo(
     () => (group === "All" ? ASSETS : ASSETS.filter((asset) => asset.group === group)),
     [group],
@@ -157,16 +175,29 @@ export function IllustrationsPanel() {
           50+ CC0 assets. Click an illustration to place it on the canvas.
         </p>
       </div>
-      <label className="flex items-center justify-between border border-teal/25 bg-surface px-2 py-1.5 font-mono text-[9px] uppercase text-teal/70">
-        Illustration color
-        <input
-          type="color"
-          value={tint}
-          onChange={(event) => setTint(event.target.value)}
-          aria-label="Illustration color"
-          className="size-5 cursor-pointer border-0 bg-transparent p-0"
-        />
-      </label>
+      <div className="flex flex-col gap-2 border border-teal/25 bg-surface p-2 font-mono text-[9px] uppercase text-teal/70">
+        <span>Illustration treatment</span>
+        <div className="grid grid-cols-3 gap-1">
+          {(["solid", "linear", "radial"] as const).map((mode) => (
+            <button key={mode} type="button" onClick={() => setTreatment(mode)} className={`border px-1 py-1 ${treatment === mode ? "border-teal bg-blue-deep text-teal" : "border-teal/25 bg-surface-2 text-teal/60"}`}>
+              {mode}
+            </button>
+          ))}
+        </div>
+        {treatment === "solid" ? (
+          <label className="flex items-center justify-between gap-2">
+            Color
+            <input type="color" value={tint} onChange={(event) => setTint(event.target.value)} aria-label="Illustration color" className="size-5 cursor-pointer border-0 bg-transparent p-0" />
+          </label>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center justify-between gap-2">From <input type="color" value={gradientFrom} onChange={(event) => setGradientFrom(event.target.value)} aria-label="Gradient start color" className="size-5 cursor-pointer border-0 bg-transparent p-0" /></label>
+            <label className="flex items-center justify-between gap-2">To <input type="color" value={gradientTo} onChange={(event) => setGradientTo(event.target.value)} aria-label="Gradient end color" className="size-5 cursor-pointer border-0 bg-transparent p-0" /></label>
+            {treatment === "linear" && <label className="flex items-center gap-2">Angle <input type="range" min={0} max={360} value={gradientAngle} onChange={(event) => setGradientAngle(+event.target.value)} className="w-full accent-teal" /></label>}
+            <label className="flex items-center gap-2">Opacity <input type="range" min={0} max={1} step={0.05} value={gradientOpacity} onChange={(event) => setGradientOpacity(+event.target.value)} className="w-full accent-teal" /></label>
+          </div>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-1">
         {GROUPS.map((item) => (
           <button
@@ -179,16 +210,17 @@ export function IllustrationsPanel() {
         ))}
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {assets.map(({ file, group: assetGroup }) => {
-          const src = `/illustrations/${file}`;
-          const name = file.replace(/\.svg$/i, "").replaceAll("-", " ");
+        {assets.map(({ file, group: assetGroup, src, format }) => {
+          const name = file.replace(/\.(svg|png)$/i, "").replaceAll("-", " ");
           return (
             <button
               key={file}
-              onClick={() =>
-                add(newImage(src, { tint: editorTheme.includes("dark") ? "#ffffff" : tint }))
-              }
-              title={`Add ${name}`}
+              onClick={() => add(newImage(src, {
+                tint: format === "SVG" ? (editorTheme.includes("dark") ? "#ffffff" : tint) : undefined,
+                gradient,
+                gradientOpacity: gradient ? gradientOpacity : undefined,
+              }))}
+              title={`Add ${name} ${format}`}
               className="group brutal-border-2 brutal-press overflow-hidden bg-surface p-1 hover:border-teal"
             >
               <div className="grid h-24 place-items-center bg-surface-2 p-2">
