@@ -38,7 +38,8 @@ async function chatComplete(
 ): Promise<string> {
   const apiKey = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
     ?.trim()
-    .replace(/^Bearer\s+/i, "");
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
   if (!apiKey) throw new Error("NVIDIA AI is not configured.");
   const requestedModel = model.startsWith("openrouter/") ? model.slice("openrouter/".length) : model;
   const nvidiaModel = ["moonshotai/kimi-k3", "moonshotai/kimi-k2.6", NVIDIA_DEFAULT_MODEL].includes(requestedModel)
@@ -379,7 +380,10 @@ export const suggestIcons = createServerFn({ method: "POST" })
     return { prompt: data.prompt.slice(0, 300), count };
   })
   .handler(async ({ data }): Promise<{ icons: string[] }> => {
-    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
     if (!key) throw new Error("NVIDIA AI is not configured.");
     const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
@@ -447,7 +451,10 @@ export const generate3DScene = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<Ai3DScene> => {
-    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
     if (!key) throw new Error("NVIDIA AI is not configured.");
     const sys = `Design a 3D composition on a ${data.width}×${data.height}px canvas using ONLY spheres (planets, orbs, bubbles).
 Compose 3-7 spheres, varied sizes (80-700px), thoughtful color harmony.
@@ -496,6 +503,7 @@ export const askKimiAdvisor = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const content = await chatComplete(
+      NVIDIA_DEFAULT_MODEL,
       [
         {
           role: "system",
@@ -546,7 +554,7 @@ You will receive the CURRENT slide as JSON and a user instruction. Apply the ins
 
 Rules:
 - Preserve everything the user didn't ask to change. Don't restyle unrelated elements.
-- Keep all elements inside bounds (0 ≤ x, x+width ≤ ${data.width}; 0 ≤ y, y+height ≤ ${data.height}).
+- Keep all elements inside bounds (0 ��� x, x+width ≤ ${data.width}; 0 ≤ y, y+height ≤ ${data.height}).
 - Use realistic hex colors. Available fonts: "Orbitron", "JetBrains Mono", "Archivo Black", "Inter", "Georgia".
 - Element types: text, shape (rect/circle/triangle/star/arrow), icon (lucide PascalCase), model3d (sphere only).
 - Shape effects available: "liquid_glass", "neon", "soft_shadow", "inner_glow".
@@ -671,7 +679,10 @@ export const translateTexts = createServerFn({ method: "POST" })
     return { texts, target };
   })
   .handler(async ({ data }): Promise<{ translations: string[] }> => {
-    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
     if (!key) throw new Error("NVIDIA AI is not configured.");
     if (data.texts.length === 0) return { translations: [] };
 
@@ -737,7 +748,10 @@ export const generateAiAsset = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<{ dataUrl: string }> => {
-    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
     if (!key) throw new Error("NVIDIA AI is not configured.");
     const isGemini = data.model.startsWith("google/");
     const body = isGemini
@@ -864,7 +878,10 @@ export const importTemplateFromFile = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<AiDeck> => {
-    const key = process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2;
+    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
     if (!key) throw new Error("NVIDIA AI is not configured.");
 
     const sys = `${buildSystem(data.width, data.height, data.style, true)}

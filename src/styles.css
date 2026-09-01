@@ -550,4 +550,19 @@
 }
 .el-anim-glitch {
   animation: el-glitch 600ms steps(8, end) both;
+  }
+
+.el-hover-glitch {
+  animation: el-glitch 420ms steps(8, end) infinite;
+}
+
+.el-hover-glitch img,
+.el-hover-glitch svg,
+.el-hover-glitch > div {
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.el-hover-glitch img,
+.el-hover-glitch svg {
+  filter: hue-rotate(28deg) saturate(1.7) contrast(1.15);
 }

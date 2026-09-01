@@ -8,6 +8,7 @@ export type ElementBase = {
   height: number;
   rotation: number;
   animation?: ElementAnimation;
+  interaction?: ElementInteraction;
 };
 
 export type ElementAnimation = "none" | "fade-up" | "pop" | "glitch";
@@ -31,6 +32,17 @@ export type TextElement = ElementBase & {
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
   opacity?: number; // 0..1
   shadow?: ElementShadow;
+  gradient?: ShapeGradient;
+  gradientOpacity?: number;
+  interaction?: ElementInteraction;
+};
+
+export type HoverEffect = "none" | "glitch" | "color" | "gradient";
+export type ElementInteraction = {
+  hoverEffect?: HoverEffect;
+  hoverColor?: string;
+  hoverGradient?: ShapeGradient;
+  moveToSlide?: number;
 };
 
 export type ShapeKind =
@@ -487,7 +499,7 @@ export const CANVAS_PRESETS = [
   { name: "Slide 16:9", w: 1920, h: 1080 },
 ] as const;
 
-type Tool = "home" | "text" | "elements" | "design" | "ai" | "components";
+type Tool = "home" | "text" | "elements" | "design" | "ai" | "components" | "illustrations";
 
 type HistorySnap = { pages: Page[]; currentIndex: number };
 
