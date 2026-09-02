@@ -281,7 +281,8 @@ export const generateAiTemplate = createServerFn({ method: "POST" })
         style,
         imageDataUrl: img,
         slideCount,
-        model: pickModel(data.model),
+        model: pickModel(),
+        template: data.template,
       };
     },
   )
@@ -462,7 +463,7 @@ export const askCohereAdvisor = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const content = await chatComplete(
-      NVIDIA_DEFAULT_MODEL,
+      COHERE_MODEL,
       [
         {
           role: "system",
@@ -503,7 +504,7 @@ export const editCurrentSlide = createServerFn({ method: "POST" })
         width: clamp(data.width, 1920),
         height: clamp(data.height, 1080),
         page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
-        model: pickModel(data.model),
+        model: pickModel(),
       };
     },
   )
@@ -580,7 +581,7 @@ export const redesignSlideVariations = createServerFn({ method: "POST" })
         page: { bg: data.page.bg ?? "#0a0f1f", elements: data.page.elements.slice(0, 200) },
         count,
         style,
-        model: pickModel(data.model),
+        model: pickModel(),
       };
     },
   )
