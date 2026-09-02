@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, Loader2, Pencil, Trash2, X } from "lucide-react";
 import { ThemeStudio } from "./ThemeStudio";
-import { useSettings, PANEL_LABELS, AI_MODELS, EDITOR_THEMES, springEasing, type PanelId } from "@/store/settings";
+import { useSettings, PANEL_LABELS, EDITOR_THEMES, springEasing, type PanelId } from "@/store/settings";
 import { useAuth } from "@/hooks/use-auth";
 import {
   listMyPublicTemplates,
@@ -13,7 +13,7 @@ import {
 
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const {
-    aiEnabled, setAiEnabled, aiModel, setAiModel, panels, togglePanel, resetPanels,
+    aiEnabled, setAiEnabled, panels, togglePanel, resetPanels,
     panelDurationMs, setPanelDurationMs, panelStiffness, setPanelStiffness,
     reduceMotion, setReduceMotion, resetMotion,
     editorTheme, setEditorTheme,
@@ -100,35 +100,6 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </section>
-
-        {/* AI model */}
-        {aiEnabled && (
-          <section className="brutal-border-2 mb-4 bg-surface p-4">
-            <div className="mb-1 font-display text-[12px] tracking-[0.2em] text-teal">AI MODEL</div>
-            <p className="mb-3 font-mono text-[10px] text-teal/60">
-              &gt; used by the deck generator, chat edit and redesign
-            </p>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {AI_MODELS.map((m) => {
-                const on = aiModel === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    onClick={() => setAiModel(m.id)}
-                    className={`border px-2 py-2 text-left transition-colors duration-150 ${
-                      on ? "border-teal bg-blue-deep text-teal" : "border-teal/30 bg-ink text-teal/60 hover:border-teal/60"
-                    }`}
-                  >
-                    <div className="font-display text-[11px] tracking-[0.15em]">
-                      [{on ? "x" : " "}] {m.label}
-                    </div>
-                    <div className="font-mono text-[9px] opacity-70">{m.hint}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         {/* Panels */}
         <section className="brutal-border-2 mb-4 bg-surface p-4">
