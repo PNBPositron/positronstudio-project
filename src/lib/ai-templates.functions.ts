@@ -20,7 +20,15 @@ async function chatComplete(
   const res = await fetch("https://api.cohere.com/v2/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: COHERE_MODEL, preamble: typeof system === "string" ? system : undefined, chat_history: chatHistory, message: typeof last?.content === "string" ? last.content : JSON.stringify(last?.content ?? ""), temperature: extra.temperature ?? 0.4, max_tokens: extra.max_tokens ?? 4000 }),
+    body: JSON.stringify({
+      model: COHERE_MODEL,
+      messages: messages.map((entry) => ({
+        role: entry.role === "user" ? "user" : "system",
+        content: typeof entry.content === "string" ? entry.content : JSON.stringify(entry.content),
+      })),
+      temperature: extra.temperature ?? 0.4,
+      max_tokens: extra.max_tokens ?? 4000,
+    }),
   });
   if (res.status === 429) throw new Error("Cohere rate limit hit. Try again in a moment.");
   if (!res.ok) throw new Error(`Cohere error ${res.status}: ${await res.text()}`);
