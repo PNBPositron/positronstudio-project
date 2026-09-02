@@ -87,15 +87,29 @@ export function PresentationMode() {
     ? `slide-transition-${page.transition}`
     : "";
   // Morph matches elements across slides so shared shapes/text tween instead of cutting.
-  const morphKey = (el: (typeof page.elements)[number], i: number) => {
-    if (!morphing) return el.id;
-    if (el.type === "text") return `t:${el.text.slice(0, 40)}`;
-    if (el.type === "image") return `i:${el.src.slice(-40)}`;
-    if (el.type === "shape") return `s:${el.shape}:${el.fill}`;
-    if (el.type === "ui") return `u:${el.kind}`;
-    if (el.type === "chart") return `c:${el.chart}`;
-    return `${el.type}:${i}`;
-  };
+  // Matching is exact first (same content = same object), then positional by type so the
+  // Nth text/shape of the outgoing slide continues into the Nth of the incoming slide.
+  const morphKeys = (() => {
+    if (!morphing) return page.elements.map((el) => el.id);
+    const seen: Record<string, number> = {};
+    const exact = (el: (typeof page.elements)[number]): string | null => {
+      if (el.type === "image") return `i:${el.src.slice(-60)}`;
+      if (el.type === "text" && el.text.trim()) return `t:${el.text.trim().slice(0, 60)}`;
+      return null;
+    };
+    const used = new Set<string>();
+    return page.elements.map((el) => {
+      const e = exact(el);
+      if (e && !used.has(e)) {
+        used.add(e);
+        return e;
+      }
+      const n = (seen[el.type] = (seen[el.type] ?? 0) + 1);
+      const key = `${el.type}#${n}`;
+      used.add(key);
+      return key;
+    });
+  })();
   const ratio = canvasW / canvasH;
   const tW = ratio >= 1 ? 96 : 96 * ratio;
   const tH = ratio >= 1 ? 96 / ratio : 96;
@@ -160,9 +174,15 @@ export function PresentationMode() {
               transition: morphing ? "background-color 620ms ease" : undefined,
             }}
           >
-            {page.elements.map((el, i) => (
-              <CanvasElement key={morphKey(el, i)} element={el} scale={scale} morph={morphing} />
-            ))}
+            {page.elements.map((el, i) =>
+              morphing ? (
+                <div key={morphKeys[i]} className="morph-item">
+                  <CanvasElement element={el} scale={scale} morph />
+                </div>
+              ) : (
+                <CanvasElement key={el.id} element={el} scale={scale} />
+              ),
+            )}
           </div>
         </div>
       </div>

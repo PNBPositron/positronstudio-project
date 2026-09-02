@@ -306,6 +306,9 @@ export function CanvasElement({
               : undefined,
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
+            transition: morph
+              ? "font-size 620ms cubic-bezier(0.22,1,0.36,1), color 620ms ease, letter-spacing 620ms ease, opacity 320ms ease"
+              : undefined,
           };
           const inner = (
             <div
