@@ -1,9 +1,20 @@
 import { useEditor, type SlideTransition } from "@/store/editor";
-import { Plus, Copy, Trash2, Play } from "lucide-react";
+import { Plus, Copy, Trash2, Play, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function PagesBar() {
-  const { pages, currentIndex, setCurrentPage, addPage, duplicatePage, removePage, canvasW, canvasH, setTransition, setPresenting } =
-    useEditor();
+  const {
+    pages,
+    currentIndex,
+    setCurrentPage,
+    addPage,
+    duplicatePage,
+    removePage,
+    movePage,
+    canvasW,
+    canvasH,
+    setTransition,
+    setPresenting,
+  } = useEditor();
   const currentTransition: SlideTransition = pages[currentIndex]?.transition ?? "none";
   const ratio = canvasW / canvasH;
   const thumbW = ratio >= 1 ? 96 : 96 * ratio;
@@ -37,10 +48,31 @@ export function PagesBar() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </button>
-              <div className="absolute -right-1 -top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute -right-1 -top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                {i > 0 && (
+                  <button
+                    onClick={() => movePage(i, i - 1)}
+                    title="Move page left"
+                    aria-label={`Move page ${i + 1} left`}
+                    className="grid h-5 w-5 place-items-center bg-teal text-ink"
+                  >
+                    <ChevronLeft className="h-3 w-3" strokeWidth={3} />
+                  </button>
+                )}
+                {i < pages.length - 1 && (
+                  <button
+                    onClick={() => movePage(i, i + 1)}
+                    title="Move page right"
+                    aria-label={`Move page ${i + 1} right`}
+                    className="grid h-5 w-5 place-items-center bg-teal text-ink"
+                  >
+                    <ChevronRight className="h-3 w-3" strokeWidth={3} />
+                  </button>
+                )}
                 <button
                   onClick={() => duplicatePage(i)}
                   title="Duplicate"
+                  aria-label={`Duplicate page ${i + 1}`}
                   className="grid h-5 w-5 place-items-center bg-blue text-ink"
                 >
                   <Copy className="h-3 w-3" strokeWidth={3} />
@@ -49,6 +81,7 @@ export function PagesBar() {
                   <button
                     onClick={() => removePage(i)}
                     title="Delete"
+                    aria-label={`Delete page ${i + 1}`}
                     className="grid h-5 w-5 place-items-center bg-[#ff0080] text-ink"
                   >
                     <Trash2 className="h-3 w-3" strokeWidth={3} />
