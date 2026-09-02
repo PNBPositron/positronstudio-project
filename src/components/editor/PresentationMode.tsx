@@ -174,9 +174,15 @@ export function PresentationMode() {
               transition: morphing ? "background-color 620ms ease" : undefined,
             }}
           >
-            {page.elements.map((el, i) => (
-              <CanvasElement key={morphKey(el, i)} element={el} scale={scale} morph={morphing} />
-            ))}
+            {page.elements.map((el, i) =>
+              morphing ? (
+                <div key={morphKeys[i]} className="morph-item">
+                  <CanvasElement element={el} scale={scale} morph />
+                </div>
+              ) : (
+                <CanvasElement key={el.id} element={el} scale={scale} />
+              ),
+            )}
           </div>
         </div>
       </div>
