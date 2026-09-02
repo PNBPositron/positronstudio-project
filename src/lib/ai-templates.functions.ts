@@ -1,74 +1,32 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-// Text models users can pick in Settings. Keep in sync with AI_MODELS in src/store/settings.ts.
-const ALLOWED_TEXT_MODELS = [
-  "google/gemini-3.6-flash",
-  "google/gemini-3.1-flash-lite",
-  "google/gemini-3.1-pro-preview",
-  "google/gemini-2.5-pro",
-  "openai/gpt-5.6-terra",
-  "openai/gpt-5.6-luna",
-  "openai/gpt-5.5",
-  "openai/gpt-5.4-mini",
-  // OpenRouter free tier (requires OPENROUTER_API_KEY)
-  "openrouter/openai/gpt-oss-20b:free",
-  "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
-  "openrouter/google/gemma-4-31b-it:free",
-];
-const DEFAULT_TEXT_MODEL = "google/gemini-3.6-flash";
+const COHERE_MODEL = "command-a-03-2025";
+const pickModel = () => COHERE_MODEL;
 
-function pickModel(m?: string) {
-  return typeof m === "string" && ALLOWED_TEXT_MODELS.includes(m) ? m : DEFAULT_TEXT_MODEL;
-}
+type CohereMessage = { role: "system" | "user"; content: string | Array<Record<string, unknown>> };
 
-// GPT-5.6 models require reasoning_effort to be set explicitly.
-function reasoningFor(model: string) {
-  return model.startsWith("openai/gpt-5.6") ? { reasoning_effort: "none" as const } : {};
-}
-
-const NVIDIA_ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
-const NVIDIA_DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b";
-
-/** Chat completion through NVIDIA NIM, using the project NVIDIA credential. */
+/** Text generation through Cohere. The API key is server-only. */
 async function chatComplete(
-  model: string,
-  messages: unknown[],
+  _model: string,
+  messages: CohereMessage[],
   extra: Record<string, unknown> = {},
 ): Promise<string> {
-  const apiKey = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-  if (!apiKey) throw new Error("NVIDIA AI is not configured.");
-  const requestedModel = model.startsWith("openrouter/") ? model.slice("openrouter/".length) : model;
-  const nvidiaModel = ["moonshotai/kimi-k3", "moonshotai/kimi-k2.6", NVIDIA_DEFAULT_MODEL].includes(requestedModel)
-    ? requestedModel
-    : NVIDIA_DEFAULT_MODEL;
-  const res = await fetch(NVIDIA_ENDPOINT, {
+  const apiKey = process.env.COHERE_API_KEY?.trim();
+  if (!apiKey) throw new Error("Cohere AI is not configured.");
+  const system = messages.find((m) => m.role === "system")?.content;
+  const chatHistory = messages.filter((m) => m.role !== "system").slice(0, -1).map((m) => ({ role: m.role === "user" ? "USER" : "CHATBOT", message: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }));
+  const last = messages[messages.length - 1];
+  const res = await fetch("https://api.cohere.com/v2/chat", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: nvidiaModel,
-      messages,
-      ...extra,
-    }),
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ model: COHERE_MODEL, preamble: typeof system === "string" ? system : undefined, chat_history: chatHistory, message: typeof last?.content === "string" ? last.content : JSON.stringify(last?.content ?? ""), temperature: extra.temperature ?? 0.4, max_tokens: extra.max_tokens ?? 4000 }),
   });
-  if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-  if (res.status === 402)
-    throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
-  if (!res.ok) throw new Error(`AI error ${res.status}: ${await res.text()}`);
-  const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string; reasoning_content?: string }; text?: string }>;
-    output_text?: string;
-  };
-  const content =
-    json.choices?.[0]?.message?.content || json.choices?.[0]?.text || json.output_text;
-  if (!content) throw new Error("Empty AI response");
+  if (res.status === 429) throw new Error("Cohere rate limit hit. Try again in a moment.");
+  if (!res.ok) throw new Error(`Cohere error ${res.status}: ${await res.text()}`);
+  const json = (await res.json()) as { message?: { content?: Array<{ text?: string }> } };
+  const content = json.message?.content?.map((part) => part.text ?? "").join("").trim();
+  if (!content) throw new Error("Cohere returned an empty response");
   return content;
 }
 
@@ -280,6 +238,7 @@ export const generateAiTemplate = createServerFn({ method: "POST" })
       imageDataUrl?: string;
       slideCount?: number;
       model?: string;
+      template?: unknown;
     }) => {
       if (!data || typeof data.prompt !== "string") throw new Error("Prompt is required");
       if (!data.prompt.trim() && !data.imageDataUrl)
@@ -330,7 +289,7 @@ export const generateAiTemplate = createServerFn({ method: "POST" })
     const userContent: Array<Record<string, unknown>> = [
       {
         type: "text",
-        text: `Design concept: ${data.prompt || "(use the attached image as the brief)"}\n\nProduce exactly ${data.slideCount} slides.`,
+        text: `Remix this published public template while changing its content to match the user's request. Template JSON:\n${JSON.stringify(data.template)}\n\nNew content brief: ${data.prompt || "(use the attached image as the brief)"}\n\nProduce exactly ${data.slideCount} slides.`,
       },
     ];
     if (data.imageDataUrl) {
@@ -492,9 +451,9 @@ spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
     return parsed;
   });
 
-// ---------------- Kimi advisor chat ----------------
+// ---------------- Cohere advisor chat ----------------
 
-export const askKimiAdvisor = createServerFn({ method: "POST" })
+export const askCohereAdvisor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { prompt: string; context?: string }) => {
     const prompt = (data?.prompt ?? "").toString().slice(0, 2000).trim();

@@ -77,6 +77,7 @@ export function TemplatesPanel() {
   const aiEnabled = useSettings((s) => s.aiEnabled);
   const aiModel = useSettings((s) => s.aiModel);
   const [prompt, setPrompt] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [style, setStyle] = useState<AiStyle>("auto");
   const [slideCount, setSlideCount] = useState(5);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
@@ -147,7 +148,12 @@ export function TemplatesPanel() {
   };
 
   const handleGenerate = async () => {
-    if ((!prompt.trim() && !imageDataUrl) || loading) return;
+    if ((!prompt.trim() && !imageDataUrl) || !selectedTemplateId || loading) return;
+    const selectedTemplate = community.find((template) => template.id === selectedTemplateId);
+    if (!selectedTemplate) {
+      setError("Choose a published public template first.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -160,6 +166,7 @@ export function TemplatesPanel() {
           imageDataUrl: imageDataUrl ?? undefined,
           slideCount,
           model: aiModel,
+          template: selectedTemplate.pages,
         },
       });
       const newPages: Page[] = res.pages.map((p) => ({
@@ -189,6 +196,16 @@ export function TemplatesPanel() {
         <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
           <Sparkles className="h-3.5 w-3.5" /> AI_GENERATOR
         </div>
+
+        <label className="font-mono text-[10px] text-teal/70">published public template:</label>
+        <select
+          value={selectedTemplateId}
+          onChange={(e) => setSelectedTemplateId(e.target.value)}
+          className="w-full border border-teal/40 bg-ink px-2 py-1.5 font-mono text-[11px] text-teal focus:border-teal focus:outline-none"
+        >
+          <option value="">Choose a template to remix…</option>
+          {community.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+        </select>
 
         <select
           value={style}
