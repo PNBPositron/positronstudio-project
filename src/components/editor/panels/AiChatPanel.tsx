@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Send, Sparkles, Wand2, X } from "lucide-react";
 import { useEditor, newText, newShape, newIcon, type AnyElement, type Page } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
-import { useSettings } from "@/store/settings";
 import {
   askCohereAdvisor,
   editCurrentSlide,
@@ -126,7 +125,6 @@ const QUICK_PROMPTS = [
 
 export function AiChatPanel() {
   const { elements, bgColor, canvasW, canvasH, loadTemplate } = useEditor();
-  const aiModel = useSettings((s) => s.aiModel);
   const edit = useServerFn(editCurrentSlide);
   const redesign = useServerFn(redesignSlideVariations);
   const askAdvisor = useServerFn(askCohereAdvisor);
@@ -177,7 +175,6 @@ export function AiChatPanel() {
           width: canvasW,
           height: canvasH,
           page: { bg: bgColor, elements: toAi(elements) },
-          model: aiModel,
         },
       });
       loadTemplate(buildFromAi(res.elements), res.bg);
@@ -200,7 +197,6 @@ export function AiChatPanel() {
           height: canvasH,
           page: { bg: bgColor, elements: toAi(elements) },
           count: 3,
-          model: aiModel,
         },
       });
       setVariants(res.variants);
@@ -223,13 +219,13 @@ export function AiChatPanel() {
         &gt; Chat to edit the CURRENT slide. Restyle, add elements, rewrite copy.
       </p>
 
-      <section className="brutal-border-2 bg-surface p-3" aria-labelledby="kimi-advisor-title">
+      <section className="brutal-border-2 bg-surface p-3" aria-labelledby="cohere-advisor-title">
         <div className="flex items-center justify-between gap-2">
           <h2
-            id="kimi-advisor-title"
+            id="cohere-advisor-title"
             className="font-display text-[11px] tracking-[0.16em] text-teal"
           >
-            KIMI ADVISOR
+            COHERE ADVISOR
           </h2>
           <span className="border border-teal/40 px-1.5 py-0.5 font-mono text-[8px] text-teal/60">
             ADVICE ONLY
@@ -247,7 +243,7 @@ export function AiChatPanel() {
                 key={i}
                 className="mb-2 font-mono text-[10px] leading-relaxed text-teal last:mb-0"
               >
-                <span className="opacity-50">{m.role === "user" ? "▸ you: " : "▹ kimi: "}</span>
+                <span className="opacity-50">{m.role === "user" ? "▸ you: " : "▹ cohere: "}</span>
                 {m.text}
               </div>
             ))

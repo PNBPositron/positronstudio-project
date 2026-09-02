@@ -75,7 +75,6 @@ export function TemplatesPanel() {
   const { canvasW, canvasH } = useEditor();
   const generate = useServerFn(generateAiTemplate);
   const aiEnabled = useSettings((s) => s.aiEnabled);
-  const aiModel = useSettings((s) => s.aiModel);
   const [prompt, setPrompt] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [style, setStyle] = useState<AiStyle>("auto");
@@ -165,7 +164,6 @@ export function TemplatesPanel() {
           style,
           imageDataUrl: imageDataUrl ?? undefined,
           slideCount,
-          model: aiModel,
           template: selectedTemplate.pages,
         },
       });

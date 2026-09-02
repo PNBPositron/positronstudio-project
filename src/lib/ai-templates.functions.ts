@@ -12,8 +12,11 @@ async function chatComplete(
   messages: CohereMessage[],
   extra: Record<string, unknown> = {},
 ): Promise<string> {
-  const apiKey = process.env.COHERE_API_KEY?.trim();
-  if (!apiKey) throw new Error("Cohere AI is not configured.");
+  const apiKey = process.env.COHERE_API_KEY
+    ?.trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^['"]|['"]$/g, "");
+  if (!apiKey) throw new Error("Cohere AI is not configured. Set COHERE_API_KEY.");
   const system = messages.find((m) => m.role === "system")?.content;
   const chatHistory = messages.filter((m) => m.role !== "system").slice(0, -1).map((m) => ({ role: m.role === "user" ? "USER" : "CHATBOT", message: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }));
   const last = messages[messages.length - 1];
@@ -348,31 +351,13 @@ export const suggestIcons = createServerFn({ method: "POST" })
     return { prompt: data.prompt.slice(0, 300), count };
   })
   .handler(async ({ data }): Promise<{ icons: string[] }> => {
-    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-    if (!key) throw new Error("NVIDIA AI is not configured.");
-    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          {
-            role: "system",
-            content: `Return ${data.count} lucide-react icon names (PascalCase) that best fit the user's theme. Use only real lucide icons. Return JSON: { "icons": string[] }. No commentary.`,
-          },
-          { role: "user", content: `Theme: ${data.prompt}` },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
-    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = json.choices?.[0]?.message?.content ?? "";
+    const content = await chatComplete(COHERE_MODEL, [
+      {
+        role: "system",
+        content: `Return ${data.count} lucide-react icon names (PascalCase) that best fit the user's theme. Use only real lucide icons. Return JSON: { "icons": string[] }. No commentary.`,
+      },
+      { role: "user", content: `Theme: ${data.prompt}` },
+    ], { temperature: 0.2, max_tokens: 500 });
     let parsed: { icons?: unknown };
     try {
       parsed = JSON.parse(content);
@@ -419,33 +404,15 @@ export const generate3DScene = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<Ai3DScene> => {
-    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-    if (!key) throw new Error("NVIDIA AI is not configured.");
     const sys = `Design a 3D composition on a ${data.width}×${data.height}px canvas using ONLY spheres (planets, orbs, bubbles).
 Compose 3-7 spheres, varied sizes (80-700px), thoughtful color harmony.
 Coordinates absolute, must stay inside bounds.
 Return JSON only: { "bg": "#hex", "models": Array<{ "shape":"sphere", "x", "y", "width", "height", "color", "spinSpeed"?, "tiltX"?, "tiltY"? }> }.
 spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
-    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: `Theme: ${data.prompt}` },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.status === 429) throw new Error("Rate limit hit.");
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
-    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = json.choices?.[0]?.message?.content ?? "";
+    const content = await chatComplete(COHERE_MODEL, [
+      { role: "system", content: sys },
+      { role: "user", content: `Theme: ${data.prompt}` },
+    ], { temperature: 0.5, max_tokens: 1200 });
     let parsed: Ai3DScene;
     try {
       parsed = JSON.parse(content);
@@ -476,7 +443,7 @@ export const askCohereAdvisor = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are Kimi, a helpful presentation design advisor inside Positron Studio. Give concise, practical advice about layout, typography, color, hierarchy, storytelling, and presentation clarity. You may analyze the current slide context. You must never create, modify, generate, or return slide elements, JSON, or code. Clearly state that you are advising only when relevant.",
+            "You are Cohere, a helpful presentation design advisor inside Positron Studio. Give concise, practical advice about layout, typography, color, hierarchy, storytelling, and presentation clarity. You may analyze the current slide context. You must never create, modify, generate, or return slide elements, JSON, or code. Clearly state that you are advising only when relevant.",
         },
         {
           role: "user",
@@ -647,11 +614,6 @@ export const translateTexts = createServerFn({ method: "POST" })
     return { texts, target };
   })
   .handler(async ({ data }): Promise<{ translations: string[] }> => {
-    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-    if (!key) throw new Error("NVIDIA AI is not configured.");
     if (data.texts.length === 0) return { translations: [] };
 
     const sys = `You are a professional translator. Translate each string in the input array into ${data.target}.
@@ -662,23 +624,10 @@ Rules:
 - If a string is empty or already in ${data.target}, return it unchanged.
 Return ONLY JSON: { "translations": string[] } with exactly ${data.texts.length} entries.`;
 
-    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: JSON.stringify({ texts: data.texts }) },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
-    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = json.choices?.[0]?.message?.content ?? "";
+    const content = await chatComplete(COHERE_MODEL, [
+      { role: "system", content: sys },
+      { role: "user", content: JSON.stringify({ texts: data.texts }) },
+    ], { temperature: 0.1, max_tokens: Math.min(8000, data.texts.length * 500) });
     const parsed = parseLooseJson<{ translations?: unknown }>(content);
     const out = Array.isArray(parsed.translations) ? parsed.translations : [];
     const translations = data.texts.map((original, i) => {
@@ -686,68 +635,6 @@ Return ONLY JSON: { "translations": string[] } with exactly ${data.texts.length}
       return typeof t === "string" ? t : original;
     });
     return { translations };
-  });
-
-// ---------------- AI image asset generation ----------------
-
-export const generateAiAsset = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (data: {
-      prompt: string;
-      size?: "1024x1024" | "1024x1536" | "1536x1024";
-      model?: string;
-      quality?: "low" | "medium" | "high";
-    }) => {
-      if (!data?.prompt?.trim()) throw new Error("Prompt is required");
-      const size = data.size === "1024x1536" || data.size === "1536x1024" ? data.size : "1024x1024";
-      const allowedModels = [
-        "openai/gpt-image-2",
-        "openai/gpt-image-1-mini",
-        "google/gemini-2.5-flash-image",
-        "google/gemini-3.1-flash-image-preview",
-        "google/gemini-3-pro-image-preview",
-      ];
-      const model =
-        data.model && allowedModels.includes(data.model) ? data.model : "openai/gpt-image-2";
-      const quality: "low" | "medium" | "high" =
-        data.quality === "medium" || data.quality === "high" ? data.quality : "low";
-      return { prompt: data.prompt.slice(0, 1000), size, model, quality };
-    },
-  )
-  .handler(async ({ data }): Promise<{ dataUrl: string }> => {
-    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-    if (!key) throw new Error("NVIDIA AI is not configured.");
-    const isGemini = data.model.startsWith("google/");
-    const body = isGemini
-      ? {
-          model: data.model,
-          messages: [{ role: "user", content: data.prompt }],
-          modalities: ["image", "text"],
-        }
-      : {
-          model: data.model,
-          prompt: data.prompt,
-          size: data.size,
-          quality: data.quality,
-          n: 1,
-        };
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.status === 429) throw new Error("Rate limit hit. Try again shortly.");
-    if (res.status === 402) throw new Error("AI credits exhausted.");
-    if (!res.ok) throw new Error(`AI gateway error ${res.status}: ${await res.text()}`);
-    const json = (await res.json()) as { data?: Array<{ b64_json?: string; url?: string }> };
-    const first = json.data?.[0];
-    if (first?.b64_json) return { dataUrl: `data:image/png;base64,${first.b64_json}` };
-    if (first?.url) return { dataUrl: first.url };
-    throw new Error("AI returned no image");
   });
 
 // ---------------- Stock photo search (Openverse) ----------------
@@ -846,59 +733,8 @@ export const importTemplateFromFile = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<AiDeck> => {
-    const key = (process.env.NVIDIA_API_KEY || process.env.NVIDIA_API_KEY_2)
-    ?.trim()
-    .replace(/^Bearer\s+/i, "")
-    .replace(/^['"]|['"]$/g, "");
-    if (!key) throw new Error("NVIDIA AI is not configured.");
 
-    const sys = `${buildSystem(data.width, data.height, data.style, true)}
-
-IMPORT MODE: A presentation file (PDF or PPTX) is attached. Carefully READ every slide/page — extract the text content, structure, headings, bullet points, data, and overall narrative. Then REDESIGN the whole deck as a beautiful, cohesive template on the ${data.width}×${data.height}px canvas, preserving the source's textual content and slide order but elevating the visual design.
-
-Rules:
-- Keep the SAME number of slides as the source (or as close as possible, max 12).
-- Preserve headings, key phrases, bullets, and numbers verbatim where possible.
-- Reinterpret the layout — do not copy the original layout. Use the style brief above.
-- If the source has charts/images, replace them with iconography or shapes that evoke the same idea.`;
-
-    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: sys },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Imported file: ${data.fileName || "(unnamed)"}. Read its slides and rebuild them as a designed template.`,
-              },
-              { type: "image_url", image_url: { url: data.fileDataUrl } },
-            ],
-          },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (res.status === 429) throw new Error("Rate limit hit. Try again in a moment.");
-    if (res.status === 402)
-      throw new Error("AI credits exhausted. Add credits in Settings → Workspace → Usage.");
-    if (!res.ok) throw new Error(`AI gateway error ${res.status}: ${await res.text()}`);
-    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = json.choices?.[0]?.message?.content;
-    if (!content) throw new Error("Empty AI response");
-    const parsed = parseLooseJson<AiDeck | AiTemplate>(content);
-    let pages: AiPage[];
-    if ("pages" in parsed && Array.isArray(parsed.pages)) {
-      pages = parsed.pages.filter((p) => p && Array.isArray(p.elements));
-    } else if ("elements" in parsed && Array.isArray(parsed.elements)) {
-      pages = [{ bg: parsed.bg ?? "#0a0f1f", elements: parsed.elements }];
-    } else {
-      throw new Error("AI response missing pages/elements");
-    }
-    if (pages.length === 0) throw new Error("AI returned an empty deck");
-    return { pages };
+    throw new Error(
+      "Cohere text generation cannot read PDF or PPTX files. Use a published template in the generator instead.",
+    );
   });
