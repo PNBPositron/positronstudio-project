@@ -5,7 +5,7 @@ import { useEditor, newText, newShape, newIcon, type AnyElement, type Page } fro
 import { PanelHeader } from "./TextPanel";
 import { useSettings } from "@/store/settings";
 import {
-  askKimiAdvisor,
+  askCohereAdvisor,
   editCurrentSlide,
   redesignSlideVariations,
   type AiElementInput,
@@ -129,7 +129,7 @@ export function AiChatPanel() {
   const aiModel = useSettings((s) => s.aiModel);
   const edit = useServerFn(editCurrentSlide);
   const redesign = useServerFn(redesignSlideVariations);
-  const askAdvisor = useServerFn(askKimiAdvisor);
+  const askAdvisor = useServerFn(askCohereAdvisor);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [msgs, setMsgs] = useState<ChatMsg[]>([]);
@@ -157,7 +157,7 @@ export function AiChatPanel() {
     } catch (e) {
       setAdvisorMsgs((m) => [
         ...m,
-        { role: "assistant", text: e instanceof Error ? e.message : "Kimi could not answer." },
+        { role: "assistant", text: e instanceof Error ? e.message : "Cohere could not answer." },
       ]);
     } finally {
       setAdvisorBusy(false);
@@ -236,11 +236,11 @@ export function AiChatPanel() {
           </span>
         </div>
         <p className="mt-1 font-mono text-[9px] leading-relaxed text-teal/60">
-          Ask for critique and design direction. Kimi cannot create or modify slides.
+          Ask for critique and design direction. Cohere cannot create or modify slides.
         </p>
         <div className="mt-2 max-h-44 min-h-16 overflow-y-auto border border-teal/20 bg-ink/5 p-2">
           {advisorMsgs.length === 0 ? (
-            <p className="font-mono text-[10px] text-teal/45">&gt; ask Kimi about this slide_</p>
+            <p className="font-mono text-[10px] text-teal/45">&gt; ask Cohere about this slide_</p>
           ) : (
             advisorMsgs.map((m, i) => (
               <div
@@ -253,7 +253,7 @@ export function AiChatPanel() {
             ))
           )}
           {advisorBusy && (
-            <div className="font-mono text-[10px] text-teal/60">Kimi is thinking…</div>
+            <div className="font-mono text-[10px] text-teal/60">Cohere is thinking…</div>
           )}
         </div>
         <div className="mt-2 flex gap-2">
@@ -273,13 +273,13 @@ export function AiChatPanel() {
             }}
             placeholder="How can I improve this slide?"
             rows={2}
-            aria-label="Ask Kimi for advice"
+            aria-label="Ask Cohere for advice"
             className="min-w-0 flex-1 resize-none border border-teal/40 bg-ink p-2 font-mono text-[10px] text-teal placeholder:text-teal/30 focus:border-teal focus:outline-none"
           />
           <button
             onClick={askForAdvice}
             disabled={advisorBusy || !advisorInput.trim()}
-            aria-label="Ask Kimi"
+            aria-label="Ask Cohere"
             className="brutal-border brutal-press self-end bg-blue px-3 py-2 text-ink disabled:opacity-50"
           >
             <Send className="size-4" />
