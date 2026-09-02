@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, Loader2, Pencil, Trash2, X } from "lucide-react";
+import { ThemeStudio } from "./ThemeStudio";
 import { useSettings, PANEL_LABELS, AI_MODELS, EDITOR_THEMES, springEasing, type PanelId } from "@/store/settings";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -270,6 +272,8 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
+        <ThemeStudio />
+
         {/* Published templates */}
         <section className="brutal-border-2 bg-surface p-4">
           <div className="mb-2 font-display text-[12px] tracking-[0.2em] text-teal">
@@ -329,6 +333,30 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           )}
           {error && <p className="mt-2 font-mono text-[10px] text-[#ff0080]">! {error}</p>}
         </section>
+
+        <nav className="mt-4 flex flex-wrap items-center gap-3 border-t border-teal/20 pt-3">
+          <Link
+            to="/marketplace"
+            onClick={onClose}
+            className="font-mono text-[10px] text-teal/70 underline hover:text-teal"
+          >
+            marketplace
+          </Link>
+          <Link
+            to="/license"
+            onClick={onClose}
+            className="font-mono text-[10px] text-teal/70 underline hover:text-teal"
+          >
+            license
+          </Link>
+          <Link
+            to="/privacypolicy"
+            onClick={onClose}
+            className="font-mono text-[10px] text-teal/70 underline hover:text-teal"
+          >
+            privacy policy
+          </Link>
+        </nav>
       </div>
     </div>
   );
