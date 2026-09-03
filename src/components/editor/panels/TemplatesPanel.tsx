@@ -1,18 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Sparkles, Loader2, ImagePlus, X, Heart, Grid3x3 } from "lucide-react";
-import {
-  useEditor,
-  newText,
-  newShape,
-  newIcon,
-  DEFAULT_PAGE_DURATION,
-  type AnyElement,
-  type Page,
-} from "@/store/editor";
+import { Sparkles, Loader2, Heart, Grid3x3, ArrowLeft } from "lucide-react";
+import { useEditor, type Page } from "@/store/editor";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PanelHeader } from "./TextPanel";
-import { generateAiTemplate, type AiElementInput, type AiStyle } from "@/lib/ai-templates.functions";
+import { generateDeckCopy, type DeckCopy } from "@/lib/ai-templates.functions";
+import {
+  buildPagesFromCopy,
+  buildPagesFromTemplate,
+  COPY_PALETTES,
+} from "@/lib/deck-copy";
+import { SUGGESTIONS, type LayoutId } from "@/lib/designer";
 import {
   listPublicTemplates,
   listTemplateLikeCounts,
@@ -25,51 +23,10 @@ import { SlideThumbnail } from "../SlideThumbnail";
 import { useSettings } from "@/store/settings";
 import { useAuth } from "@/hooks/use-auth";
 
-function buildFromAi(els: AiElementInput[]): AnyElement[] {
-  return els
-    .map((e): AnyElement | null => {
-      if (e.type === "text") {
-        return newText({
-          text: e.text,
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fontSize: e.fontSize, color: e.color,
-          fontFamily: e.fontFamily ?? "Archivo Black",
-          fontWeight: e.fontWeight ?? 700,
-          align: e.align ?? "left",
-          italic: e.italic, underline: e.underline, bullet: e.bullet, href: e.href,
-        });
-      }
-      if (e.type === "shape") {
-        return newShape(e.shape, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          fill: e.fill, stroke: e.stroke, strokeWidth: e.strokeWidth,
-          effect: e.effect, shadow: e.shadow,
-        });
-      }
-      if (e.type === "icon") {
-        return newIcon(e.name, {
-          x: e.x, y: e.y, width: e.width, height: e.height,
-          color: e.color, strokeWidth: e.strokeWidth ?? 2,
-        });
-      }
-      return null;
-    })
-    .filter((e): e is AnyElement => e !== null);
-}
+type LayoutChoice =
+  | { kind: "layout"; id: LayoutId; label: string; hint: string }
+  | { kind: "template"; id: string; label: string; hint: string; template: PublicTemplate };
 
-const STYLE_OPTIONS: { id: AiStyle; label: string }[] = [
-  { id: "auto", label: "Auto (detect from prompt)" },
-  { id: "cyberpunk", label: "Cyberpunk" },
-  { id: "liquid_glass", label: "Liquid Glass" },
-  { id: "minimal", label: "Minimal" },
-  { id: "editorial", label: "Editorial" },
-  { id: "brutalist", label: "Brutalist" },
-  { id: "retro_80s", label: "Retro 80s" },
-  { id: "organic", label: "Organic" },
-  { id: "art_deco", label: "Art Deco" },
-  { id: "memphis", label: "Memphis" },
-  { id: "y2k", label: "Y2K" },
-];
 
 export function TemplatesPanel() {
   const { canvasW, canvasH } = useEditor();
