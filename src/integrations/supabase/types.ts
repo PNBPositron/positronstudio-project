@@ -76,34 +76,46 @@ export type Database = {
       }
       public_templates: {
         Row: {
+          author_name: string | null
           canvas_h: number
           canvas_w: number
           created_at: string
+          description: string | null
           id: string
           name: string
           pages: Json
+          style: string | null
+          tags: string[] | null
           thumbnail: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          author_name?: string | null
           canvas_h?: number
           canvas_w?: number
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           pages?: Json
+          style?: string | null
+          tags?: string[] | null
           thumbnail?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          author_name?: string | null
           canvas_h?: number
           canvas_w?: number
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           pages?: Json
+          style?: string | null
+          tags?: string[] | null
           thumbnail?: string | null
           updated_at?: string
           user_id?: string
@@ -112,23 +124,35 @@ export type Database = {
       }
       public_themes: {
         Row: {
+          author_name: string | null
           created_at: string
+          description: string | null
           id: string
           name: string
+          style: string | null
+          tags: string[] | null
           tokens: Json
           user_id: string
         }
         Insert: {
+          author_name?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name: string
+          style?: string | null
+          tags?: string[] | null
           tokens: Json
           user_id: string
         }
         Update: {
+          author_name?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
+          style?: string | null
+          tags?: string[] | null
           tokens?: Json
           user_id?: string
         }
