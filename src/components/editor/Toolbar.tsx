@@ -25,6 +25,7 @@ import {
 import { useAuth, signOut } from "@/hooks/use-auth";
 import { saveDesign, publishAsTemplate } from "@/lib/designs";
 import { MyDesignsDialog } from "./MyDesignsDialog";
+import { PublishMetaDialog, type PublishMeta } from "./PublishMetaDialog";
 import {
   exportPNG,
   exportPDF,
@@ -73,6 +74,8 @@ export function Toolbar() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -152,29 +155,30 @@ export function Toolbar() {
     }
   };
 
-  const handlePublish = async () => {
+  const handlePublish = () => {
     if (!user || publishing) return;
-    const name = window.prompt("Template name?", designName || "Untitled template");
-    if (!name) return;
+    setPublishError(null);
+    setPublishDialogOpen(true);
+  };
+
+  const submitPublish = async (meta: PublishMeta) => {
     setPublishing(true);
+    setPublishError(null);
     try {
       const { pages, canvasW, canvasH } = useEditor.getState();
       const tpl = await publishAsTemplate({
-        name,
+        name: meta.name,
         canvas_w: canvasW,
         canvas_h: canvasH,
         pages,
       });
+      setPublishDialogOpen(false);
       const link = `${window.location.origin}/t/${tpl.id}`;
       setShareLink(link);
-      try {
-        await navigator.clipboard.writeText(link);
-      } catch {
-        /* clipboard blocked — link is shown in the dialog */
-      }
+      await navigator.clipboard.writeText(link).catch(() => {});
     } catch (e) {
       console.error(e);
-      alert(e instanceof Error ? e.message : "Failed to publish");
+      setPublishError(e instanceof Error ? e.message : "Failed to publish");
     } finally {
       setPublishing(false);
     }
@@ -413,6 +417,16 @@ export function Toolbar() {
       </div>
 
       {open && <MyDesignsDialog onClose={() => setOpen(false)} />}
+      <PublishMetaDialog
+        open={publishDialogOpen}
+        kind="template"
+        defaultName={designName || "Untitled template"}
+        defaultAuthor={user?.user_metadata?.full_name ?? user?.email ?? ""}
+        busy={publishing}
+        error={publishError}
+        onCancel={() => setPublishDialogOpen(false)}
+        onSubmit={submitPublish}
+      />
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
         <DialogContent className="brutal-border-2 max-w-sm rounded-none border-teal bg-ink text-teal shadow-[8px_8px_0_var(--blue)]">
           <DialogHeader className="text-left">
