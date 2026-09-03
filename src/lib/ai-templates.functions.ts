@@ -738,3 +738,112 @@ export const importTemplateFromFile = createServerFn({ method: "POST" })
       "Cohere text generation cannot read PDF or PPTX files. Use a published template in the generator instead.",
     );
   });
+
+/* ============================================================
+   Cohere copywriting flow — text only, no coordinates.
+   ============================================================ */
+
+/** Thin, well-named wrapper over the Cohere v2 chat endpoint. */
+async function cohereChat(
+  messages: CohereMessage[],
+  extra: Record<string, unknown> = {},
+): Promise<string> {
+  return chatComplete(COHERE_MODEL, messages, extra);
+}
+
+export type DeckCopySlide = {
+  kind: "title" | "content" | "summary";
+  title: string;
+  subtitle?: string;
+  bullets: string[];
+  notes: string;
+};
+
+export type DeckCopy = { deckTitle: string; slides: DeckCopySlide[] };
+
+export const generateDeckCopy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { prompt: string; slideCount?: number; tone?: string; language?: string }) => {
+    if (!data || typeof data.prompt !== "string" || !data.prompt.trim())
+      throw new Error("Prompt is required");
+    const slideCount = Math.max(
+      2,
+      Math.min(
+        12,
+        typeof data.slideCount === "number" && Number.isFinite(data.slideCount)
+          ? Math.round(data.slideCount)
+          : 5,
+      ),
+    );
+    return {
+      prompt: data.prompt.trim().slice(0, 1200),
+      slideCount,
+      tone: (data.tone ?? "confident, concrete, jargon-free").slice(0, 120),
+      language: (data.language ?? "English").slice(0, 40),
+    };
+  })
+  .handler(async ({ data }): Promise<DeckCopy> => {
+    const { prompt, slideCount, tone, language } = data;
+    const content = await cohereChat(
+      [
+        {
+          role: "system",
+          content: `You are a presentation copywriter. You write the WORDS of a deck only.
+You never invent layouts, coordinates, colors, sizes or design instructions.
+Write in ${language}. Tone: ${tone}.
+
+Return ONLY valid JSON, no markdown, no commentary:
+{
+  "deckTitle": string,
+  "slides": Array<{
+    "kind": "title" | "content" | "summary",
+    "title": string,
+    "subtitle"?: string,
+    "bullets": string[],
+    "notes": string
+  }>
+}
+
+Rules:
+- Exactly ${slideCount} slides.
+- Slide 1 is kind "title" (title + subtitle, bullets empty).
+- Last slide is kind "summary" (3-4 takeaway bullets).
+- Every other slide is kind "content" with 3-5 bullets.
+- Titles max 8 words. Bullets max 14 words, no trailing periods.
+- "notes" is 1-2 sentences of speaker notes.`,
+        },
+        { role: "user", content: prompt },
+      ],
+      { temperature: 0.6, max_tokens: 2200 },
+    );
+
+    const parsed = parseLooseJson<{ deckTitle?: unknown; slides?: unknown }>(content);
+    const rawSlides = Array.isArray(parsed.slides) ? parsed.slides : [];
+    const slides: DeckCopySlide[] = rawSlides
+      .map((s): DeckCopySlide | null => {
+        const o = s as Record<string, unknown>;
+        const title = typeof o.title === "string" ? o.title.trim() : "";
+        if (!title) return null;
+        const kind =
+          o.kind === "title" || o.kind === "summary" || o.kind === "content"
+            ? (o.kind as DeckCopySlide["kind"])
+            : "content";
+        return {
+          kind,
+          title,
+          subtitle: typeof o.subtitle === "string" ? o.subtitle.trim() : undefined,
+          bullets: Array.isArray(o.bullets)
+            ? o.bullets.filter((b): b is string => typeof b === "string" && !!b.trim()).slice(0, 6)
+            : [],
+          notes: typeof o.notes === "string" ? o.notes.trim() : "",
+        };
+      })
+      .filter((s): s is DeckCopySlide => s !== null)
+      .slice(0, slideCount);
+
+    if (slides.length === 0) throw new Error("Cohere returned no usable slide copy");
+    return {
+      deckTitle: typeof parsed.deckTitle === "string" && parsed.deckTitle.trim() ? parsed.deckTitle.trim() : slides[0].title,
+      slides,
+    };
+  });
