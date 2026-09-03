@@ -112,6 +112,15 @@ export function ColorPanel() {
         )}
       </div>
 
+      <div>
+        <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Gradient wallpapers</label>
+        <div className="grid grid-cols-2 gap-2">
+          {["linear-gradient(135deg, #050816 0%, #172554 48%, #ff0080 100%)", "linear-gradient(120deg, #07111f 0%, #00d9ff 52%, #7c3aed 100%)", "radial-gradient(circle at 20% 20%, #ff0080, #0a0f1f 62%)", "linear-gradient(160deg, #0a0f1f 0%, #123c4a 50%, #39ff14 140%)"].map((wallpaper) => (
+            <button key={wallpaper} onClick={() => setBg(wallpaper)} className="brutal-border-2 h-16 hover:border-teal" style={{ background: wallpaper }} aria-label="Apply gradient wallpaper" />
+          ))}
+        </div>
+      </div>
+
       {PALETTES.map((p) => (
         <div key={p.name}>
           <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">

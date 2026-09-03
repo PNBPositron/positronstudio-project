@@ -9,6 +9,12 @@ function pathFor(kind: ShapeKind): string | null {
       return "M50 4 L 96 50 L 50 96 L 4 50 Z";
     case "hexagon":
       return "M25 6 L 75 6 L 96 50 L 75 94 L 25 94 L 4 50 Z";
+    case "holographic_grid":
+      return "M4 4 H96 V96 H4 Z M4 28 H96 M4 52 H96 M4 76 H96 M28 4 V96 M52 4 V96 M76 4 V96";
+    case "glitch":
+      return "M6 12 H72 L60 30 H94 L78 52 H44 L58 68 H8 L22 44 H6 Z";
+    case "honeycomb":
+      return "M25 5 H75 L97 50 L75 95 H25 L3 50 Z M25 5 V95 M75 5 V95 M3 50 H97";
     case "pentagon":
       return "M50 4 L 96 38 L 78 94 L 22 94 L 4 38 Z";
     case "parallelogram":
