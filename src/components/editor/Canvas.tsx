@@ -78,9 +78,13 @@ export function Canvas() {
           style={{
             width: canvasW,
             height: canvasH,
-            backgroundColor: bgColor,
-            backgroundImage: page.bgImage ? `url(${page.bgImage})` : undefined,
-            backgroundSize: (page.bgFit ?? "cover"),
+            backgroundColor: bgColor.includes("gradient(") ? "#0a0f1f" : bgColor,
+            backgroundImage: page.bgImage
+              ? `url(${page.bgImage})`
+              : bgColor.includes("gradient(")
+                ? bgColor
+                : undefined,
+            backgroundSize: page.bgImage ? (page.bgFit ?? "cover") : "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             transform: `scale(${scale})`,
