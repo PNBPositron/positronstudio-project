@@ -334,6 +334,12 @@ export function PropertiesPanel() {
                 ))}
               </div>
             </Field>
+            <Field label="Image blend URL">
+              <input value={el.imageOverlay ?? ""} onChange={(e) => update(el.id, { imageOverlay: e.target.value || undefined })} placeholder="https://…/texture.png" className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-[10px] text-teal" />
+            </Field>
+            <Field label="Blend mode">
+              <select value={el.blendMode ?? "normal"} onChange={(e) => update(el.id, { blendMode: e.target.value as any })} className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-xs text-teal"><option value="normal">normal</option><option value="screen">screen</option><option value="overlay">overlay</option><option value="color-dodge">color dodge</option></select>
+            </Field>
             <ShadowEditor
               shadow={el.shadow}
               onChange={(s) => update(el.id, { shadow: s })}

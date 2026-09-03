@@ -34,6 +34,8 @@ export type TextElement = ElementBase & {
   shadow?: ElementShadow;
   gradient?: ShapeGradient;
   gradientOpacity?: number;
+  blendMode?: BlendMode;
+  imageOverlay?: string;
   interaction?: ElementInteraction;
 };
 
@@ -48,6 +50,9 @@ export type ElementInteraction = {
 export type ShapeKind =
   | "rect"
   | "circle"
+  | "holographic_grid"
+  | "glitch"
+  | "honeycomb"
   | "triangle"
   | "star"
   | "arrow"
@@ -61,7 +66,8 @@ export type ShapeKind =
   | "lightning"
   | "cloud"
   | "speech";
-export type ShapeEffect = "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow";
+export type ShapeEffect = "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow" | "holographic" | "glitch" | "honeycomb";
+export type BlendMode = "normal" | "screen" | "overlay" | "multiply" | "color-dodge";
 export type ElementShadow = {
   x: number;
   y: number;
@@ -85,6 +91,8 @@ export type ShapeElement = ElementBase & {
   gradient?: ShapeGradient;
   cornerRadius?: number; // px, used by rect
   opacity?: number; // 0..1
+  blendMode?: BlendMode;
+  imageOverlay?: string;
   strokeStyle?: "solid" | "dashed" | "dotted";
 };
 

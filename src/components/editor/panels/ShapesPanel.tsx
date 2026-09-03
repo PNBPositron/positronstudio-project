@@ -4,6 +4,9 @@ import { shapePathD } from "../ShapeRender";
 
 const SHAPES: { kind: ShapeKind; label: string }[] = [
   { kind: "rect", label: "Rectangle" },
+  { kind: "holographic_grid", label: "Holographic Grid" },
+  { kind: "glitch", label: "Glitch" },
+  { kind: "honeycomb", label: "Honeycomb" },
   { kind: "circle", label: "Circle" },
   { kind: "triangle", label: "Triangle" },
   { kind: "star", label: "Star" },
