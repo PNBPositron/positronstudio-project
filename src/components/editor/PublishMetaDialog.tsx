@@ -7,7 +7,10 @@ export type PublishMeta = {
   description: string;
   author_name: string;
   tags: string[];
+  license: string;
 };
+
+export const PUBLISH_LICENSES = ["CC BY 4.0", "CC BY-NC 4.0", "MIT", "All rights reserved"];
 
 export const PUBLISH_STYLES = [
   "Minimal",
@@ -46,6 +49,7 @@ export function PublishMetaDialog({
   const [description, setDescription] = useState("");
   const [author, setAuthor] = useState(defaultAuthor ?? "");
   const [tags, setTags] = useState("");
+  const [license, setLicense] = useState(PUBLISH_LICENSES[0]);
 
   useEffect(() => {
     if (open) {
@@ -67,6 +71,7 @@ export function PublishMetaDialog({
         .map((t) => t.trim())
         .filter(Boolean)
         .slice(0, 8),
+      license,
     });
 
   return (
@@ -112,6 +117,17 @@ export function PublishMetaDialog({
               {PUBLISH_STYLES.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="font-mono text-[10px] text-teal/70">license</span>
+            <select
+              value={license}
+              onChange={(e) => setLicense(e.target.value)}
+              className="mt-1 w-full border border-teal/40 bg-surface px-2 py-1.5 font-mono text-[11px] text-teal outline-none focus:border-teal"
+            >
+              {PUBLISH_LICENSES.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
 
