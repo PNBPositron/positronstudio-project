@@ -30,16 +30,14 @@ type LayoutChoice =
 
 export function TemplatesPanel() {
   const { canvasW, canvasH } = useEditor();
-  const generate = useServerFn(generateAiTemplate);
+  const genCopy = useServerFn(generateDeckCopy);
   const aiEnabled = useSettings((s) => s.aiEnabled);
   const [prompt, setPrompt] = useState("");
-  const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [style, setStyle] = useState<AiStyle>("auto");
   const [slideCount, setSlideCount] = useState(5);
-  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [copy, setCopy] = useState<DeckCopy | null>(null);
+  const [paletteId, setPaletteId] = useState(COPY_PALETTES[0].id);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [community, setCommunity] = useState<PublicTemplate[]>([]);
   const [communityLoading, setCommunityLoading] = useState(false);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
@@ -93,49 +91,61 @@ export function TemplatesPanel() {
     }
   };
 
-  const onPickImage = (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Image too large (max 5MB)");
-      return;
-    }
-    const r = new FileReader();
-    r.onload = () => setImageDataUrl(r.result as string);
-    r.readAsDataURL(file);
-  };
+  const palette =
+    COPY_PALETTES.find((p) => p.id === paletteId)?.palette ?? COPY_PALETTES[0].palette;
 
-  const handleGenerate = async () => {
-    if ((!prompt.trim() && !imageDataUrl) || !selectedTemplateId || loading) return;
-    const selectedTemplate = community.find((template) => template.id === selectedTemplateId);
-    if (!selectedTemplate) {
-      setError("Choose a published public template first.");
-      return;
-    }
+  const choices: LayoutChoice[] = useMemo(
+    () => [
+      ...SUGGESTIONS.map(
+        (s): LayoutChoice => ({ kind: "layout", id: s.id, label: s.label, hint: s.hint }),
+      ),
+      ...community.slice(0, 6).map(
+        (t): LayoutChoice => ({
+          kind: "template",
+          id: t.id,
+          label: t.name,
+          hint: "community layout",
+          template: t,
+        }),
+      ),
+    ],
+    [community],
+  );
+
+  const previews = useMemo(() => {
+    if (!copy) return [] as Array<{ choice: LayoutChoice; pages: Page[] }>;
+    return choices
+      .map((choice) => ({
+        choice,
+        pages:
+          choice.kind === "layout"
+            ? buildPagesFromCopy(copy, choice.id, canvasW, canvasH, palette)
+            : buildPagesFromTemplate(copy, choice.template.pages as Page[], canvasW, canvasH),
+      }))
+      .filter((p) => p.pages.length > 0);
+  }, [copy, choices, canvasW, canvasH, palette]);
+
+  const handleGenerateCopy = async () => {
+    if (!prompt.trim() || loading) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await generate({
-        data: {
-          prompt: prompt.trim() || "Use the attached image as the brief",
-          width: canvasW,
-          height: canvasH,
-          style,
-          imageDataUrl: imageDataUrl ?? undefined,
-          slideCount,
-          template: selectedTemplate.pages,
-        },
-      });
-      const newPages: Page[] = res.pages.map((p) => ({
-        id: Math.random().toString(36).slice(2, 10),
-        bgColor: p.bg,
-        elements: buildFromAi(p.elements),
-        duration: DEFAULT_PAGE_DURATION,
-      }));
-      useEditor.getState().loadPages(newPages);
+      const res = await genCopy({ data: { prompt: prompt.trim(), slideCount } });
+      setCopy(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Generation failed");
+      setError(e instanceof Error ? e.message : "Copy generation failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyChoice = (pages: Page[], choice: LayoutChoice) => {
+    if (!window.confirm("Apply this layout — this replaces your current pages.")) return;
+    if (choice.kind === "template") {
+      useEditor.getState().setCanvasSize(choice.template.canvas_w, choice.template.canvas_h);
+    }
+    useEditor.getState().loadPages(pages);
+    setCopy(null);
   };
 
   return (
@@ -146,96 +156,124 @@ export function TemplatesPanel() {
         <div className="brutal-border-2 bg-surface p-3 font-mono text-[10px] text-teal/50">
           &gt; AI features are turned off in settings
         </div>
-      ) : (
-      <div className="brutal-border-2 space-y-2 bg-surface p-3">
-        <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
-          <Sparkles className="h-3.5 w-3.5" /> AI_GENERATOR
-        </div>
+      ) : !copy ? (
+        <div className="brutal-border-2 space-y-2 bg-surface p-3">
+          <div className="flex items-center gap-2 font-display text-[11px] tracking-[0.2em] text-teal">
+            <Sparkles className="h-3.5 w-3.5" /> AI_COPYWRITER
+          </div>
+          <p className="font-mono text-[10px] text-teal/60">
+            &gt; step 1 · write the words · step 2 · pick a layout
+          </p>
 
-        <label className="font-mono text-[10px] text-teal/70">published public template:</label>
-        <select
-          value={selectedTemplateId}
-          onChange={(e) => setSelectedTemplateId(e.target.value)}
-          className="w-full border border-teal/40 bg-ink px-2 py-1.5 font-mono text-[11px] text-teal focus:border-teal focus:outline-none"
-        >
-          <option value="">Choose a template to remix…</option>
-          {community.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
-        </select>
+          <div className="flex items-center gap-2">
+            <label className="font-mono text-[10px] text-teal/70">slides:</label>
+            <input
+              type="number"
+              min={2}
+              max={12}
+              value={slideCount}
+              onChange={(e) => setSlideCount(Math.max(2, Math.min(12, parseInt(e.target.value) || 5)))}
+              className="w-16 border border-teal/40 bg-ink px-2 py-1 font-mono text-[11px] text-teal focus:border-teal focus:outline-none"
+            />
+          </div>
 
-        <select
-          value={style}
-          onChange={(e) => setStyle(e.target.value as AiStyle)}
-          className="w-full border border-teal/40 bg-ink px-2 py-1.5 font-mono text-[11px] text-teal focus:border-teal focus:outline-none"
-        >
-          {STYLE_OPTIONS.map((s) => (
-            <option key={s.id} value={s.id}>{s.label}</option>
-          ))}
-        </select>
-
-        <div className="flex items-center gap-2">
-          <label className="font-mono text-[10px] text-teal/70">slides:</label>
-          <input
-            type="number"
-            min={1}
-            max={10}
-            value={slideCount}
-            onChange={(e) => setSlideCount(Math.max(1, Math.min(10, parseInt(e.target.value) || 5)))}
-            className="w-16 border border-teal/40 bg-ink px-2 py-1 font-mono text-[11px] text-teal focus:border-teal focus:outline-none"
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. pitch deck for a solar rooftop startup"
+            rows={3}
+            className="w-full resize-none border border-teal/40 bg-ink p-2 font-mono text-[11px] text-teal placeholder:text-teal/30 focus:border-teal focus:outline-none"
           />
+
+          <button
+            onClick={handleGenerateCopy}
+            disabled={loading || !prompt.trim()}
+            className="brutal-border brutal-press flex w-full items-center justify-center gap-2 bg-blue px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {loading ? "WRITING..." : "GENERATE COPY"}
+          </button>
+          {error && <p className="font-mono text-[10px] text-[#ff0080]">! {error}</p>}
         </div>
-
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. midnight rave poster · or leave blank if using image"
-          rows={3}
-          className="w-full resize-none border border-teal/40 bg-ink p-2 font-mono text-[11px] text-teal placeholder:text-teal/30 focus:border-teal focus:outline-none"
-        />
-
-        {imageDataUrl ? (
-          <div className="relative">
-            <img src={imageDataUrl} alt="AI reference image preview" className="h-20 w-full border border-teal/40 object-cover" />
+      ) : (
+        <div className="brutal-border-2 space-y-3 bg-surface p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="truncate font-display text-[11px] tracking-[0.2em] text-teal">
+                {copy.deckTitle}
+              </div>
+              <div className="font-mono text-[9px] text-teal/60">
+                {copy.slides.length} slides · pick a layout
+              </div>
+            </div>
             <button
-              onClick={() => setImageDataUrl(null)}
-              className="absolute right-1 top-1 grid h-5 w-5 place-items-center bg-ink/90 text-teal hover:text-[#ff0080]"
-              title="Remove image"
+              onClick={() => setCopy(null)}
+              className="flex items-center gap-1 border border-teal/40 px-2 py-1 font-mono text-[10px] text-teal hover:border-teal"
             >
-              <X className="h-3 w-3" />
+              <ArrowLeft className="h-3 w-3" /> back
             </button>
           </div>
-        ) : (
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="flex w-full items-center justify-center gap-2 border border-dashed border-teal/40 bg-ink px-2 py-2 font-mono text-[10px] text-teal/70 hover:border-teal hover:text-teal"
-          >
-            <ImagePlus className="h-3.5 w-3.5" /> reference image (optional)
-          </button>
-        )}
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onPickImage(f);
-            e.target.value = "";
-          }}
-        />
 
-        <button
-          onClick={handleGenerate}
-          disabled={loading || (!prompt.trim() && !imageDataUrl)}
-          className="brutal-border brutal-press flex w-full items-center justify-center gap-2 bg-blue px-3 py-2 font-display text-[11px] tracking-[0.2em] text-ink disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-          {loading ? "GENERATING..." : "GENERATE"}
-        </button>
-        {error && (
-          <p className="font-mono text-[10px] text-[#ff0080]">! {error}</p>
-        )}
-      </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="font-mono text-[10px] text-teal/60">palette:</span>
+            {COPY_PALETTES.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPaletteId(p.id)}
+                className={`border px-2 py-1 font-mono text-[9px] ${
+                  paletteId === p.id ? "border-teal text-teal" : "border-teal/30 text-teal/60"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {previews.map(({ choice, pages }) => (
+              <button
+                key={`${choice.kind}-${choice.id}`}
+                onClick={() => applyChoice(pages, choice)}
+                className="brutal-border-2 overflow-hidden bg-ink text-left hover:border-teal"
+                title={`Use ${choice.label}`}
+              >
+                <SlideThumbnail
+                  page={pages[Math.min(1, pages.length - 1)]}
+                  canvasW={choice.kind === "template" ? choice.template.canvas_w : canvasW}
+                  canvasH={choice.kind === "template" ? choice.template.canvas_h : canvasH}
+                  className="w-full border-b border-teal/30"
+                />
+                <div className="truncate px-2 py-1 font-display text-[10px] uppercase tracking-[0.15em] text-teal">
+                  {choice.label}
+                </div>
+                <div className="truncate px-2 pb-1 font-mono text-[9px] text-teal/50">
+                  {choice.hint}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <details className="border border-teal/25 bg-ink p-2">
+            <summary className="cursor-pointer font-mono text-[10px] text-teal/70">
+              review copy
+            </summary>
+            <ul className="mt-2 space-y-2">
+              {copy.slides.map((s, i) => (
+                <li key={i} className="font-mono text-[9px] text-teal/70">
+                  <span className="text-teal">{i + 1}. {s.title}</span>
+                  {s.bullets.length > 0 && (
+                    <ul className="ml-3 list-disc text-teal/50">
+                      {s.bullets.map((b, j) => <li key={j}>{b}</li>)}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </details>
+          {error && <p className="font-mono text-[10px] text-[#ff0080]">! {error}</p>}
+        </div>
       )}
+
 
       <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
         ▸ Top community templates
