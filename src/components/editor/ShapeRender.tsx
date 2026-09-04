@@ -15,6 +15,16 @@ function pathFor(kind: ShapeKind): string | null {
       return "M6 12 H72 L60 30 H94 L78 52 H44 L58 68 H8 L22 44 H6 Z";
     case "honeycomb":
       return "M25 5 H75 L97 50 L75 95 H25 L3 50 Z M25 5 V95 M75 5 V95 M3 50 H97";
+    case "circuit":
+      return "M6 20 H30 L40 30 H62 L72 20 H94 M6 50 H26 L36 40 H64 L74 50 H94 M6 80 H30 L40 70 H62 L72 80 H94 M20 6 V20 M80 6 V20 M20 80 V94 M80 80 V94 M50 30 V70";
+    case "cyber_frame":
+      return "M6 30 V6 H34 M66 6 H94 V30 M94 70 V94 H66 M34 94 H6 V70 M18 18 H38 L44 12 H82 V38 M82 62 V82 H62 L56 88 H18 V62";
+    case "data_shard":
+      return "M48 3 L90 26 L72 48 L94 70 L54 97 L8 72 L28 51 L12 28 Z M48 3 L54 97 M12 28 L90 26 M28 51 L72 48";
+    case "tech_chevron":
+      return "M6 18 L36 50 L6 82 L26 82 L56 50 L26 18 Z M44 18 L74 50 L44 82 L64 82 L94 50 L64 18 Z";
+    case "scanner":
+      return "M10 28 V10 H32 M68 10 H90 V28 M90 72 V90 H68 M32 90 H10 V72 M18 50 H82 M26 40 H74 M34 60 H66";
     case "pentagon":
       return "M50 4 L 96 38 L 78 94 L 22 94 L 4 38 Z";
     case "parallelogram":

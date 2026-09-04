@@ -42,8 +42,12 @@ export function SlideThumbnail({
         style={{
           width: canvasW,
           height: canvasH,
-          backgroundColor: page.bgColor,
-          backgroundImage: page.bgImage ? `url(${page.bgImage})` : undefined,
+          backgroundColor: page.bgColor.includes("gradient(") ? "#0a0f1f" : page.bgColor,
+          backgroundImage: page.bgImage
+            ? `url(${page.bgImage})`
+            : page.bgColor.includes("gradient(")
+              ? page.bgColor
+              : undefined,
           backgroundSize: page.bgFit ?? "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

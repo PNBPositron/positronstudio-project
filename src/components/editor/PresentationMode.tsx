@@ -164,8 +164,12 @@ export function PresentationMode() {
             style={{
               width: canvasW,
               height: canvasH,
-              backgroundColor: page.bgColor,
-              backgroundImage: page.bgImage ? `url(${page.bgImage})` : undefined,
+              backgroundColor: page.bgColor.includes("gradient(") ? "#0a0f1f" : page.bgColor,
+              backgroundImage: page.bgImage
+                ? `url(${page.bgImage})`
+                : page.bgColor.includes("gradient(")
+                  ? page.bgColor
+                  : undefined,
               backgroundSize: page.bgFit ?? "cover",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
@@ -207,8 +211,12 @@ export function PresentationMode() {
                 style={{
                   width: tW,
                   height: tH,
-                  background: p.bgColor,
-                  backgroundImage: p.bgImage ? `url(${p.bgImage})` : undefined,
+                  background: p.bgColor.includes("gradient(") ? "#0a0f1f" : p.bgColor,
+                  backgroundImage: p.bgImage
+                    ? `url(${p.bgImage})`
+                    : p.bgColor.includes("gradient(")
+                      ? p.bgColor
+                      : undefined,
                   backgroundSize: p.bgFit ?? "cover",
                   backgroundPosition: "center",
                 }}
