@@ -49,31 +49,53 @@ export function shapePathD(kind: ShapeKind): string | null {
 }
 
 export function ShapeRender({ element }: { element: ShapeElement }) {
-  const { shape, fill, stroke, strokeWidth, width, height, gradient, cornerRadius } = element;
+  const { shape, fill, stroke, strokeWidth, width, height, gradient, cornerRadius, imageOverlay } =
+    element;
   const gradId = `g-${element.id}`;
-  const fillRef = gradient ? `url(#${gradId})` : fill;
-  const defs = gradient ? (
-    <defs>
-      {(gradient.type ?? "linear") === "radial" ? (
-        <radialGradient id={gradId} gradientUnits="objectBoundingBox" cx="0.5" cy="0.5" r="0.75">
-          <stop offset="0%" stopColor={gradient.from} />
-          <stop offset="100%" stopColor={gradient.to} />
-        </radialGradient>
-      ) : (
-        <linearGradient
-          id={gradId}
-          gradientUnits="objectBoundingBox"
-          x1="0"
-          y1="0"
-          x2={Math.cos((gradient.angle * Math.PI) / 180)}
-          y2={Math.sin((gradient.angle * Math.PI) / 180)}
-        >
-          <stop offset="0%" stopColor={gradient.from} />
-          <stop offset="100%" stopColor={gradient.to} />
-        </linearGradient>
-      )}
-    </defs>
-  ) : null;
+  const imageId = `image-${element.id}`;
+  const fillRef = imageOverlay ? `url(#${imageId})` : gradient ? `url(#${gradId})` : fill;
+  const defs =
+    gradient || imageOverlay ? (
+      <defs>
+        {imageOverlay && (
+          <pattern id={imageId} patternUnits="objectBoundingBox" width="1" height="1">
+            <image
+              href={imageOverlay}
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </pattern>
+        )}
+        {gradient &&
+          ((gradient.type ?? "linear") === "radial" ? (
+            <radialGradient
+              id={gradId}
+              gradientUnits="objectBoundingBox"
+              cx="0.5"
+              cy="0.5"
+              r="0.75"
+            >
+              <stop offset="0%" stopColor={gradient.from} />
+              <stop offset="100%" stopColor={gradient.to} />
+            </radialGradient>
+          ) : (
+            <linearGradient
+              id={gradId}
+              gradientUnits="objectBoundingBox"
+              x1="0"
+              y1="0"
+              x2={Math.cos((gradient.angle * Math.PI) / 180)}
+              y2={Math.sin((gradient.angle * Math.PI) / 180)}
+            >
+              <stop offset="0%" stopColor={gradient.from} />
+              <stop offset="100%" stopColor={gradient.to} />
+            </linearGradient>
+          ))}
+      </defs>
+    ) : null;
   const dash =
     element.strokeStyle === "dashed"
       ? `${Math.max(6, strokeWidth * 3)} ${Math.max(4, strokeWidth * 2)}`
@@ -139,7 +161,8 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
     );
   }
   if (shape === "star") {
-    const cx = width / 2, cy = height / 2;
+    const cx = width / 2,
+      cy = height / 2;
     const rO = Math.min(width, height) / 2 - strokeWidth;
     const rI = rO * 0.45;
     const pts: string[] = [];
@@ -151,7 +174,13 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
     return (
       <svg {...common}>
         {defs}
-        <polygon points={pts.join(" ")} fill={fillRef} stroke={stroke} strokeWidth={strokeWidth} strokeLinejoin="miter" />
+        <polygon
+          points={pts.join(" ")}
+          fill={fillRef}
+          stroke={stroke}
+          strokeWidth={strokeWidth}
+          strokeLinejoin="miter"
+        />
       </svg>
     );
   }
@@ -185,7 +214,13 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
         style={{ opacity: element.opacity ?? 1 }}
       >
         {defs}
-        <path d={d} fill={fillRef} stroke={stroke} strokeWidth={strokeWidth / 2} strokeLinejoin="miter" />
+        <path
+          d={d}
+          fill={fillRef}
+          stroke={stroke}
+          strokeWidth={strokeWidth / 2}
+          strokeLinejoin="miter"
+        />
       </svg>
     );
   }

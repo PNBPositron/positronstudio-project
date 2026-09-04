@@ -252,9 +252,13 @@ export function CanvasElement({
       }}
       className={
         [
-          presenting && element.animation && element.animation !== "none" ? `el-anim-${element.animation}` : "",
+          presenting && element.animation && element.animation !== "none"
+            ? `el-anim-${element.animation}`
+            : "",
           hovered && interaction?.hoverEffect === "glitch" ? "el-hover-glitch" : "",
-        ].filter(Boolean).join(" ") || undefined
+        ]
+          .filter(Boolean)
+          .join(" ") || undefined
       }
       style={{
         position: "absolute",
@@ -270,10 +274,6 @@ export function CanvasElement({
         outline: selected ? "3px solid #2b6bff" : "none",
         outlineOffset: "2px",
         mixBlendMode: "blendMode" in element ? (element.blendMode ?? "normal") : "normal",
-        backgroundImage:
-          "imageOverlay" in element && element.imageOverlay ? `url(${element.imageOverlay})` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
       }}
     >
       {element.type === "text" &&
@@ -291,11 +291,41 @@ export function CanvasElement({
             width: "100%",
             height: "100%",
             fontSize: element.fontSize,
-            color: hovered && interaction?.hoverEffect === "color" ? (interaction.hoverColor ?? element.color) : element.color,
-            backgroundImage: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? gradientCss(interaction.hoverGradient) : undefined,
-            backgroundClip: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "text" : undefined,
-            WebkitBackgroundClip: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "text" : undefined,
-            WebkitTextFillColor: hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient ? "transparent" : undefined,
+            color:
+              element.gradient ||
+              element.imageOverlay ||
+              (hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient)
+                ? "transparent"
+                : hovered && interaction?.hoverEffect === "color"
+                  ? (interaction.hoverColor ?? element.color)
+                  : element.color,
+            backgroundImage: element.imageOverlay
+              ? `url("${element.imageOverlay}")`
+              : element.gradient
+                ? gradientCss(element.gradient)
+                : hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient
+                  ? gradientCss(interaction.hoverGradient)
+                  : undefined,
+            backgroundSize: element.imageOverlay ? "cover" : undefined,
+            backgroundPosition: element.imageOverlay ? "center" : undefined,
+            backgroundClip:
+              element.gradient ||
+              element.imageOverlay ||
+              (hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient)
+                ? "text"
+                : undefined,
+            WebkitBackgroundClip:
+              element.gradient ||
+              element.imageOverlay ||
+              (hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient)
+                ? "text"
+                : undefined,
+            WebkitTextFillColor:
+              element.gradient ||
+              element.imageOverlay ||
+              (hovered && interaction?.hoverEffect === "gradient" && interaction.hoverGradient)
+                ? "transparent"
+                : undefined,
             fontWeight: element.fontWeight,
             fontFamily: element.fontFamily,
             textAlign: element.align,
