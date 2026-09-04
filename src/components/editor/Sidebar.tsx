@@ -17,14 +17,14 @@ import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { TextPanel } from "./panels/TextPanel";
 import { ElementsPanel } from "./panels/ElementsPanel";
 import { DesignPanel } from "./panels/DesignPanel";
-import { AiChatPanel } from "./panels/AiChatPanel";
+import { DesignerPanel } from "./panels/DesignerPanel";
 import { ComponentsPanel } from "./panels/ComponentsPanel";
 import { IllustrationsPanel } from "./panels/IllustrationsPanel";
 import { SettingsDialog } from "./SettingsDialog";
 
 const TOOLS = [
   { id: "home", label: "Home", icon: LayoutTemplate },
-  { id: "ai", label: "AI Edit", icon: Bot },
+  { id: "ai", label: "Presenton AI", icon: Bot },
   { id: "text", label: "Text", icon: Type },
   { id: "elements", label: "Elements", icon: Shapes },
   { id: "illustrations", label: "Illustrations", icon: Images },
@@ -174,7 +174,7 @@ export function Sidebar() {
         }`}
       >
         {tool === "home" && <TemplatesPanel />}
-        {tool === "ai" && aiEnabled && <AiChatPanel />}
+        {tool === "ai" && aiEnabled && <DesignerPanel />}
         {tool === "text" && <TextPanel />}
         {tool === "components" && <ComponentsPanel />}
         {tool === "elements" && <ElementsPanel />}

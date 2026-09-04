@@ -13,7 +13,7 @@ export type PanelId =
 
 export const PANEL_LABELS: Record<PanelId, string> = {
   home: "Home",
-  ai: "AI Edit",
+  ai: "Presenton AI",
   text: "Text",
   components: "Components",
   elements: "Elements",
