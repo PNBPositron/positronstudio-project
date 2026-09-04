@@ -15,8 +15,15 @@ import {
   type ButtonAction,
   type UiStyle,
 } from "@/store/editor";
-import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check } from "lucide-react";
+import { Copy, Trash2, ArrowUp, ArrowDown, Layers, RotateCcw, Plus, Check, Upload } from "lucide-react";
 import { FONTS } from "./panels/TextPanel";
+
+const readImageFile = (file: File, onLoad: (src: string) => void) => {
+  if (!file.type.startsWith("image/")) return;
+  const reader = new FileReader();
+  reader.onload = () => onLoad(String(reader.result));
+  reader.readAsDataURL(file);
+};
 
 const FONT_FAMILIES: string[] = Array.from(
   new Set(["Inter", "Orbitron", "JetBrains Mono", "Georgia", ...FONTS.map((f) => f.family)]),
@@ -392,13 +399,29 @@ export function PropertiesPanel() {
               fill={el.color}
               onChange={(g) => update(el.id, { gradient: g })}
             />
-            <Field label="Image fill URL">
-              <input
-                value={el.imageOverlay ?? ""}
-                onChange={(e) => update(el.id, { imageOverlay: e.target.value || undefined })}
-                placeholder="https://…/texture.png"
-                className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-[10px] text-teal"
-              />
+            <Field label="Image fill">
+              <div className="flex flex-col gap-2">
+                <label className="brutal-border-2 brutal-press flex cursor-pointer items-center justify-center gap-2 bg-surface px-2 py-2 font-mono text-[10px] uppercase text-teal hover:border-teal">
+                  <Upload className="h-3.5 w-3.5" /> Upload image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) readImageFile(file, (src) => update(el.id, { imageOverlay: src }));
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+                <input
+                  value={el.imageOverlay ?? ""}
+                  onChange={(e) => update(el.id, { imageOverlay: e.target.value || undefined })}
+                  placeholder="Paste image URL or upload"
+                  className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-[10px] text-teal"
+                />
+                {el.imageOverlay && <button type="button" onClick={() => update(el.id, { imageOverlay: undefined })} className="font-mono text-[10px] text-teal/60 underline">Clear image fill</button>}
+              </div>
             </Field>
             <Field label="Blend mode">
               <select
@@ -483,13 +506,29 @@ export function PropertiesPanel() {
               fill={el.fill}
               onChange={(g) => update(el.id, { gradient: g })}
             />
-            <Field label="Image fill URL">
-              <input
-                value={el.imageOverlay ?? ""}
-                onChange={(e) => update(el.id, { imageOverlay: e.target.value || undefined })}
-                placeholder="https://…/texture.png"
-                className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-[10px] text-teal"
-              />
+            <Field label="Image fill">
+              <div className="flex flex-col gap-2">
+                <label className="brutal-border-2 brutal-press flex cursor-pointer items-center justify-center gap-2 bg-surface px-2 py-2 font-mono text-[10px] uppercase text-teal hover:border-teal">
+                  <Upload className="h-3.5 w-3.5" /> Upload image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) readImageFile(file, (src) => update(el.id, { imageOverlay: src }));
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                </label>
+                <input
+                  value={el.imageOverlay ?? ""}
+                  onChange={(e) => update(el.id, { imageOverlay: e.target.value || undefined })}
+                  placeholder="Paste image URL or upload"
+                  className="brutal-border-2 w-full bg-surface px-2 py-1.5 font-mono text-[10px] text-teal"
+                />
+                {el.imageOverlay && <button type="button" onClick={() => update(el.id, { imageOverlay: undefined })} className="font-mono text-[10px] text-teal/60 underline">Clear image fill</button>}
+              </div>
             </Field>
             {el.shape === "rect" && (
               <Field label="Corner radius">

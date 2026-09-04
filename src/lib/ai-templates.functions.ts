@@ -11,7 +11,7 @@ type CohereMessage = {
 
 /** Text generation through Cohere. The API key is server-only. */
 async function chatComplete(
-  _model: string,
+  model: string,
   messages: CohereMessage[],
   extra: Record<string, unknown> = {},
 ): Promise<string> {
@@ -23,7 +23,7 @@ async function chatComplete(
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: COHERE_MODEL,
+      model: model || COHERE_MODEL,
       messages: messages.map((entry) => ({
         role: entry.role,
         content: typeof entry.content === "string" ? entry.content : JSON.stringify(entry.content),

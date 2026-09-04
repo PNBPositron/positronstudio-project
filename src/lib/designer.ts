@@ -1,4 +1,24 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AnyElement } from "@/store/editor";
+
+export const generatePresentonDeck = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { prompt: string; slideCount?: number }) => ({
+    prompt: String(data?.prompt ?? "").trim().slice(0, 2000),
+    slideCount: Math.max(2, Math.min(12, Math.round(data?.slideCount ?? 6))),
+  }))
+  .handler(async ({ data }) => {
+    const apiKey = process.env.PRESENTON_API_KEY?.trim();
+    if (!apiKey) throw new Error("Presenton is not configured. Set PRESENTON_API_KEY.");
+    const response = await fetch("https://api.presenton.ai/api/v1/presentations/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ prompt: data.prompt, slide_count: data.slideCount }),
+    });
+    if (!response.ok) throw new Error(`Presenton error ${response.status}: ${await response.text()}`);
+    return (await response.json()) as { url?: string; presentation_url?: string; id?: string };
+  });
 
 export type LayoutId = "centered" | "left-stack" | "split" | "grid" | "hero";
 

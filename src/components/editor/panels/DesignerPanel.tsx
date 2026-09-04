@@ -1,9 +1,15 @@
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useEditor } from "@/store/editor";
-import { applyLayout, SUGGESTIONS } from "@/lib/designer";
+import { applyLayout, generatePresentonDeck, SUGGESTIONS } from "@/lib/designer";
 import { PanelHeader } from "./TextPanel";
 
 export function DesignerPanel() {
   const { pages, currentIndex, canvasW, canvasH, loadTemplate } = useEditor();
+  const presenton = useServerFn(generatePresentonDeck);
+  const [prompt, setPrompt] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const page = pages[currentIndex];
   const els = page?.elements ?? [];
 
@@ -15,6 +21,20 @@ export function DesignerPanel() {
       <p className="font-mono text-[10px] leading-relaxed text-teal/60">
         Same content, new composition. Click a layout to apply it to this slide.
       </p>
+      <div className="flex flex-col gap-2 border border-teal/30 bg-ink/30 p-2">
+        <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Describe a deck to generate with Presenton…" rows={2} className="brutal-border-2 w-full bg-surface p-2 font-mono text-[10px] text-teal" />
+        <button type="button" disabled={busy || !prompt.trim()} onClick={async () => {
+          setBusy(true); setError(null);
+          try {
+            const result = await presenton({ data: { prompt, slideCount: pages.length || 6 } });
+            const url = result.url ?? result.presentation_url;
+            if (url) window.open(url, "_blank", "noopener,noreferrer");
+            else setError("Presenton returned no presentation URL.");
+          } catch (cause) { setError(cause instanceof Error ? cause.message : "Presenton request failed."); }
+          finally { setBusy(false); }
+        }} className="brutal-border brutal-press bg-blue px-3 py-2 font-display text-[10px] uppercase tracking-[0.15em] text-ink disabled:opacity-40">{busy ? "Generating…" : "Generate with Presenton"}</button>
+        {error && <p className="font-mono text-[10px] text-pink">{error}</p>}
+      </div>
       <div className="grid grid-cols-2 gap-2">
         {SUGGESTIONS.map((s) => {
           const laid = preview(s.id);
