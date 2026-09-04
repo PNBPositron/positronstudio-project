@@ -103,6 +103,14 @@ export type AiElementInput =
       shape:
         | "rect"
         | "circle"
+        | "holographic_grid"
+        | "glitch"
+        | "honeycomb"
+        | "circuit"
+        | "cyber_frame"
+        | "data_shard"
+        | "tech_chevron"
+        | "scanner"
         | "triangle"
         | "star"
         | "arrow"
@@ -123,7 +131,7 @@ export type AiElementInput =
       fill: string;
       stroke: string;
       strokeWidth: number;
-      effect?: "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow";
+      effect?: "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow" | "holographic" | "glitch" | "honeycomb";
       shadow?: AiShadow;
     }
   | {

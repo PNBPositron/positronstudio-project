@@ -269,8 +269,9 @@ export function CanvasElement({
         cursor: editing ? "text" : "move",
         outline: selected ? "3px solid #2b6bff" : "none",
         outlineOffset: "2px",
-        mixBlendMode: element.blendMode ?? "normal",
-        backgroundImage: element.imageOverlay ? `url(${element.imageOverlay})` : undefined,
+        mixBlendMode: "blendMode" in element ? (element.blendMode ?? "normal") : "normal",
+        backgroundImage:
+          "imageOverlay" in element && element.imageOverlay ? `url(${element.imageOverlay})` : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

@@ -37,6 +37,14 @@ const STYLE_OPTIONS: { id: AiStyle; label: string }[] = [
 
 const SHAPES: { kind: ShapeKind; label: string }[] = [
   { kind: "rect", label: "Rectangle" },
+  { kind: "holographic_grid", label: "Holographic Grid" },
+  { kind: "glitch", label: "Glitch Fragment" },
+  { kind: "honeycomb", label: "Honeycomb Cell" },
+  { kind: "circuit", label: "Circuit Traces" },
+  { kind: "cyber_frame", label: "Cyber Frame" },
+  { kind: "data_shard", label: "Data Shard" },
+  { kind: "tech_chevron", label: "Tech Chevron" },
+  { kind: "scanner", label: "Scanner Reticle" },
   { kind: "circle", label: "Circle" },
   { kind: "triangle", label: "Triangle" },
   { kind: "star", label: "Star" },

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useEditor } from "@/store/editor";
 import { PanelHeader } from "./TextPanel";
 import { ImagePlus, X } from "lucide-react";
@@ -30,12 +30,40 @@ const PALETTES: { name: string; colors: string[] }[] = [
   },
 ];
 
+const GRADIENT_WALLPAPERS = [
+  { name: "Neon dusk", value: "linear-gradient(135deg, #050816 0%, #172554 48%, #ff0080 100%)" },
+  { name: "Electric tide", value: "linear-gradient(120deg, #07111f 0%, #00d9ff 52%, #7c3aed 100%)" },
+  { name: "Signal bloom", value: "radial-gradient(circle at 20% 20%, #ff0080, #0a0f1f 62%)" },
+  { name: "Acid night", value: "linear-gradient(160deg, #0a0f1f 0%, #123c4a 50%, #39ff14 140%)" },
+  { name: "Chrome heat", value: "linear-gradient(115deg, #111827 0%, #64748b 35%, #f8fafc 50%, #ff4081 72%, #1f2937 100%)" },
+  { name: "Ultraviolet", value: "radial-gradient(circle at 75% 25%, #7df9ff 0%, #4d7cff 28%, #a855f7 55%, #0a0f1f 82%)" },
+  { name: "Solar flare", value: "linear-gradient(145deg, #0a0f1f 5%, #ff0080 38%, #ff6b35 65%, #ffd84a 100%)" },
+  { name: "Aurora grid", value: "linear-gradient(125deg, #07111f 0%, #14b8a6 34%, #4d7cff 68%, #ff6ec7 100%)" },
+];
+
+const ABSTRACT_WALLPAPERS = [
+  { name: "Cyber rings", value: "radial-gradient(circle at 18% 22%, transparent 0 12%, #00d9ff 12.5% 13.5%, transparent 14% 28%, #ff0080 28.5% 30%, transparent 30.5%), linear-gradient(135deg, #050816, #172554)" },
+  { name: "Data field", value: "repeating-linear-gradient(118deg, transparent 0 22px, #7df9ff 23px 24px, transparent 25px 52px), linear-gradient(155deg, #07111f, #1b1b2f 55%, #4d7cff)" },
+  { name: "Prism cut", value: "conic-gradient(from 210deg at 68% 38%, #0a0f1f, #4d7cff, #ff0080, #ffd84a, #0a0f1f)" },
+  { name: "Scanline", value: "repeating-linear-gradient(0deg, transparent 0 7px, #00d9ff 8px 9px), radial-gradient(circle at 70% 30%, #ff0080, #0a0f1f 58%)" },
+  { name: "Vector mesh", value: "repeating-conic-gradient(from 45deg at 50% 50%, #0a0f1f 0 7deg, #16213e 8deg 15deg, #00d9ff 16deg 17deg)" },
+  { name: "Horizon", value: "linear-gradient(175deg, transparent 0 54%, #ff0080 55% 56%, transparent 57%), repeating-linear-gradient(90deg, transparent 0 38px, #4d7cff 39px 40px), linear-gradient(#0a0f1f, #16213e)" },
+];
+
 export function ColorPanel() {
   const { bgColor, setBg, pages, currentIndex, setBgImage } = useEditor();
   const page = pages[currentIndex];
   const bgImage = page.bgImage;
   const bgFit = page.bgFit ?? "cover";
   const fileRef = useRef<HTMLInputElement>(null);
+  const [gradientFrom, setGradientFrom] = useState("#00d9ff");
+  const [gradientTo, setGradientTo] = useState("#ff0080");
+  const [gradientAngle, setGradientAngle] = useState(135);
+  const [gradientType, setGradientType] = useState<"linear" | "radial">("linear");
+
+  const customGradient = gradientType === "radial"
+    ? `radial-gradient(circle at center, ${gradientFrom}, ${gradientTo})`
+    : `linear-gradient(${gradientAngle}deg, ${gradientFrom}, ${gradientTo})`;
 
   const onPickImage = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -115,8 +143,32 @@ export function ColorPanel() {
       <div>
         <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Gradient wallpapers</label>
         <div className="grid grid-cols-2 gap-2">
-          {["linear-gradient(135deg, #050816 0%, #172554 48%, #ff0080 100%)", "linear-gradient(120deg, #07111f 0%, #00d9ff 52%, #7c3aed 100%)", "radial-gradient(circle at 20% 20%, #ff0080, #0a0f1f 62%)", "linear-gradient(160deg, #0a0f1f 0%, #123c4a 50%, #39ff14 140%)"].map((wallpaper) => (
-            <button key={wallpaper} onClick={() => setBg(wallpaper)} className="brutal-border-2 h-16 hover:border-teal" style={{ background: wallpaper }} aria-label="Apply gradient wallpaper" />
+          {GRADIENT_WALLPAPERS.map((wallpaper) => (
+            <button key={wallpaper.name} onClick={() => setBg(wallpaper.value)} className="brutal-border-2 h-16 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
+          ))}
+        </div>
+      </div>
+
+      <div className="brutal-border-2 space-y-3 bg-surface p-3">
+        <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Custom gradient</div>
+        <button className="brutal-border-2 h-16 w-full hover:border-teal" style={{ background: customGradient }} onClick={() => setBg(customGradient)} aria-label="Apply custom gradient" />
+        <div className="grid grid-cols-2 gap-2 font-mono text-[10px] text-teal/80">
+          <label className="flex items-center justify-between gap-2">From <input type="color" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="h-7 w-9 bg-transparent" /></label>
+          <label className="flex items-center justify-between gap-2">To <input type="color" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="h-7 w-9 bg-transparent" /></label>
+        </div>
+        <div className="grid grid-cols-2 gap-1">
+          {(["linear", "radial"] as const).map((type) => (
+            <button key={type} onClick={() => setGradientType(type)} className={`brutal-border-2 py-1 font-mono text-[10px] uppercase ${gradientType === type ? "border-teal bg-blue text-ink" : "bg-ink text-teal"}`}>{type}</button>
+          ))}
+        </div>
+        {gradientType === "linear" && <label className="flex items-center gap-2 font-mono text-[10px] text-teal/80">Angle <input type="range" min={0} max={360} value={gradientAngle} onChange={(e) => setGradientAngle(+e.target.value)} className="w-full accent-teal" /><span className="w-8 text-right">{gradientAngle}°</span></label>}
+      </div>
+
+      <div>
+        <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Abstract wallpapers</label>
+        <div className="grid grid-cols-2 gap-2">
+          {ABSTRACT_WALLPAPERS.map((wallpaper) => (
+            <button key={wallpaper.name} onClick={() => setBg(wallpaper.value)} className="brutal-border-2 h-20 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
           ))}
         </div>
       </div>
@@ -149,7 +201,7 @@ export function ColorPanel() {
         <div className="flex gap-2">
           <input
             type="color"
-            value={bgColor}
+            value={bgColor.startsWith("#") ? bgColor : "#0a0f1f"}
             onChange={(e) => setBg(e.target.value)}
             className="brutal-border-2 h-12 w-16 bg-surface"
           />
