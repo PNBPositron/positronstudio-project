@@ -4,39 +4,41 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const COHERE_MODEL = "command-a-03-2025";
 const pickModel = () => COHERE_MODEL;
 
-type CohereMessage = { role: "system" | "user"; content: string | Array<Record<string, unknown>> };
+type CohereMessage = {
+  role: "system" | "user" | "assistant";
+  content: string | Array<Record<string, unknown>>;
+};
 
 /** Text generation through Cohere. The API key is server-only. */
 async function chatComplete(
-  _model: string,
+  model: string,
   messages: CohereMessage[],
   extra: Record<string, unknown> = {},
 ): Promise<string> {
-  const apiKey = process.env.COHERE_API_KEY
-    ?.trim()
+  const apiKey = process.env.COHERE_API_KEY?.trim()
     .replace(/^Bearer\s+/i, "")
     .replace(/^['"]|['"]$/g, "");
   if (!apiKey) throw new Error("Cohere AI is not configured. Set COHERE_API_KEY.");
-  const system = messages.find((m) => m.role === "system")?.content;
-  const chatHistory = messages.filter((m) => m.role !== "system").slice(0, -1).map((m) => ({ role: m.role === "user" ? "USER" : "CHATBOT", message: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }));
-  const last = messages[messages.length - 1];
   const res = await fetch("https://api.cohere.com/v2/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: COHERE_MODEL,
+      model: model || COHERE_MODEL,
       messages: messages.map((entry) => ({
-        role: entry.role === "user" ? "user" : "system",
+        role: entry.role,
         content: typeof entry.content === "string" ? entry.content : JSON.stringify(entry.content),
       })),
       temperature: extra.temperature ?? 0.4,
-      max_tokens: extra.max_tokens ?? 4000,
+      max_tokens: Math.min(8192, Math.max(256, Number(extra.max_tokens ?? 8192))),
     }),
   });
   if (res.status === 429) throw new Error("Cohere rate limit hit. Try again in a moment.");
   if (!res.ok) throw new Error(`Cohere error ${res.status}: ${await res.text()}`);
   const json = (await res.json()) as { message?: { content?: Array<{ text?: string }> } };
-  const content = json.message?.content?.map((part) => part.text ?? "").join("").trim();
+  const content = json.message?.content
+    ?.map((part) => part.text ?? "")
+    .join("")
+    .trim();
   if (!content) throw new Error("Cohere returned an empty response");
   return content;
 }
@@ -131,7 +133,15 @@ export type AiElementInput =
       fill: string;
       stroke: string;
       strokeWidth: number;
-      effect?: "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow" | "holographic" | "glitch" | "honeycomb";
+      effect?:
+        | "none"
+        | "liquid_glass"
+        | "neon"
+        | "soft_shadow"
+        | "inner_glow"
+        | "holographic"
+        | "glitch"
+        | "honeycomb";
       shadow?: AiShadow;
     }
   | {
@@ -359,13 +369,17 @@ export const suggestIcons = createServerFn({ method: "POST" })
     return { prompt: data.prompt.slice(0, 300), count };
   })
   .handler(async ({ data }): Promise<{ icons: string[] }> => {
-    const content = await chatComplete(COHERE_MODEL, [
-      {
-        role: "system",
-        content: `Return ${data.count} lucide-react icon names (PascalCase) that best fit the user's theme. Use only real lucide icons. Return JSON: { "icons": string[] }. No commentary.`,
-      },
-      { role: "user", content: `Theme: ${data.prompt}` },
-    ], { temperature: 0.2, max_tokens: 500 });
+    const content = await chatComplete(
+      COHERE_MODEL,
+      [
+        {
+          role: "system",
+          content: `Return ${data.count} lucide-react icon names (PascalCase) that best fit the user's theme. Use only real lucide icons. Return JSON: { "icons": string[] }. No commentary.`,
+        },
+        { role: "user", content: `Theme: ${data.prompt}` },
+      ],
+      { temperature: 0.2, max_tokens: 500 },
+    );
     let parsed: { icons?: unknown };
     try {
       parsed = JSON.parse(content);
@@ -417,10 +431,14 @@ Compose 3-7 spheres, varied sizes (80-700px), thoughtful color harmony.
 Coordinates absolute, must stay inside bounds.
 Return JSON only: { "bg": "#hex", "models": Array<{ "shape":"sphere", "x", "y", "width", "height", "color", "spinSpeed"?, "tiltX"?, "tiltY"? }> }.
 spinSpeed: 0-30 seconds (0 = static). Always set "shape" to "sphere".`;
-    const content = await chatComplete(COHERE_MODEL, [
-      { role: "system", content: sys },
-      { role: "user", content: `Theme: ${data.prompt}` },
-    ], { temperature: 0.5, max_tokens: 1200 });
+    const content = await chatComplete(
+      COHERE_MODEL,
+      [
+        { role: "system", content: sys },
+        { role: "user", content: `Theme: ${data.prompt}` },
+      ],
+      { temperature: 0.5, max_tokens: 1200 },
+    );
     let parsed: Ai3DScene;
     try {
       parsed = JSON.parse(content);
@@ -632,10 +650,14 @@ Rules:
 - If a string is empty or already in ${data.target}, return it unchanged.
 Return ONLY JSON: { "translations": string[] } with exactly ${data.texts.length} entries.`;
 
-    const content = await chatComplete(COHERE_MODEL, [
-      { role: "system", content: sys },
-      { role: "user", content: JSON.stringify({ texts: data.texts }) },
-    ], { temperature: 0.1, max_tokens: Math.min(8000, data.texts.length * 500) });
+    const content = await chatComplete(
+      COHERE_MODEL,
+      [
+        { role: "system", content: sys },
+        { role: "user", content: JSON.stringify({ texts: data.texts }) },
+      ],
+      { temperature: 0.1, max_tokens: Math.min(8000, data.texts.length * 500) },
+    );
     const parsed = parseLooseJson<{ translations?: unknown }>(content);
     const out = Array.isArray(parsed.translations) ? parsed.translations : [];
     const translations = data.texts.map((original, i) => {
@@ -741,7 +763,6 @@ export const importTemplateFromFile = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }): Promise<AiDeck> => {
-
     throw new Error(
       "Cohere text generation cannot read PDF or PPTX files. Use a published template in the generator instead.",
     );
@@ -771,25 +792,27 @@ export type DeckCopy = { deckTitle: string; slides: DeckCopySlide[] };
 
 export const generateDeckCopy = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { prompt: string; slideCount?: number; tone?: string; language?: string }) => {
-    if (!data || typeof data.prompt !== "string" || !data.prompt.trim())
-      throw new Error("Prompt is required");
-    const slideCount = Math.max(
-      2,
-      Math.min(
-        12,
-        typeof data.slideCount === "number" && Number.isFinite(data.slideCount)
-          ? Math.round(data.slideCount)
-          : 5,
-      ),
-    );
-    return {
-      prompt: data.prompt.trim().slice(0, 1200),
-      slideCount,
-      tone: (data.tone ?? "confident, concrete, jargon-free").slice(0, 120),
-      language: (data.language ?? "English").slice(0, 40),
-    };
-  })
+  .inputValidator(
+    (data: { prompt: string; slideCount?: number; tone?: string; language?: string }) => {
+      if (!data || typeof data.prompt !== "string" || !data.prompt.trim())
+        throw new Error("Prompt is required");
+      const slideCount = Math.max(
+        2,
+        Math.min(
+          12,
+          typeof data.slideCount === "number" && Number.isFinite(data.slideCount)
+            ? Math.round(data.slideCount)
+            : 5,
+        ),
+      );
+      return {
+        prompt: data.prompt.trim().slice(0, 1200),
+        slideCount,
+        tone: (data.tone ?? "confident, concrete, jargon-free").slice(0, 120),
+        language: (data.language ?? "English").slice(0, 40),
+      };
+    },
+  )
   .handler(async ({ data }): Promise<DeckCopy> => {
     const { prompt, slideCount, tone, language } = data;
     const content = await cohereChat(
@@ -851,7 +874,10 @@ Rules:
 
     if (slides.length === 0) throw new Error("Cohere returned no usable slide copy");
     return {
-      deckTitle: typeof parsed.deckTitle === "string" && parsed.deckTitle.trim() ? parsed.deckTitle.trim() : slides[0].title,
+      deckTitle:
+        typeof parsed.deckTitle === "string" && parsed.deckTitle.trim()
+          ? parsed.deckTitle.trim()
+          : slides[0].title,
       slides,
     };
   });
