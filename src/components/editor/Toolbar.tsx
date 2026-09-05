@@ -34,7 +34,6 @@ import {
   exportJSON,
   importJSONFile,
 } from "@/lib/export";
-import { useSettings } from "@/store/settings";
 import {
   Dialog,
   DialogContent,
@@ -43,24 +42,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const LANGUAGES = [
-  "Spanish",
-  "French",
-  "German",
-  "Italian",
-  "Portuguese",
-  "Dutch",
-  "Japanese",
-  "Korean",
-  "Chinese (Simplified)",
-  "Arabic",
-  "Hindi",
-  "Russian",
-  "Turkish",
-  "Polish",
-  "Swedish",
-  "English",
-];
 
 export function Toolbar() {
   const { undo, redo, clear, designId, designName, setDesignName, setDesignMeta, newDesign } =
