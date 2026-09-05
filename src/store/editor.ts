@@ -70,7 +70,12 @@ export type ShapeKind =
   | "cross"
   | "lightning"
   | "cloud"
-  | "speech";
+  | "speech"
+  | "frame_cut"
+  | "diagonal_stripes"
+  | "dot_grid"
+  | "dotted_triangle"
+  | "accent_slash";
 export type ShapeEffect = "none" | "liquid_glass" | "neon" | "soft_shadow" | "inner_glow" | "holographic" | "glitch" | "honeycomb";
 export type BlendMode = "normal" | "screen" | "overlay" | "multiply" | "color-dodge";
 export type ElementShadow = {
