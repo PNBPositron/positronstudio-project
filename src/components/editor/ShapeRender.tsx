@@ -263,6 +263,7 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
         {defs}
         <path
           d={d}
+          fillRule={EVENODD_SHAPES.includes(shape) ? "evenodd" : undefined}
           fill={fillRef}
           stroke={stroke}
           strokeWidth={strokeWidth / 2}
