@@ -8,7 +8,6 @@ import {
   Type,
   Shapes,
   SlidersHorizontal,
-  Bot,
   Blocks,
   Settings,
   Images,
@@ -17,17 +16,15 @@ import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { TextPanel } from "./panels/TextPanel";
 import { ElementsPanel } from "./panels/ElementsPanel";
 import { DesignPanel } from "./panels/DesignPanel";
-import { DesignerPanel } from "./panels/DesignerPanel";
 import { ComponentsPanel } from "./panels/ComponentsPanel";
 import { IllustrationsPanel } from "./panels/IllustrationsPanel";
 import { SettingsDialog } from "./SettingsDialog";
 
 const TOOLS = [
   { id: "home", label: "Home", icon: LayoutTemplate },
-  { id: "ai", label: "Presenton AI", icon: Bot },
   { id: "text", label: "Text", icon: Type },
   { id: "elements", label: "Elements", icon: Shapes },
-  { id: "illustrations", label: "Illustrations", icon: Images },
+  { id: "illustrations", label: "Illus", icon: Images },
   { id: "components", label: "Presets", icon: Blocks },
   { id: "design", label: "Design", icon: SlidersHorizontal },
 ] as const;
@@ -36,7 +33,6 @@ export function Sidebar() {
   const { tool, setTool, bgColor } = useEditor();
   const {
     panels,
-    aiEnabled,
     panelDurationMs,
     panelStiffness,
     reduceMotion,
@@ -112,7 +108,7 @@ export function Sidebar() {
   const panelTransition = `transform ${dur}ms ${ease}, opacity ${Math.round(dur * 0.62)}ms ${ease}, filter ${Math.round(dur * 0.7)}ms ease-out`;
 
   const visible = TOOLS.filter(
-    (t) => panels[t.id as PanelId] !== false && !(t.id === "ai" && !aiEnabled),
+    (t) => panels[t.id as PanelId] !== false,
   );
 
   const visibleKey = visible.map((t) => t.id).join(",");
@@ -174,7 +170,6 @@ export function Sidebar() {
         }`}
       >
         {tool === "home" && <TemplatesPanel />}
-        {tool === "ai" && aiEnabled && <DesignerPanel />}
         {tool === "text" && <TextPanel />}
         {tool === "components" && <ComponentsPanel />}
         {tool === "elements" && <ElementsPanel />}
