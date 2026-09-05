@@ -17,7 +17,7 @@ export const PANEL_LABELS: Record<PanelId, string> = {
   text: "Text",
   components: "Components",
   elements: "Elements",
-  illustrations: "Illustrations",
+  illustrations: "Illus.",
   design: "Design",
 };
 

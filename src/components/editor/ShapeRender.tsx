@@ -25,6 +25,14 @@ function pathFor(kind: ShapeKind): string | null {
       return "M6 18 L36 50 L6 82 L26 82 L56 50 L26 18 Z M44 18 L74 50 L44 82 L64 82 L94 50 L64 18 Z";
     case "scanner":
       return "M10 28 V10 H32 M68 10 H90 V28 M90 72 V90 H68 M32 90 H10 V72 M18 50 H82 M26 40 H74 M34 60 H66";
+    case "ring":
+      return "M50 5 A45 45 0 1 1 50 95 A45 45 0 1 1 50 5 M50 22 A28 28 0 1 0 50 78 A28 28 0 1 0 50 22";
+    case "hex_ring":
+      return "M25 7 H75 L97 50 L75 93 H25 L3 50 Z M32 25 H68 L81 50 L68 75 H32 L19 50 Z";
+    case "angular_frame":
+      return "M4 28 L28 4 H72 L96 28 V72 L72 96 H28 L4 72 Z M16 34 L34 16 H66 L84 34 V66 L66 84 H34 L16 66 Z";
+    case "corner_bracket":
+      return "M8 36 V8 H36 M64 8 H92 V36 M92 64 V92 H64 M36 92 H8 V64 M18 42 V18 H42 M58 18 H82 V42 M82 58 V82 H58 M42 82 H18 V58";
     case "pentagon":
       return "M50 4 L 96 38 L 78 94 L 22 94 L 4 38 Z";
     case "parallelogram":
