@@ -1,8 +1,55 @@
 import type { ShapeElement, ShapeKind } from "@/store/editor";
 
+// Shapes drawn as outline + inner cut-out need even-odd filling to keep the hole.
+const EVENODD_SHAPES: ShapeKind[] = ["frame_cut"];
+
+function dotGridPath(cols = 6, rows = 5, r = 3.2): string {
+  const parts: string[] = [];
+  const stepX = 100 / (cols + 1);
+  const stepY = 100 / (rows + 1);
+  for (let i = 1; i <= cols; i++) {
+    for (let j = 1; j <= rows; j++) {
+      const cx = i * stepX;
+      const cy = j * stepY;
+      parts.push(`M${cx - r} ${cy} a${r} ${r} 0 1 0 ${r * 2} 0 a${r} ${r} 0 1 0 ${-r * 2} 0`);
+    }
+  }
+  return parts.join(" ");
+}
+
+function dottedTrianglePath(perSide = 7, r = 3): string {
+  const pts: Array<[number, number]> = [
+    [50, 6],
+    [95, 92],
+    [5, 92],
+  ];
+  const parts: string[] = [];
+  for (let s = 0; s < 3; s++) {
+    const [x1, y1] = pts[s];
+    const [x2, y2] = pts[(s + 1) % 3];
+    for (let i = 0; i < perSide; i++) {
+      const t = i / perSide;
+      const cx = x1 + (x2 - x1) * t;
+      const cy = y1 + (y2 - y1) * t;
+      parts.push(`M${cx - r} ${cy} a${r} ${r} 0 1 0 ${r * 2} 0 a${r} ${r} 0 1 0 ${-r * 2} 0`);
+    }
+  }
+  return parts.join(" ");
+}
+
 // Reusable path generators (normalized 0-100 viewBox) so previews and canvas share geometry.
 function pathFor(kind: ShapeKind): string | null {
   switch (kind) {
+    case "frame_cut":
+      return "M3 3 H70 L97 30 V97 H30 L3 70 Z M12 12 L12 66 L34 88 L88 88 L88 34 L66 12 Z";
+    case "diagonal_stripes":
+      return "M0 32 L32 0 H54 L0 54 Z M0 74 L74 0 H94 L0 94 Z M26 100 L100 26 V46 L46 100 Z M70 100 L100 70 V88 L88 100 Z";
+    case "dot_grid":
+      return dotGridPath();
+    case "dotted_triangle":
+      return dottedTrianglePath();
+    case "accent_slash":
+      return "M56 3 H80 L32 97 H8 Z M88 3 H99 L74 52 H63 Z";
     case "heart":
       return "M50 88 C 18 66, 6 44, 18 26 C 28 12, 44 14, 50 28 C 56 14, 72 12, 82 26 C 94 44, 82 66, 50 88 Z";
     case "diamond":
@@ -216,6 +263,7 @@ export function ShapeRender({ element }: { element: ShapeElement }) {
         {defs}
         <path
           d={d}
+          fillRule={EVENODD_SHAPES.includes(shape) ? "evenodd" : undefined}
           fill={fillRef}
           stroke={stroke}
           strokeWidth={strokeWidth / 2}

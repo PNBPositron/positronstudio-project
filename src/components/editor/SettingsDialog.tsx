@@ -13,7 +13,7 @@ import {
 
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const {
-    aiEnabled, setAiEnabled, panels, togglePanel, resetPanels,
+    panels, togglePanel, resetPanels,
     panelDurationMs, setPanelDurationMs, panelStiffness, setPanelStiffness,
     reduceMotion, setReduceMotion, resetMotion,
     editorTheme, setEditorTheme,
@@ -79,28 +79,6 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           preferences are stored on this device.
         </p>
 
-        {/* AI toggle */}
-        <section className="brutal-border-2 mb-4 bg-surface p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <div className="font-display text-[12px] tracking-[0.2em] text-teal">AI FEATURES</div>
-              <p className="font-mono text-[10px] text-teal/60">
-                &gt; generator, chat edit, redesign, translate, import
-              </p>
-            </div>
-            <button
-              onClick={() => setAiEnabled(!aiEnabled)}
-              role="switch"
-              aria-checked={aiEnabled}
-              className={`brutal-border brutal-press px-4 py-2 font-display text-[11px] tracking-[0.2em] ${
-                aiEnabled ? "bg-blue text-ink" : "bg-surface-2 text-teal/70"
-              }`}
-            >
-              {aiEnabled ? "ENABLED" : "DISABLED"}
-            </button>
-          </div>
-        </section>
-
         {/* Panels */}
         <section className="brutal-border-2 mb-4 bg-surface p-4">
           <div className="mb-2 flex items-center justify-between">
@@ -115,20 +93,17 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {(Object.keys(PANEL_LABELS) as PanelId[]).map((id) => {
               const on = panels[id];
-              const locked = id === "ai" && !aiEnabled;
               return (
                 <button
                   key={id}
                   onClick={() => togglePanel(id)}
-                  disabled={locked}
                   className={`border px-2 py-2 text-left font-mono text-[11px] ${
-                    on && !locked
+                    on
                       ? "border-teal bg-blue-deep text-teal"
                       : "border-teal/30 bg-ink text-teal/45"
                   } disabled:opacity-50`}
                 >
-                  [{on && !locked ? "x" : " "}] {PANEL_LABELS[id]}
-                  {locked && <span className="block text-[9px] text-teal/40">ai off</span>}
+                  [{on ? "x" : " "}] {PANEL_LABELS[id]}
                 </button>
               );
             })}

@@ -4,7 +4,6 @@ import type { ThemeTokens } from "@/lib/themes";
 
 export type PanelId =
   | "home"
-  | "ai"
   | "text"
   | "components"
   | "elements"
@@ -13,11 +12,10 @@ export type PanelId =
 
 export const PANEL_LABELS: Record<PanelId, string> = {
   home: "Home",
-  ai: "Presenton AI",
   text: "Text",
   components: "Components",
   elements: "Elements",
-  illustrations: "Illustrations",
+  illustrations: "Illus",
   design: "Design",
 };
 
@@ -42,7 +40,6 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
 };
 
 type SettingsState = {
-  aiEnabled: boolean;
   autoHidePanel: boolean;
   editorTheme: string;
   panels: Record<PanelId, boolean>;
@@ -55,7 +52,6 @@ type SettingsState = {
   removeCustomTheme: (id: string) => void;
   setBrandKit: (patch: Partial<BrandKit>) => void;
   resetBrandKit: () => void;
-  setAiEnabled: (v: boolean) => void;
   setAutoHidePanel: (v: boolean) => void;
   setEditorTheme: (v: string) => void;
   setPanelDurationMs: (v: number) => void;
@@ -94,7 +90,6 @@ export const DEFAULT_EDITOR_THEME = "glass";
 
 const ALL_ON: Record<PanelId, boolean> = {
   home: true,
-  ai: true,
   text: true,
   components: true,
   elements: true,
@@ -105,7 +100,6 @@ const ALL_ON: Record<PanelId, boolean> = {
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
-      aiEnabled: true,
       autoHidePanel: false,
           editorTheme: DEFAULT_EDITOR_THEME,
       panels: { ...ALL_ON },
@@ -123,7 +117,6 @@ export const useSettings = create<SettingsState>()(
         })),
       setBrandKit: (patch) => set((s) => ({ brandKit: { ...s.brandKit, ...patch } })),
       resetBrandKit: () => set({ brandKit: { ...DEFAULT_BRAND_KIT } }),
-      setAiEnabled: (aiEnabled) => set({ aiEnabled }),
       setAutoHidePanel: (autoHidePanel) => set({ autoHidePanel }),
           setEditorTheme: (editorTheme) => set({ editorTheme }),
       setPanelDurationMs: (panelDurationMs) => set({ panelDurationMs }),

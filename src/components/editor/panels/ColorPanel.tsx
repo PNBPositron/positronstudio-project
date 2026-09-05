@@ -144,14 +144,14 @@ export function ColorPanel() {
         <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Gradient wallpapers</label>
         <div className="grid grid-cols-2 gap-2">
           {GRADIENT_WALLPAPERS.map((wallpaper) => (
-            <button key={wallpaper.name} onClick={() => setBg(wallpaper.value)} className="brutal-border-2 h-16 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
+            <button key={wallpaper.name} onClick={() => { setBgImage(undefined); setBg(wallpaper.value); }} className="brutal-border-2 h-16 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
           ))}
         </div>
       </div>
 
       <div className="brutal-border-2 space-y-3 bg-surface p-3">
         <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Custom gradient</div>
-        <button className="brutal-border-2 h-16 w-full hover:border-teal" style={{ background: customGradient }} onClick={() => setBg(customGradient)} aria-label="Apply custom gradient" />
+        <button className="brutal-border-2 h-16 w-full hover:border-teal" style={{ background: customGradient }} onClick={() => { setBgImage(undefined); setBg(customGradient); }} aria-label="Apply custom gradient" />
         <div className="grid grid-cols-2 gap-2 font-mono text-[10px] text-teal/80">
           <label className="flex items-center justify-between gap-2">From <input type="color" value={gradientFrom} onChange={(e) => setGradientFrom(e.target.value)} className="h-7 w-9 bg-transparent" /></label>
           <label className="flex items-center justify-between gap-2">To <input type="color" value={gradientTo} onChange={(e) => setGradientTo(e.target.value)} className="h-7 w-9 bg-transparent" /></label>
@@ -162,13 +162,14 @@ export function ColorPanel() {
           ))}
         </div>
         {gradientType === "linear" && <label className="flex items-center gap-2 font-mono text-[10px] text-teal/80">Angle <input type="range" min={0} max={360} value={gradientAngle} onChange={(e) => setGradientAngle(+e.target.value)} className="w-full accent-teal" /><span className="w-8 text-right">{gradientAngle}°</span></label>}
+        <p className="font-mono text-[9px] text-teal/50">click the preview above to apply it to this slide</p>
       </div>
 
       <div>
         <label className="mb-1.5 block font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">▸ Abstract wallpapers</label>
         <div className="grid grid-cols-2 gap-2">
           {ABSTRACT_WALLPAPERS.map((wallpaper) => (
-            <button key={wallpaper.name} onClick={() => setBg(wallpaper.value)} className="brutal-border-2 h-20 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
+            <button key={wallpaper.name} onClick={() => { setBgImage(undefined); setBg(wallpaper.value); }} className="brutal-border-2 h-20 hover:border-teal" style={{ background: wallpaper.value }} aria-label={`Apply ${wallpaper.name} wallpaper`} title={wallpaper.name} />
           ))}
         </div>
       </div>

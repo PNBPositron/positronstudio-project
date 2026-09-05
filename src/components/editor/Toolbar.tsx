@@ -17,7 +17,6 @@ import {
   ChevronDown,
   Share2,
   Upload,
-  Languages,
   Settings,
   Zap,
   Info,
@@ -35,9 +34,6 @@ import {
   exportJSON,
   importJSONFile,
 } from "@/lib/export";
-import { useServerFn } from "@tanstack/react-start";
-import { translateTexts } from "@/lib/ai-templates.functions";
-import { useSettings } from "@/store/settings";
 import {
   Dialog,
   DialogContent,
@@ -46,40 +42,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const LANGUAGES = [
-  "Spanish",
-  "French",
-  "German",
-  "Italian",
-  "Portuguese",
-  "Dutch",
-  "Japanese",
-  "Korean",
-  "Chinese (Simplified)",
-  "Arabic",
-  "Hindi",
-  "Russian",
-  "Turkish",
-  "Polish",
-  "Swedish",
-  "English",
-];
 
 export function Toolbar() {
   const { undo, redo, clear, designId, designName, setDesignName, setDesignMeta, newDesign } =
     useEditor();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const aiEnabled = useSettings((s) => s.aiEnabled);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
-  const [translating, setTranslating] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const langRef = useRef<HTMLDivElement>(null);
-  const translate = useServerFn(translateTexts);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -100,7 +73,6 @@ export function Toolbar() {
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -184,76 +156,6 @@ export function Toolbar() {
     }
   };
 
-  const handleTranslate = async (target: string) => {
-    setLangOpen(false);
-    if (translating) return;
-    setTranslating(true);
-    try {
-      const { pages, loadPages } = useEditor.getState();
-      // Collect strings with a stable path index.
-      const strings: string[] = [];
-      const paths: Array<{
-        p: number;
-        i: number;
-        field: "text" | "question" | "opt";
-        oi?: number;
-      }> = [];
-      pages.forEach((pg, p) => {
-        pg.elements.forEach((el, i) => {
-          if (el.type === "text" && el.text) {
-            strings.push(el.text);
-            paths.push({ p, i, field: "text" });
-          }
-          if (el.type === "button" && el.text) {
-            strings.push(el.text);
-            paths.push({ p, i, field: "text" });
-          }
-          if (el.type === "quiz") {
-            if (el.question) {
-              strings.push(el.question);
-              paths.push({ p, i, field: "question" });
-            }
-            el.options.forEach((o, oi) => {
-              if (o.text) {
-                strings.push(o.text);
-                paths.push({ p, i, field: "opt", oi });
-              }
-            });
-          }
-        });
-      });
-      if (strings.length === 0) {
-        alert("No text to translate.");
-        return;
-      }
-
-      const { translations } = await translate({ data: { texts: strings, target } });
-
-      const nextPages: Page[] = pages.map((pg) => ({
-        ...pg,
-        elements: pg.elements.map((e) => ({ ...e })) as AnyElement[],
-      }));
-      paths.forEach((path, idx) => {
-        const t = translations[idx];
-        if (typeof t !== "string") return;
-        const el = nextPages[path.p].elements[path.i] as AnyElement;
-        if (el.type === "text" && path.field === "text") el.text = t;
-        else if (el.type === "button" && path.field === "text") el.text = t;
-        else if (el.type === "quiz") {
-          if (path.field === "question") el.question = t;
-          else if (path.field === "opt" && typeof path.oi === "number") {
-            el.options = el.options.map((o, oi) => (oi === path.oi ? { ...o, text: t } : o));
-          }
-        }
-      });
-      loadPages(nextPages);
-    } catch (e) {
-      console.error(e);
-      alert(e instanceof Error ? e.message : "Translation failed");
-    } finally {
-      setTranslating(false);
-    }
-  };
 
   return (
     <header className="relative flex items-center justify-between gap-4 border-b border-teal/40 bg-ink px-5 py-3">
@@ -317,39 +219,6 @@ export function Toolbar() {
 
         {user ? (
           <>
-            {aiEnabled && (
-              <div className="relative" ref={langRef}>
-                <button
-                  onClick={() => setLangOpen((v) => !v)}
-                  disabled={translating}
-                  title="Translate deck"
-                  aria-label="Translate deck"
-                  className="brutal-border-2 brutal-press grid h-10 w-10 place-items-center bg-surface text-teal hover:bg-surface-2 hover:border-teal disabled:opacity-60"
-                >
-                  {translating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Languages className="h-4 w-4" strokeWidth={2.5} />
-                  )}
-                </button>
-                {langOpen && (
-                  <div className="brutal-border-2 absolute right-0 top-12 z-50 max-h-72 w-52 overflow-y-auto bg-ink p-1">
-                    <div className="border-b border-teal/30 px-3 py-1.5 font-mono text-[10px] text-teal/60">
-                      TRANSLATE TO...
-                    </div>
-                    {LANGUAGES.map((l) => (
-                      <button
-                        key={l}
-                        onClick={() => handleTranslate(l)}
-                        className="flex w-full items-center px-3 py-2 font-display text-[11px] tracking-[0.15em] text-teal hover:bg-surface"
-                      >
-                        {l.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
             <button
               onClick={handleSave}
               disabled={saving}
