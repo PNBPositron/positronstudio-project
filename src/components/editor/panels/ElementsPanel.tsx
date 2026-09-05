@@ -59,6 +59,11 @@ const SHAPES: { kind: ShapeKind; label: string }[] = [
   { kind: "lightning", label: "Lightning" },
   { kind: "cloud", label: "Cloud" },
   { kind: "speech", label: "Speech" },
+  { kind: "frame_cut", label: "Cut-corner Frame" },
+  { kind: "diagonal_stripes", label: "Diagonal Stripes" },
+  { kind: "dot_grid", label: "Dot Grid" },
+  { kind: "dotted_triangle", label: "Dotted Triangle" },
+  { kind: "accent_slash", label: "Accent Slash" },
 ];
 
 const FILLS = ["#7df9ff", "#ff0080"];

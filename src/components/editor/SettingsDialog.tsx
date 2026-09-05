@@ -98,9 +98,8 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
                 <button
                   key={id}
                   onClick={() => togglePanel(id)}
-                  disabled={locked}
                   className={`border px-2 py-2 text-left font-mono text-[11px] ${
-                    on && !locked
+                    on
                       ? "border-teal bg-blue-deep text-teal"
                       : "border-teal/30 bg-ink text-teal/45"
                   } disabled:opacity-50`}
