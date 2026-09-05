@@ -73,6 +73,8 @@ export function TemplatesPanel() {
     <div className="space-y-4">
       <PanelHeader title="Templates" />
 
+      {error && <p className="font-mono text-[10px] text-[#ff0080]">! {error}</p>}
+
       <div className="font-display text-[10px] uppercase tracking-[0.2em] text-teal/80">
         ▸ Top community templates
       </div>
