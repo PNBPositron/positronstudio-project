@@ -107,13 +107,7 @@ export function Sidebar() {
   const ease = springEasing(panelStiffness);
   const panelTransition = `transform ${dur}ms ${ease}, opacity ${Math.round(dur * 0.62)}ms ${ease}, filter ${Math.round(dur * 0.7)}ms ease-out`;
 
-<<<<<<< HEAD
   const visible = TOOLS.filter((t) => panels[t.id as PanelId] !== false);
-=======
-  const visible = TOOLS.filter(
-    (t) => panels[t.id as PanelId] !== false,
-  );
->>>>>>> 1a681823b5acc059f41f8c980728ceecec80b6ac
 
   const visibleKey = visible.map((t) => t.id).join(",");
   useEffect(() => {
